@@ -1,0 +1,439 @@
+:root {
+  --table-color: #0a6b16;
+  --table-border-color: #4a2a0b;
+  --card-bg: #ffffff;
+  --card-border: #ccc;
+  --text-light: #ffffff;
+  --text-dark: #000000;
+  --red-suit: #d90429;
+  --black-suit: #000000;
+  --button-fold: #c1121f;
+  --button-check: #669bbc;
+  --button-bet: #003049;
+  --button-confirm: #4caf50;
+  --bet-box-bg: rgba(0, 0, 0, 0.3);
+  --dealer-chip: #fca311;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #121212;
+  color: var(--text-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#game-container {
+  width: 100%;
+  max-width: 450px;
+  height: 100vh;
+  max-height: 900px;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Casino Lobby */
+#casino-lobby-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background: #1a1a1a;
+}
+
+.casino-title {
+  font-size: 3em;
+  color: var(--dealer-chip);
+  text-shadow: 0 0 10px var(--dealer-chip), 0 0 20px var(--dealer-chip), 0 0 5px #000;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+#game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.game-card {
+  background-color: #333;
+  border: 2px solid var(--dealer-chip);
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 300px;
+}
+
+.game-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(252, 163, 17, 0.6);
+}
+
+.game-card-icon {
+  font-size: 3em;
+  margin-bottom: 10px;
+}
+
+.game-card h2 {
+  font-size: 1.5em;
+  margin-bottom: 5px;
+  color: var(--text-light);
+}
+
+.game-card p {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+/* Poker Game View */
+#poker-game-view {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#table {
+  flex-grow: 1;
+  background-color: var(--table-color);
+  border-radius: 50% / 25%;
+  border: 10px solid var(--table-border-color);
+  margin: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 20px;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Player Areas */
+.player-area {
+  position: relative;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#ai-area {
+  justify-content: flex-start;
+}
+
+#player-area {
+  justify-content: flex-end;
+}
+
+.player-info {
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 4px 12px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.9em;
+  min-width: 100px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stack-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: bold;
+}
+
+.chip-icon {
+  color: var(--dealer-chip);
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  height: 70px; /* Card height */
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.card {
+  width: 50px;
+  height: 70px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 5px;
+  position: relative;
+  color: var(--text-dark);
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.card.red { color: var(--red-suit); }
+.card.black { color: var(--black-suit); }
+
+.card .rank {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 14px;
+}
+.card .suit {
+  font-size: 28px;
+}
+
+.card .suit-corner {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 14px;
+}
+
+.card.back {
+  background-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    #5c0000,
+    #800000 10px,
+    #5c0000 20px
+  );
+  color: transparent;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.bet-box {
+  position: absolute;
+  background: var(--bet-box-bg);
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 0.8em;
+  min-width: 40px;
+  text-align: center;
+}
+
+#ai-area .bet-box {
+  bottom: -20px;
+}
+
+#player-area .bet-box {
+  top: -20px;
+}
+
+.dealer-chip {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: var(--dealer-chip);
+  border-radius: 50%;
+  color: var(--text-dark);
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid var(--text-light);
+}
+#ai-area .dealer-chip { right: 10px; top: 30px; }
+#player-area .dealer-chip { right: 10px; bottom: 30px; }
+
+
+.action-bubble {
+    position: absolute;
+    top: 50px;
+    left: -70px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: black;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Community Area */
+#community-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#pot-area {
+  background: var(--bet-box-bg);
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-weight: bold;
+}
+
+/* Messages and Controls */
+#message-box {
+  background-color: rgba(0, 0, 0, 0.7);
+  text-align: center;
+  padding: 10px;
+  /* position: absolute;
+  bottom: 120px; */
+  width: 100%;
+  z-index: 10;
+  font-size: 1.1em;
+  min-height: 44px;
+}
+
+#controls {
+  background-color: #222;
+  padding: 10px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.control-btn {
+  border: none;
+  border-radius: 8px;
+  color: var(--text-light);
+  font-size: 1.2em;
+  font-weight: bold;
+  padding: 15px 10px;
+  flex-grow: 1;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+.control-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+}
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.fold { background-color: var(--button-fold); }
+.check { background-color: var(--button-check); }
+.bet { background-color: var(--button-bet); }
+.confirm { background-color: var(--button-confirm); }
+.cancel { background-color: var(--button-fold); }
+
+.back-btn {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  background-color: rgba(0,0,0,0.4);
+  color: white;
+  border: 1px solid #888;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 50;
+  transition: background-color 0.2s;
+}
+.back-btn:hover {
+  background-color: rgba(0,0,0,0.7);
+}
+
+
+#bet-slider-container {
+  padding: 10px 15px;
+  text-align: center;
+}
+
+#bet-amount-display {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--dealer-chip);
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: #555;
+  outline: none;
+  margin-top: 10px;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--dealer-chip);
+  cursor: pointer;
+  border: 2px solid white;
+}
+
+.bet-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.bet-actions .control-btn {
+  width: 48%;
+  padding: 10px 5px;
+  font-size: 1em;
+}
+
+/* Animations */
+.deal-card {
+  animation: deal 0.5s ease-out;
+}
+@keyframes deal {
+  from { transform: translate(0, -200px) rotate(180deg); opacity: 0; }
+  to { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out forwards;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.winner .player-info {
+  box-shadow: 0 0 15px gold;
+  border-color: gold;
+}

@@ -1,65 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AlphaQubit: Quantum Error Decoding</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              serif: ['"Playfair Display"', 'serif'],
-              sans: ['"Inter"', 'sans-serif'],
-            },
-            colors: {
-              nobel: {
-                gold: '#C5A059',
-                dark: '#1a1a1a',
-                cream: '#F9F8F4',
-              }
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      html {
-        scroll-behavior: smooth;
-        scroll-padding-top: 100px;
-      }
-      body {
-        background-color: #F9F8F4;
-        color: #1a1a1a;
-      }
-      @media print {
-        nav, footer, button {
-          display: none !important;
-        }
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "@react-three/fiber": "https://aistudiocdn.com/@react-three/fiber@^9.4.0",
-    "@react-three/drei": "https://aistudiocdn.com/@react-three/drei@^10.7.7",
-    "three": "https://aistudiocdn.com/three@^0.181.1",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.553.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+    <title>Gemini Casino</title>
+    <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="/index.css">
 </head>
   <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <div id="game-container">
+      <!-- Casino Lobby View -->
+      <div id="casino-lobby-view">
+        <h1 class="casino-title">GEMINI CASINO</h1>
+        <div id="game-list">
+          <div id="play-poker-btn" class="game-card">
+            <div class="game-card-icon">♠️ ♥️</div>
+            <h2>Texas Hold'em</h2>
+            <p>The classic poker game. Can you outsmart the AI?</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Poker Game View -->
+      <div id="poker-game-view" style="display: none">
+        <button id="back-to-lobby-btn" class="back-btn">← Lobby</button>
+        <div id="table">
+          <!-- AI Player Area -->
+          <div id="ai-area" class="player-area">
+            <div class="player-info">
+              <span class="name">AI Bot</span>
+              <div class="stack-container">
+                <span class="chip-icon">$</span>
+                <span class="stack">...</span>
+              </div>
+            </div>
+            <div class="cards"></div>
+            <div class="bet-box">
+              <span class="bet-amount"></span>
+            </div>
+            <div class="dealer-chip" style="display: none">D</div>
+            <div class="action-bubble" style="display: none"></div>
+          </div>
+
+          <!-- Community Area -->
+          <div id="community-area">
+            <div id="pot-area">
+              Pot: <span class="pot-amount">0</span>
+            </div>
+            <div id="community-cards" class="cards"></div>
+          </div>
+
+          <!-- Human Player Area -->
+          <div id="player-area" class="player-area">
+            <div class="cards"></div>
+            <div class="player-info">
+              <span class="name">You</span>
+              <div class="stack-container">
+                <span class="chip-icon">$</span>
+                <span class="stack">...</span>
+              </div>
+            </div>
+            <div class="bet-box">
+              <span class="bet-amount"></span>
+            </div>
+            <div class="dealer-chip" style="display: none">D</div>
+          </div>
+        </div>
+
+        <!-- Controls and Messages -->
+        <div id="message-box">
+          <p id="message">Welcome to AI Poker! Good luck!</p>
+        </div>
+
+        <div id="controls">
+          <div class="actions">
+            <button id="fold-btn" class="control-btn fold">Fold</button>
+            <button id="check-call-btn" class="control-btn check">Check</button>
+            <button id="bet-raise-btn" class="control-btn bet">Bet</button>
+          </div>
+          <div id="bet-slider-container" style="display: none">
+            <div class="bet-size-info">
+              <span id="bet-amount-display"></span>
+            </div>
+            <input
+              type="range"
+              id="bet-slider"
+              min="0"
+              max="0"
+              step="1"
+              value="0"
+            />
+            <div class="bet-actions">
+              <button id="confirm-bet-btn" class="control-btn confirm">
+                Confirm
+              </button>
+              <button id="cancel-bet-btn" class="control-btn cancel">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>
