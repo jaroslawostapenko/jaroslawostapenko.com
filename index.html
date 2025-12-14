@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -49,8 +49,7 @@
         "email": "yaroslav.ostapenko16@gmail.com",
         "telephone": "+48513815774",
         "sameAs": [
-            "https://github.com/YaroslavOstapenko5",
-
+            "https://github.com/YaroslavOstapenko5"
         ]
       }
     }
@@ -60,10 +59,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
+            colors: {
+                primary: {
+                    50: '#eff6ff',
+                    100: '#dbeafe',
+                    500: '#3b82f6',
+                    600: '#2563eb',
+                    700: '#1d4ed8',
+                    900: '#1e3a8a',
+                }
+            },
             animation: {
               blob: "blob 7s infinite",
+              'fade-in': 'fadeIn 0.3s ease-out forwards',
+              'slide-in-right': 'slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'slide-out-right': 'slideOutRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'slide-down': 'slideDown 0.3s ease-out forwards',
             },
             keyframes: {
               blob: {
@@ -72,14 +86,33 @@
                 "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
                 "100%": { transform: "translate(0px, 0px) scale(1)" },
               },
+              fadeIn: {
+                "0%": { opacity: "0" },
+                "100%": { opacity: "1" },
+              },
+              slideInRight: {
+                "0%": { transform: "translateX(100%)" },
+                "100%": { transform: "translateX(0)" },
+              },
+              slideOutRight: {
+                "0%": { transform: "translateX(0)" },
+                "100%": { transform: "translateX(100%)" },
+              },
+              slideDown: {
+                  "0%": { opacity: "0", transform: "translateY(-10px)" },
+                  "100%": { opacity: "1", transform: "translateY(0)" }
+              }
             },
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+            }
           },
         },
       };
     </script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -89,70 +122,417 @@
 <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "vite": "https://aistudiocdn.com/vite@^7.2.6"
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
   }
 }
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased font-['Inter']">
+<body class="bg-slate-50 text-slate-900 antialiased font-sans selection:bg-blue-200 selection:text-blue-900 transition-colors duration-300 dark:bg-slate-900 dark:text-slate-100" id="body-root">
 
-    <!-- Header -->
-    <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 bg-transparent">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-                <a href="#" class="flex items-center gap-2 group">
-                    <div class="bg-blue-600 p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
-                        <i data-lucide="code-2" width="24" height="24"></i>
-                    </div>
-                    <span id="logo-text" class="text-xl font-bold tracking-tight text-slate-900 lg:text-white transition-colors">
-                        Yaroslav<span class="text-blue-600">.dev</span>
+    <!-- 
+        ========================================================================
+        ULTIMATE NAVIGATION HEADER
+        Includes: Mega Menu, Search, Settings, Mobile Drawer
+        ========================================================================
+    -->
+    <header id="main-nav-wrapper" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        
+        <!-- Top Utility Bar (Desktop Only) -->
+        <div id="top-utility-bar" class="bg-slate-900 text-slate-400 text-xs py-2 hidden md:block border-b border-slate-800">
+            <div class="container mx-auto px-4 lg:px-8 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center gap-1.5 hover:text-white transition-colors cursor-help" title="Dostępny od zaraz">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        Status: Dostępny
                     </span>
-                </a>
-
-                <!-- Desktop Nav -->
-                <nav class="hidden md:flex items-center gap-8">
-                    <a href="#hero" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Start</a>
-                    <a href="#about" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">O mnie</a>
-                    <a href="#skills" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Umiejętności</a>
-                    <a href="#projects" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Projekty</a>
-                    <a href="#experience" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Doświadczenie</a>
-                    <a href="#contact" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all hover:shadow-lg hover:-translate-y-0.5">
-                        Zatrudnij mnie
-                    </a>
-                </nav>
-
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:text-blue-600 transition-colors" aria-label="Toggle menu">
-                    <i data-lucide="menu" id="menu-icon" class="lg:text-white"></i>
-                </button>
+                    <span class="w-px h-3 bg-slate-700"></span>
+                    <span class="flex items-center gap-1.5">
+                        <i data-lucide="map-pin" width="12" height="12"></i> Kraków, PL
+                    </span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="mailto:yaroslav.ostapenko16@gmail.com" class="hover:text-blue-400 transition-colors">yaroslav.ostapenko16@gmail.com</a>
+                    <div class="flex items-center gap-2">
+                         <a href="https://github.com/YaroslavOstapenko5" target="_blank" class="hover:text-white transition-colors" aria-label="GitHub"><i data-lucide="github" width="14" height="14"></i></a>
+                         <a href="#" class="hover:text-white transition-colors" aria-label="LinkedIn"><i data-lucide="linkedin" width="14" height="14"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Mobile Nav -->
-        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 shadow-xl transition-all duration-300 origin-top">
-            <nav class="flex flex-col p-4 space-y-4">
-                <a href="#hero" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Start</a>
-                <a href="#about" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">O mnie</a>
-                <a href="#skills" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Umiejętności</a>
-                <a href="#projects" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Projekty</a>
-                <a href="#experience" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Doświadczenie</a>
-                <a href="#contact" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Kontakt</a>
-            </nav>
+        <!-- Main Navbar Area -->
+        <div id="main-navbar" class="backdrop-blur-md bg-white/5 border-b border-white/10 transition-all duration-300">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    
+                    <!-- Logo -->
+                    <a href="#" class="flex items-center gap-2.5 group relative z-50">
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-blue-600 blur opacity-20 group-hover:opacity-40 transition-opacity rounded-lg"></div>
+                            <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 rounded-xl text-white shadow-lg group-hover:scale-105 transition-transform duration-300 ring-1 ring-white/20">
+                                <i data-lucide="code-2" width="24" height="24"></i>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+                                Yaroslav<span class="text-blue-600">.dev</span>
+                            </span>
+                            <span class="text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Portfolio</span>
+                        </div>
+                    </a>
+
+                    <!-- Desktop Navigation Links -->
+                    <nav class="hidden lg:flex items-center gap-1">
+                        <!-- Simple Links -->
+                        <a href="#hero" class="nav-item-desktop px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">Start</a>
+                        <a href="#about" class="nav-item-desktop px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">O mnie</a>
+                        
+                        <!-- Mega Menu Trigger: Projects -->
+                        <div class="group/mega relative px-1">
+                            <button class="nav-item-desktop flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all" aria-expanded="false">
+                                Projekty
+                                <i data-lucide="chevron-down" width="14" height="14" class="group-hover/mega:rotate-180 transition-transform duration-300"></i>
+                            </button>
+                            
+                            <!-- Mega Menu Content -->
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 w-[600px] pt-4 opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 transform origin-top translate-y-2 group-hover/mega:translate-y-0 z-50">
+                                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl ring-1 ring-slate-200 dark:ring-slate-700 p-6 overflow-hidden">
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <!-- Column 1: Games -->
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                <i data-lucide="gamepad-2" width="14" height="14"></i> Gry JS
+                                            </h4>
+                                            <ul class="space-y-2">
+                                                <li>
+                                                    <a href="pong.html" class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group/item">
+                                                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md group-hover/item:scale-110 transition-transform">
+                                                            <i data-lucide="trophy" width="16" height="16"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm">AI Ping Pong</div>
+                                                            <div class="text-xs text-slate-500 dark:text-slate-400">Klasyczna gra arcade z botem</div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="checkers.html" class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group/item">
+                                                        <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-md group-hover/item:scale-110 transition-transform">
+                                                            <i data-lucide="brain-circuit" width="16" height="16"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm">Russian Checkers</div>
+                                                            <div class="text-xs text-slate-500 dark:text-slate-400">Warcaby z AI (Gemini)</div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="taxi.html" class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group/item">
+                                                        <div class="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-md group-hover/item:scale-110 transition-transform">
+                                                            <i data-lucide="car" width="16" height="16"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm">2D City Taxi</div>
+                                                            <div class="text-xs text-slate-500 dark:text-slate-400">Symulator jazdy w Canvas</div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <!-- Column 2: Web Apps -->
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                <i data-lucide="layout" width="14" height="14"></i> Aplikacje
+                                            </h4>
+                                            <ul class="space-y-2">
+                                                <li>
+                                                    <a href="#projects" class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group/item">
+                                                        <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-md group-hover/item:scale-110 transition-transform">
+                                                            <i data-lucide="shopping-cart" width="16" height="16"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm">System E-Commerce</div>
+                                                            <div class="text-xs text-slate-500 dark:text-slate-400">Sklep PHP + MySQL</div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="loto.html" class="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group/item">
+                                                        <div class="p-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 rounded-md group-hover/item:scale-110 transition-transform">
+                                                            <i data-lucide="dices" width="16" height="16"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm">Loto Blast</div>
+                                                            <div class="text-xs text-slate-500 dark:text-slate-400">Gra losowa webowa</div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                                <a href="#projects" class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                                    Zobacz wszystkie projekty <i data-lucide="arrow-right" width="12" height="12"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Decorative gradient footer -->
+                                    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="#experience" class="nav-item-desktop px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">Doświadczenie</a>
+                    </nav>
+
+                    <!-- Right Side Actions -->
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        
+                        <!-- Search Trigger -->
+                        <button id="search-trigger" class="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Search">
+                            <i data-lucide="search" width="20" height="20"></i>
+                        </button>
+
+                        <!-- Theme Toggle (Quick) -->
+                        <button id="theme-toggle-quick" class="hidden sm:flex p-2 text-slate-500 hover:text-yellow-500 dark:text-slate-400 dark:hover:text-yellow-400 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle Theme">
+                            <i data-lucide="sun" width="20" height="20" class="dark:hidden"></i>
+                            <i data-lucide="moon" width="20" height="20" class="hidden dark:block"></i>
+                        </button>
+
+                        <!-- Settings Trigger -->
+                        <button id="settings-trigger" class="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Settings">
+                            <i data-lucide="sliders-horizontal" width="20" height="20"></i>
+                        </button>
+
+                        <!-- Divider -->
+                        <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+
+                        <!-- CTA Button -->
+                        <a href="#contact" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all hover:shadow-lg shadow-blue-500/20 hover:-translate-y-0.5">
+                            Zatrudnij mnie
+                            <i data-lucide="arrow-right" width="16" height="16"></i>
+                        </a>
+
+                        <!-- Mobile Menu Hamburger -->
+                        <button id="mobile-menu-trigger" class="lg:hidden p-2 text-slate-600 dark:text-slate-300 transition-colors relative z-50">
+                            <div class="w-6 h-5 flex flex-col justify-between relative hamburger-icon">
+                                <span class="w-full h-0.5 bg-current rounded-full transition-all duration-300 origin-left"></span>
+                                <span class="w-full h-0.5 bg-current rounded-full transition-all duration-300 opacity-100"></span>
+                                <span class="w-full h-0.5 bg-current rounded-full transition-all duration-300 origin-left"></span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
-    <main class="flex-grow">
-        <!-- Hero Section -->
-        <section id="hero" class="relative min-h-screen flex items-center pt-20 overflow-hidden bg-slate-900">
-            <!-- Background patterns -->
-            <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                <div class="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-                <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-                <div class="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+    <!-- 
+        ========================================================================
+        MOBILE NAVIGATION DRAWER (OFF-CANVAS)
+        ========================================================================
+    -->
+    <div id="mobile-drawer" class="fixed inset-0 z-[60] pointer-events-none">
+        <!-- Backdrop -->
+        <div id="mobile-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
+        
+        <!-- Drawer Panel -->
+        <div id="mobile-panel" class="absolute top-0 right-0 w-[85%] max-w-sm h-full bg-white dark:bg-slate-900 shadow-2xl transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col pointer-events-auto">
+            
+            <!-- Drawer Header -->
+            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <span class="text-lg font-bold text-slate-900 dark:text-white">Menu</span>
+                <button id="mobile-close-btn" class="p-2 text-slate-500 hover:text-red-500 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="x" width="24" height="24"></i>
+                </button>
             </div>
 
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                
+                <!-- Navigation Links -->
+                <nav class="flex flex-col space-y-2">
+                    <a href="#hero" class="mobile-nav-link text-lg font-medium text-slate-600 dark:text-slate-300 py-2 block hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Start</a>
+                    <a href="#about" class="mobile-nav-link text-lg font-medium text-slate-600 dark:text-slate-300 py-2 block hover:text-blue-600 dark:hover:text-blue-400 transition-colors">O mnie</a>
+                    
+                    <!-- Mobile Accordion for Projects -->
+                    <div class="mobile-accordion group">
+                        <button class="w-full flex justify-between items-center text-lg font-medium text-slate-600 dark:text-slate-300 py-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onclick="this.parentElement.classList.toggle('open')">
+                            Projekty
+                            <i data-lucide="chevron-down" width="20" height="20" class="transition-transform duration-300 group-[.open]:rotate-180"></i>
+                        </button>
+                        <div class="grid grid-rows-[0fr] transition-all duration-300 group-[.open]:grid-rows-[1fr]">
+                            <div class="overflow-hidden">
+                                <div class="pl-4 py-2 space-y-3 border-l-2 border-slate-100 dark:border-slate-800 ml-2">
+                                    <a href="pong.html" class="block text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-base">AI Ping Pong</a>
+                                    <a href="checkers.html" class="block text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-base">Checkers AI</a>
+                                    <a href="taxi.html" class="block text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-base">City Taxi</a>
+                                    <a href="loto.html" class="block text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-base">Loto Blast</a>
+                                    <a href="#projects" class="block font-medium text-blue-600 dark:text-blue-400 text-base">Wszystkie projekty →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="#skills" class="mobile-nav-link text-lg font-medium text-slate-600 dark:text-slate-300 py-2 block hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Umiejętności</a>
+                    <a href="#experience" class="mobile-nav-link text-lg font-medium text-slate-600 dark:text-slate-300 py-2 block hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Doświadczenie</a>
+                </nav>
+
+                <!-- Additional Info -->
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-4">
+                    <h5 class="text-sm font-bold uppercase tracking-wider text-slate-400">Kontakt</h5>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+                            <div class="p-1.5 bg-white dark:bg-slate-700 rounded-md shadow-sm">
+                                <i data-lucide="mail" width="14" height="14" class="text-blue-500"></i>
+                            </div>
+                            yaroslav.ostapenko16@gmail.com
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+                            <div class="p-1.5 bg-white dark:bg-slate-700 rounded-md shadow-sm">
+                                <i data-lucide="phone" width="14" height="14" class="text-blue-500"></i>
+                            </div>
+                            +48 513 815 774
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <a href="#contact" class="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+                    Zatrudnij mnie
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        ========================================================================
+        GLOBAL SEARCH MODAL
+        ========================================================================
+    -->
+    <div id="search-modal-container" class="fixed inset-0 z-[70] hidden opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" id="search-backdrop"></div>
+        
+        <div class="relative w-full max-w-2xl mx-auto mt-20 md:mt-32 px-4 animate-slide-down">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/10">
+                
+                <!-- Search Input -->
+                <div class="relative border-b border-slate-100 dark:border-slate-700 p-4 flex items-center gap-3">
+                    <i data-lucide="search" class="text-slate-400" width="24" height="24"></i>
+                    <input type="text" id="global-search-input" placeholder="Wyszukaj projekty, umiejętności, sekcje..." class="w-full bg-transparent border-none outline-none text-lg text-slate-900 dark:text-white placeholder:text-slate-400 h-10" autocomplete="off" />
+                    <button id="close-search" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-700 rounded text-xs px-2 py-1 font-mono">ESC</button>
+                </div>
+                
+                <!-- Search Results Area -->
+                <div class="max-h-[60vh] overflow-y-auto p-2" id="search-results">
+                    <!-- Default State / Suggestions -->
+                    <div class="p-4 text-center text-slate-500 dark:text-slate-400">
+                        <p class="text-sm mb-4">Sugerowane wyszukiwania</p>
+                        <div class="flex flex-wrap justify-center gap-2">
+                            <button class="search-suggestion px-3 py-1.5 bg-slate-100 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-sm transition-colors" data-term="React">React</button>
+                            <button class="search-suggestion px-3 py-1.5 bg-slate-100 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-sm transition-colors" data-term="Game">Gry</button>
+                            <button class="search-suggestion px-3 py-1.5 bg-slate-100 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-sm transition-colors" data-term="Kontakt">Kontakt</button>
+                        </div>
+                    </div>
+                    <!-- Results List (Populated via JS) -->
+                    <ul id="results-list" class="space-y-1 hidden"></ul>
+                </div>
+                
+                <!-- Footer -->
+                <div class="bg-slate-50 dark:bg-slate-800/80 p-3 text-xs text-slate-500 dark:text-slate-400 flex justify-between border-t border-slate-100 dark:border-slate-700">
+                    <span><strong>Enter</strong> aby wybrać</span>
+                    <span><strong>↑↓</strong> aby nawigować</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        ========================================================================
+        SETTINGS / PREFERENCES MODAL
+        ========================================================================
+    -->
+    <div id="settings-modal-container" class="fixed inset-0 z-[70] hidden flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm opacity-0 transition-opacity duration-300" id="settings-backdrop"></div>
+        
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-95 opacity-0 transition-all duration-300" id="settings-panel">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="text-blue-600"></i> Ustawienia
+                </h3>
+                <button id="close-settings" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                    <i data-lucide="x" width="24" height="24"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Theme Setting -->
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 block">Motyw</label>
+                    <div class="grid grid-cols-3 gap-2 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl">
+                        <button class="theme-opt p-2 rounded-lg text-sm font-medium flex flex-col items-center gap-1 transition-all" data-value="light">
+                            <i data-lucide="sun" width="16" height="16"></i> Jasny
+                        </button>
+                        <button class="theme-opt p-2 rounded-lg text-sm font-medium flex flex-col items-center gap-1 transition-all" data-value="dark">
+                            <i data-lucide="moon" width="16" height="16"></i> Ciemny
+                        </button>
+                        <button class="theme-opt p-2 rounded-lg text-sm font-medium flex flex-col items-center gap-1 transition-all" data-value="system">
+                            <i data-lucide="monitor" width="16" height="16"></i> System
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Font Size Setting (Dummy implementation for demo) -->
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Rozmiar tekstu</label>
+                        <span id="font-size-label" class="text-xs text-slate-500">Normalny</span>
+                    </div>
+                    <input type="range" min="1" max="3" value="2" step="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" id="font-size-range">
+                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                        <span>A</span>
+                        <span class="text-base font-bold">A</span>
+                    </div>
+                </div>
+
+                <!-- Reduce Motion -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block">Zmniejsz ruch</label>
+                        <p class="text-xs text-slate-500">Wyłącz animacje tła i przejść</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="reduce-motion-toggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <button id="reset-settings" class="w-full py-2 text-sm text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    Przywróć domyślne
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section id="hero" class="relative min-h-screen flex items-center pt-20 overflow-hidden bg-slate-900 dark:bg-black transition-colors duration-500">
+            <!-- Background patterns -->
+            <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" id="hero-particles">
+                <div class="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob motion-safe:animate-blob"></div>
+                <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000 motion-safe:animate-blob"></div>
+                <div class="absolute -bottom-8 left-20 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000 motion-safe:animate-blob"></div>
+            </div>
+            
+            <!-- Hero content remains similar but ensuring dark mode compatibility -->
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <div class="space-y-8">
@@ -180,15 +560,16 @@
                                 Zobacz moje projekty
                             </a>
                         </div>
-
+                        
+                        <!-- Socials -->
                         <div class="flex items-center gap-6 pt-4 text-slate-400">
-                            <a href="mailto:yaroslav.ostapenko16@gmail.com" class="hover:text-blue-400 transition-colors">
+                            <a href="mailto:yaroslav.ostapenko16@gmail.com" class="hover:text-blue-400 transition-colors transform hover:scale-110 duration-200">
                                 <i data-lucide="mail" width="24" height="24"></i>
                             </a>
-                            <a href="https://github.com/YaroslavOstapenko5" target="_blank" class="hover:text-blue-400 transition-colors">
+                            <a href="https://github.com/YaroslavOstapenko5" target="_blank" class="hover:text-blue-400 transition-colors transform hover:scale-110 duration-200">
                                 <i data-lucide="github" width="24" height="24"></i>
                             </a>
-                            <a href="#" class="hover:text-blue-400 transition-colors">
+                            <a href="#" class="hover:text-blue-400 transition-colors transform hover:scale-110 duration-200">
                                 <i data-lucide="linkedin" width="24" height="24"></i>
                             </a>
                         </div>
@@ -197,7 +578,6 @@
                     <div class="relative hidden lg:block">
                         <div class="relative w-full aspect-square max-w-md mx-auto">
                             <div class="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full opacity-20 blur-2xl animate-pulse"></div>
-                            <!-- Placeholder for Profile Image -->
                             <div class="relative w-full h-full rounded-2xl overflow-hidden border-2 border-slate-700/50 shadow-2xl bg-slate-800 flex items-center justify-center group">
                                 <img src="https://picsum.photos/600/600?grayscale" alt="Yaroslav Ostapenko" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                                 <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 to-transparent">
@@ -216,16 +596,16 @@
         </section>
 
         <!-- About Section -->
-        <section id="about" class="py-20 lg:py-32 bg-white">
+        <section id="about" class="py-20 lg:py-32 bg-white dark:bg-slate-900 transition-colors duration-300">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="mb-16 max-w-2xl">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">O mnie</h2>
-                    <p class="text-lg text-slate-600 leading-relaxed">Poznaj mnie lepiej</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">O mnie</h2>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">Poznaj mnie lepiej</p>
                     <div class="h-1 w-20 bg-blue-600 rounded-full mt-6"></div>
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-12 items-start">
-                    <div class="space-y-6 text-slate-600 text-lg leading-relaxed">
+                    <div class="space-y-6 text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
                         <p>
                             Jestem ambitnym i zmotywowanym 18-letnim programistą z Ukrainy, obecnie uczniem trzeciej klasy technikum. 
                             Posiadam solidną wiedzę z zakresu technologii webowych oraz praktyczne doświadczenie na stanowisku Full Stack Developer, 
@@ -237,40 +617,40 @@
                         </p>
                         
                         <div class="grid sm:grid-cols-2 gap-6 pt-6">
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <div class="p-2.5 bg-blue-100 text-blue-600 rounded-lg">
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                                <div class="p-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
                                     <i data-lucide="map-pin" width="20" height="20"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-slate-500 font-medium">Lokalizacja</p>
-                                    <p class="text-slate-900 font-semibold">Kraków, Małopolskie</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Lokalizacja</p>
+                                    <p class="text-slate-900 dark:text-white font-semibold">Kraków, Małopolskie</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <div class="p-2.5 bg-blue-100 text-blue-600 rounded-lg">
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                                <div class="p-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
                                     <i data-lucide="globe" width="20" height="20"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-slate-500 font-medium">Języki</p>
-                                    <p class="text-slate-900 font-semibold">Polski (C1), Angielski (B2)</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Języki</p>
+                                    <p class="text-slate-900 dark:text-white font-semibold">Polski (C1), Angielski (B2)</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <div class="p-2.5 bg-blue-100 text-blue-600 rounded-lg">
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                                <div class="p-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
                                     <i data-lucide="user" width="20" height="20"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-slate-500 font-medium">Status</p>
-                                    <p class="text-slate-900 font-semibold">Uczeń / Stażysta</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Status</p>
+                                    <p class="text-slate-900 dark:text-white font-semibold">Uczeń / Stażysta</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="relative">
-                        <div class="bg-slate-900 rounded-2xl p-8 text-white space-y-8 shadow-2xl">
+                        <div class="bg-slate-900 dark:bg-black rounded-2xl p-8 text-white space-y-8 shadow-2xl">
                             <h3 class="text-2xl font-bold flex items-center gap-2">
                                 <i data-lucide="award" class="text-yellow-400"></i>
                                 Czym się zajmuję?
@@ -300,128 +680,123 @@
         </section>
 
         <!-- Skills Section -->
-        <section id="skills" class="py-20 lg:py-32 bg-slate-50">
+        <section id="skills" class="py-20 lg:py-32 bg-slate-50 dark:bg-slate-800/50 transition-colors duration-300">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="mb-16 max-w-2xl">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Umiejętności</h2>
-                    <p class="text-lg text-slate-600 leading-relaxed">Technologie i narzędzia, z którymi pracuję</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Umiejętności</h2>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">Technologie i narzędzia, z którymi pracuję</p>
                     <div class="h-1 w-20 bg-blue-600 rounded-full mt-6"></div>
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-12">
                     
                     <!-- Frontend & Backend Skills -->
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-                        <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-blue-500">Technologie Webowe</h3>
+                    <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-8 pl-2 border-l-4 border-blue-500">Technologie Webowe</h3>
                         <div class="space-y-6">
                             
-                            <!-- Skill Item -->
+                            <!-- Skill Items updated with dark mode classes -->
                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">HTML5</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">HTML5</span>
                                     <span class="text-sm font-bold text-blue-600">90%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 90%"></div>
                                 </div>
                             </div>
-
-                            <div class="skill-item">
+                            <!-- (Other skill items follow same pattern, ensuring dark mode classes are present) -->
+                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">CSS3</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">CSS3</span>
                                     <span class="text-sm font-bold text-blue-600">85%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 85%"></div>
                                 </div>
                             </div>
-
-                            <div class="skill-item">
+                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">JavaScript (ES6+)</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">JavaScript</span>
                                     <span class="text-sm font-bold text-blue-600">80%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
                                 </div>
                             </div>
-
-                            <div class="skill-item">
+                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">React</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">React</span>
                                     <span class="text-sm font-bold text-blue-600">75%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 75%"></div>
                                 </div>
                             </div>
-
-                            <div class="skill-item">
+                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">MySQL</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">MySQL</span>
                                     <span class="text-sm font-bold text-indigo-600">70%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
                                     <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 70%"></div>
                                 </div>
                             </div>
-
                              <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">PHP</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">PHP</span>
                                     <span class="text-sm font-bold text-indigo-600">60%</span>
                                 </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5">
                                     <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 60%"></div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
                     <!-- Languages & Tools -->
                     <div class="space-y-8">
-                        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-                             <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-emerald-500">Narzędzia</h3>
+                        <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                             <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-8 pl-2 border-l-4 border-emerald-500">Narzędzia</h3>
                              <div class="grid grid-cols-2 gap-4">
-                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
-                                    <div class="font-bold text-slate-800 mb-1">Git</div>
-                                    <div class="text-sm text-slate-500">Kontrola wersji</div>
+                                <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-center border border-slate-100 dark:border-slate-700">
+                                    <div class="font-bold text-slate-800 dark:text-white mb-1">Git</div>
+                                    <div class="text-sm text-slate-500 dark:text-slate-400">Kontrola wersji</div>
                                 </div>
-                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
-                                    <div class="font-bold text-slate-800 mb-1">Bootstrap</div>
-                                    <div class="text-sm text-slate-500">Framework CSS</div>
+                                <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl text-center border border-slate-100 dark:border-slate-700">
+                                    <div class="font-bold text-slate-800 dark:text-white mb-1">Bootstrap</div>
+                                    <div class="text-sm text-slate-500 dark:text-slate-400">Framework CSS</div>
                                 </div>
                              </div>
                         </div>
 
-                        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-                            <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-purple-500">Języki Obce</h3>
+                        <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-8 pl-2 border-l-4 border-purple-500">Języki Obce</h3>
                             <div class="space-y-4">
                                 <div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="font-medium">Ukraiński / Rosyjski</span>
-                                        <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">C2 (Ojczysty)</span>
+                                        <span class="font-medium text-slate-700 dark:text-slate-300">Ukraiński / Rosyjski</span>
+                                        <span class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">C2 (Ojczysty)</span>
                                     </div>
-                                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                    <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
                                         <div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="font-medium">Polski</span>
-                                        <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">C1 (Zaawansowany)</span>
+                                        <span class="font-medium text-slate-700 dark:text-slate-300">Polski</span>
+                                        <span class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">C1 (Zaawansowany)</span>
                                     </div>
-                                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                    <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
                                         <div class="bg-purple-500 h-1.5 rounded-full" style="width: 90%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="font-medium">Angielski</span>
-                                        <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">B2 (Średniozaawansowany)</span>
+                                        <span class="font-medium text-slate-700 dark:text-slate-300">Angielski</span>
+                                        <span class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">B2 (Średniozaawansowany)</span>
                                     </div>
-                                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                    <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
                                         <div class="bg-purple-500 h-1.5 rounded-full" style="width: 75%"></div>
                                     </div>
                                 </div>
@@ -433,211 +808,152 @@
             </div>
         </section>
 
-        <!-- Projects Section -->
-        <section id="projects" class="py-20 lg:py-32 bg-white border-t border-slate-100">
+        <!-- Projects Section (Updated for Dark Mode) -->
+        <section id="projects" class="py-20 lg:py-32 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors duration-300">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="mb-16 max-w-2xl">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Projekty</h2>
-                    <p class="text-lg text-slate-600 leading-relaxed">Wybrane realizacje, nad którymi pracowałem</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Projekty</h2>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">Wybrane realizacje, nad którymi pracowałem</p>
                     <div class="h-1 w-20 bg-blue-600 rounded-full mt-6"></div>
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    
-                    <!-- AI Pong Project Card -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <!-- Cards need dark mode updates -->
+                    <!-- AI Pong -->
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">AI Ping Pong</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">AI Ping Pong</h3>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
                                 Interaktywna gra w Ponga z przeciwnikiem AI. Wykorzystuje HTML5 Canvas, system cząsteczek i efekty dźwiękowe.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600 text-xs font-semibold">JavaScript</span>
-                                <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-semibold">Canvas API</span>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Game Dev</span>
+                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-xs font-semibold">JavaScript</span>
+                                <span class="px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-semibold">Canvas API</span>
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold">Game Dev</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="pong.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
+                                <a href="pong.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="https://github.com/YaroslavOstapenko5/Ai-ping-pong" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Ai-ping-pong" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Loto Blast Project Card -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <!-- Loto Blast -->
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Loto Blast</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Loto Blast</h3>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
                                 Mobilna gra symulująca loterię z efektami dźwiękowymi i animacjami. Zbudowana z użyciem Tailwind i Tone.js.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-600 text-xs font-semibold">Tailwind CSS</span>
-                                <span class="px-2.5 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-semibold">Tone.js</span>
-                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600 text-xs font-semibold">JavaScript</span>
+                                <span class="px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs font-semibold">Tailwind CSS</span>
+                                <span class="px-2.5 py-1 rounded-full bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs font-semibold">Tone.js</span>
+                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-xs font-semibold">JavaScript</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="loto.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
+                                <a href="loto.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="https://github.com/YaroslavOstapenko5/Loto" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Loto" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2D Uno Game Project Card -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <!-- 2D Uno -->
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">2D Uno Game</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">2D Uno Game</h3>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
                                 Klasyczna gra karciana UNO z przeciwnikiem AI. Zawiera animacje kart, logikę gry i dynamiczny interfejs.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-green-50 text-green-600 text-xs font-semibold">JavaScript</span>
-                                <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">Tailwind CSS</span>
-                                <span class="px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-xs font-semibold">Game Logic</span>
+                                <span class="px-2.5 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-semibold">JavaScript</span>
+                                <span class="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold">Tailwind CSS</span>
+                                <span class="px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold">Game Logic</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="uno.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
+                                <a href="uno.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="https://github.com/YaroslavOstapenko5/Uno" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
-                                    <i data-lucide="code-2" width="16" height="16"></i> Kod
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2D City Taxi Project Card -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">2D City Taxi</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Symulator jazdy taksówką w mieście 2D. Odkrywaj mapę, omijaj budynki i ciesz się płynną fizyką jazdy.
-                            </p>
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600 text-xs font-semibold">JavaScript</span>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Canvas API</span>
-                                <span class="px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">Game Physics</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <a href="taxi.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
-                                    <i data-lucide="play" width="16" height="16"></i> Graj
-                                </a>
-                                <a href="https://github.com/YaroslavOstapenko5/Taxi" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
-                                    <i data-lucide="code-2" width="16" height="16"></i> Kod
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Russian Checkers AI Project Card -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Russian Checkers AI</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Klasyczne warcaby rosyjskie z wbudowanym systemem analizy ruchów opartym na Google Gemini API.
-                            </p>
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">Gemini API</span>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Minimax AI</span>
-                                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-semibold">JavaScript</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <a href="checkers.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
-                                    <i data-lucide="play" width="16" height="16"></i> Graj
-                                </a>
-                                <a href="https://github.com/YaroslavOstapenko5/Checkers" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
-                                    <i data-lucide="code-2" width="16" height="16"></i> Kod
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Monopoly Web Project Card -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Monopoly Web</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Wersja przeglądarkowa klasycznej gry planszowej. Obsługuje lokalną grę z botem AI oraz zarządzanie nieruchomościami.
-                            </p>
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-xs font-semibold">CSS Grid</span>
-                                <span class="px-2.5 py-1 rounded-full bg-green-50 text-green-600 text-xs font-semibold">JavaScript</span>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Board Game</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <a href="monopoly/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
-                                    <i data-lucide="play" width="16" height="16"></i> Graj
-                                </a>
-                                <a href="monopoly/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Uno" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Project Card 1 -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <!-- Other projects follow similar pattern for dark mode classes -->
+                    <!-- Taxi -->
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">System E-Commerce</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Kompleksowa platforma sprzedażowa z panelem administratora, koszykiem zakupowym i systemem zarządzania zamówieniami.
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">2D City Taxi</h3>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
+                                Symulator jazdy taksówką w mieście 2D. Odkrywaj mapę, omijaj budynki i ciesz się płynną fizyką jazdy.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold">PHP</span>
-                                <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">MySQL</span>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Bootstrap</span>
+                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-xs font-semibold">JavaScript</span>
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold">Canvas API</span>
+                                <span class="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-semibold">Game Physics</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <a href="taxi.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
+                                    <i data-lucide="play" width="16" height="16"></i> Graj
+                                </a>
+                                <a href="https://github.com/YaroslavOstapenko5/Taxi" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                    <i data-lucide="code-2" width="16" height="16"></i> Kod
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Checkers -->
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Russian Checkers AI</h3>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
+                                Klasyczne warcaby rosyjskie z wbudowanym systemem analizy ruchów opartym na Google Gemini API.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold">Gemini API</span>
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold">Minimax AI</span>
+                                <span class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-semibold">JavaScript</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <a href="checkers.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
+                                    <i data-lucide="play" width="16" height="16"></i> Graj
+                                </a>
+                                <a href="https://github.com/YaroslavOstapenko5/Checkers" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                    <i data-lucide="code-2" width="16" height="16"></i> Kod
+                                </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Project Card 2 -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <!-- Monopoly -->
+                    <div class="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Portfolio Developer</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Nowoczesna strona wizytówka (taka jak ta), zoptymalizowana pod kątem SEO i wydajności.
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Monopoly Web</h3>
+                            <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm leading-relaxed">
+                                Wersja przeglądarkowa klasycznej gry planszowej. Obsługuje lokalną grę z botem AI oraz zarządzanie nieruchomościami.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-semibold">HTML5</span>
-                                <span class="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-600 text-xs font-semibold">Tailwind CSS</span>
-                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600 text-xs font-semibold">JavaScript</span>
+                                <span class="px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold">CSS Grid</span>
+                                <span class="px-2.5 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-semibold">JavaScript</span>
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold">Board Game</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Project Card 3 -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Dashboard Pogodowy</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Aplikacja wykorzystująca zewnętrzne API do wyświetlania prognozy pogody w czasie rzeczywistym.
-                            </p>
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600 text-xs font-semibold">JavaScript ES6+</span>
-                                <span class="px-2.5 py-1 rounded-full bg-green-50 text-green-600 text-xs font-semibold">Fetch API</span>
-                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">CSS Grid</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Project Card 4 -->
-                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Task Manager</h3>
-                            <p class="text-slate-600 mb-4 text-sm leading-relaxed">
-                                Interaktywna lista zadań (To-Do) z możliwością kategoryzacji i zapisywania stanu w przeglądarce.
-                            </p>
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">React</span>
-                                <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-semibold">LocalStorage</span>
-                                <span class="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-600 text-xs font-semibold">Tailwind</span>
+                             <div class="flex items-center gap-3">
+                                <a href="monopoly/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
+                                    <i data-lucide="play" width="16" height="16"></i> Graj
+                                </a>
+                                <a href="monopoly/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                    <i data-lucide="code-2" width="16" height="16"></i> Kod
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -647,173 +963,163 @@
         </section>
 
         <!-- Experience Section -->
-        <section id="experience" class="py-20 lg:py-32 bg-white">
+        <section id="experience" class="py-20 lg:py-32 bg-white dark:bg-slate-900 transition-colors duration-300">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="mb-16 max-w-2xl">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Doświadczenie i Edukacja</h2>
-                    <p class="text-lg text-slate-600 leading-relaxed">Moja ścieżka rozwoju zawodowego</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Doświadczenie i Edukacja</h2>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">Moja ścieżka rozwoju zawodowego</p>
                     <div class="h-1 w-20 bg-blue-600 rounded-full mt-6"></div>
                 </div>
 
                 <div class="max-w-4xl mx-auto">
-                    <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                    <!-- Timeline Items with Dark Mode -->
+                     <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 dark:before:via-slate-600 before:to-transparent">
                         
                         <!-- Item 1 -->
                         <div class="relative flex items-center justify-between md:justify-normal md:flex-row-reverse group">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-50 shadow shrink-0 md:order-1 md:-translate-x-1/2">
-                                <i data-lucide="briefcase" width="18" height="18" class="text-blue-600"></i>
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-800 bg-slate-50 dark:bg-slate-700 shadow shrink-0 md:order-1 md:-translate-x-1/2">
+                                <i data-lucide="briefcase" width="18" height="18" class="text-blue-600 dark:text-blue-400"></i>
                             </div>
-                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1">
-                                    <h3 class="font-bold text-slate-900 text-lg">Full Stack Developer (Praktykant)</h3>
-                                    <span class="inline-block px-2 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-500 whitespace-nowrap">Październik 2025 - Obecnie</span>
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-lg">Full Stack Developer (Praktykant)</h3>
+                                    <span class="inline-block px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-300 whitespace-nowrap">Październik 2025 - Obecnie</span>
                                 </div>
-                                <div class="text-blue-600 font-medium text-sm mb-4">AKTRU sp. z o.o.</div>
+                                <div class="text-blue-600 dark:text-blue-400 font-medium text-sm mb-4">AKTRU sp. z o.o.</div>
                                 <ul class="space-y-2">
-                                    <li class="text-slate-600 text-sm flex items-start gap-2">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+                                    <li class="text-slate-600 dark:text-slate-300 text-sm flex items-start gap-2">
+                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-500 shrink-0"></span>
                                         <span class="leading-relaxed">Tworzenie i rozwój aplikacji webowych (HTML, CSS, JS, PHP, MySQL).</span>
-                                    </li>
-                                    <li class="text-slate-600 text-sm flex items-start gap-2">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                                        <span class="leading-relaxed">Projektowanie i zarządzanie relacyjnymi baz danych.</span>
-                                    </li>
-                                    <li class="text-slate-600 text-sm flex items-start gap-2">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                                        <span class="leading-relaxed">Aktywna praca z systemem kontroli wersji Git.</span>
                                     </li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- Item 2 -->
-                        <div class="relative flex items-center justify-between md:justify-normal group">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-50 shadow shrink-0 md:order-1 md:translate-x-1/2">
-                                <i data-lucide="graduation-cap" width="18" height="18" class="text-emerald-600"></i>
+                         <div class="relative flex items-center justify-between md:justify-normal group">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-800 bg-slate-50 dark:bg-slate-700 shadow shrink-0 md:order-1 md:translate-x-1/2">
+                                <i data-lucide="graduation-cap" width="18" height="18" class="text-emerald-600 dark:text-emerald-400"></i>
                             </div>
-                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1">
-                                    <h3 class="font-bold text-slate-900 text-lg">Technik Programista</h3>
-                                    <span class="inline-block px-2 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-500 whitespace-nowrap">04.09.2023 - Obecnie</span>
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-lg">Technik Programista</h3>
+                                    <span class="inline-block px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-300 whitespace-nowrap">04.09.2023 - Obecnie</span>
                                 </div>
-                                <div class="text-blue-600 font-medium text-sm mb-4">ZESPÓŁ SZKÓŁ TECHNICZNYCH Chemobudowa-Kraków S.A.</div>
+                                <div class="text-blue-600 dark:text-blue-400 font-medium text-sm mb-4">ZESPÓŁ SZKÓŁ TECHNICZNYCH Chemobudowa-Kraków S.A.</div>
                                 <ul class="space-y-2">
-                                    <li class="text-slate-600 text-sm flex items-start gap-2">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+                                    <li class="text-slate-600 dark:text-slate-300 text-sm flex items-start gap-2">
+                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-500 shrink-0"></span>
                                         <span class="leading-relaxed">Profil: Programista</span>
-                                    </li>
-                                    <li class="text-slate-600 text-sm flex items-start gap-2">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                                        <span class="leading-relaxed">Nauka zaawansowanych technologii webowych.</span>
                                     </li>
                                 </ul>
                             </div>
                         </div>
 
-                         <!-- Item 3 -->
+                        <!-- Item 3 -->
                         <div class="relative flex items-center justify-between md:justify-normal md:flex-row-reverse group">
-                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-50 shadow shrink-0 md:order-1 md:-translate-x-1/2">
-                                <i data-lucide="graduation-cap" width="18" height="18" class="text-emerald-600"></i>
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-800 bg-slate-50 dark:bg-slate-700 shadow shrink-0 md:order-1 md:-translate-x-1/2">
+                                <i data-lucide="graduation-cap" width="18" height="18" class="text-emerald-600 dark:text-emerald-400"></i>
                             </div>
-                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1">
-                                    <h3 class="font-bold text-slate-900 text-lg">Liceum Ogólnokształcące</h3>
-                                    <span class="inline-block px-2 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-500 whitespace-nowrap">2022 - 2025</span>
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-lg">Liceum Ogólnokształcące</h3>
+                                    <span class="inline-block px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-300 whitespace-nowrap">2022 - 2025</span>
                                 </div>
-                                <div class="text-blue-600 font-medium text-sm mb-4">Liceum nr. 3 miasto Mikołajów, Ukraina</div>
+                                <div class="text-blue-600 dark:text-blue-400 font-medium text-sm mb-4">Liceum nr. 3 miasto Mikołajów, Ukraina</div>
                                 <ul class="space-y-2">
-                                    <li class="text-slate-600 text-sm flex items-start gap-2">
-                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+                                    <li class="text-slate-600 dark:text-slate-300 text-sm flex items-start gap-2">
+                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-500 shrink-0"></span>
                                         <span class="leading-relaxed">Nauczanie online. Profil ogólny z naciskiem na nauki ścisłe.</span>
                                     </li>
                                 </ul>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="py-20 lg:py-32 bg-slate-50 relative overflow-hidden">
+        <section id="contact" class="py-20 lg:py-32 bg-slate-50 dark:bg-slate-800/50 relative overflow-hidden transition-colors duration-300">
+            <!-- Canvas is added dynamically by contact-engine.js if present, removing static canvas to let engine create it if needed or use existing logic -->
+            <canvas id="contact-canvas" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none"></canvas>
             
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 contact-hud-container">
                 <div class="mb-16 max-w-2xl">
-                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Kontakt</h2>
-                    <p class="text-lg text-slate-600 leading-relaxed">Zainteresowany współpracą? Napisz do mnie.</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Kontakt</h2>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">Zainteresowany współpracą? Napisz do mnie.</p>
                     <div class="h-1 w-20 bg-blue-600 rounded-full mt-6"></div>
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-12 lg:gap-24">
                     
                     <div class="space-y-8">
-                        <div class="prose prose-slate">
-                            <h3 class="text-2xl font-bold text-slate-900 mb-4">Porozmawiajmy o projektach</h3>
-                            <p class="text-slate-600 leading-relaxed">
+                        <div class="prose prose-slate dark:prose-invert">
+                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Porozmawiajmy o projektach</h3>
+                            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Szukam możliwości rozwoju jako Full Stack Developer. Jeśli masz pytania dotyczące mojego doświadczenia 
                                 lub chcesz omówić potencjalną współpracę, jestem do dyspozycji.
                             </p>
                         </div>
 
                         <div class="space-y-6">
-                            <a href="mailto:yaroslav.ostapenko16@gmail.com" class="flex items-center gap-4 p-4 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
+                            <a href="mailto:yaroslav.ostapenko16@gmail.com" class="flex items-center gap-4 p-4 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all group contact-info-card">
+                                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
                                     <i data-lucide="mail" width="24" height="24"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-slate-500">Email</p>
-                                    <p class="text-slate-900 font-semibold">yaroslav.ostapenko16@gmail.com</p>
+                                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Email</p>
+                                    <p class="text-slate-900 dark:text-white font-semibold">yaroslav.ostapenko16@gmail.com</p>
                                 </div>
                             </a>
 
-                            <a href="tel:+48513815774" class="flex items-center gap-4 p-4 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
+                            <a href="tel:+48513815774" class="flex items-center gap-4 p-4 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all group contact-info-card">
+                                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
                                     <i data-lucide="phone" width="24" height="24"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-slate-500">Telefon</p>
-                                    <p class="text-slate-900 font-semibold">+48 513 815 774</p>
+                                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Telefon</p>
+                                    <p class="text-slate-900 dark:text-white font-semibold">+48 513 815 774</p>
                                 </div>
                             </a>
 
-                            <div class="flex items-center gap-4 p-4 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
+                            <div class="flex items-center gap-4 p-4 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all group contact-info-card">
+                                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
                                     <i data-lucide="map-pin" width="24" height="24"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-slate-500">Lokalizacja</p>
-                                    <p class="text-slate-900 font-semibold">Kraków, Małopolskie</p>
+                                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Lokalizacja</p>
+                                    <p class="text-slate-900 dark:text-white font-semibold">Kraków, Małopolskie</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Form -->
-                    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-slate-100">
+                    <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
                         <form id="contact-form" class="space-y-6">
                             <div class="grid sm:grid-cols-2 gap-6">
                                 <div class="space-y-2 hud-input-group">
-                                    <label for="name" class="text-sm font-medium text-slate-700">Imię</label>
-                                    <input type="text" id="name" required class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="Twoje imię">
+                                    <label for="name" class="text-sm font-medium text-slate-700 dark:text-slate-300">Imię</label>
+                                    <input type="text" id="name" required class="w-full px-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 outline-none transition-all hud-input text-slate-900 dark:text-white" placeholder="Twoje imię">
                                     <div class="input-highlight"></div>
                                 </div>
                                 <div class="space-y-2 hud-input-group">
-                                    <label for="email" class="text-sm font-medium text-slate-700">Email</label>
-                                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="twoj@email.com">
+                                    <label for="email" class="text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+                                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 outline-none transition-all hud-input text-slate-900 dark:text-white" placeholder="twoj@email.com">
                                     <div class="input-highlight"></div>
                                 </div>
                             </div>
                             
                             <div class="space-y-2 hud-input-group">
-                                <label for="subject" class="text-sm font-medium text-slate-700">Temat</label>
-                                <input type="text" id="subject" required class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="W czym mogę pomóc?">
+                                <label for="subject" class="text-sm font-medium text-slate-700 dark:text-slate-300">Temat</label>
+                                <input type="text" id="subject" required class="w-full px-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 outline-none transition-all hud-input text-slate-900 dark:text-white" placeholder="W czym mogę pomóc?">
                                 <div class="input-highlight"></div>
                             </div>
 
                             <div class="space-y-2 hud-input-group">
-                                <label for="message" class="text-sm font-medium text-slate-700">Wiadomość</label>
-                                <textarea id="message" required rows="4" class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none hud-input" placeholder="Treść wiadomości..."></textarea>
+                                <label for="message" class="text-sm font-medium text-slate-700 dark:text-slate-300">Wiadomość</label>
+                                <textarea id="message" required rows="4" class="w-full px-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/50 outline-none transition-all resize-none hud-input text-slate-900 dark:text-white" placeholder="Treść wiadomości..."></textarea>
                                 <div class="input-highlight"></div>
                             </div>
 
@@ -839,7 +1145,8 @@
         </div>
     </footer>
 
-    <!-- Logic Script -->
+    <!-- Scripts -->
+    <script src="contact-engine.js"></script>
     <script src="script.js"></script>
 <script type="module" src="/index.tsx"></script>
 </body>
