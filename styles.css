@@ -5,9 +5,6 @@
 ::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
-.dark ::-webkit-scrollbar-track {
-    background: #0f172a;
-}
 ::-webkit-scrollbar-thumb {
     background: #3b82f6;
     border-radius: 4px;
@@ -38,18 +35,6 @@ html {
   animation-delay: 4s;
 }
 
-/* Motion Reduction Preference */
-@media (prefers-reduced-motion: reduce) {
-    .animate-blob, 
-    .animate-bounce,
-    .transition-all,
-    .duration-300,
-    .duration-500 {
-        animation: none !important;
-        transition: none !important;
-    }
-}
-
 /* Timeline helpers */
 .group.is-education .lucide-briefcase {
     display: none;
@@ -60,9 +45,14 @@ html {
 
 /* 
    =============================================================================
-   CONTACT SECTION HUD STYLING
+   CONTACT SECTION HUD STYLING (ADDENDUM)
    =============================================================================
 */
+
+/* Glassmorphism Container for Content */
+.contact-hud-container {
+    /* Base styles handled by Tailwind classes in HTML, extras here */
+}
 
 /* Info Cards Restyling */
 .contact-info-card {
@@ -75,12 +65,7 @@ html {
     transform: translateX(8px) scale(1.02);
     box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
     border-color: #93c5fd; /* blue-300 */
-}
-
-/* Dark mode specific for hover state override */
-.dark .contact-info-card:hover {
-    background: #1e293b; /* slate-800 */
-    border-color: #3b82f6;
+    background: white;
 }
 
 /* Icon Pulse Effect */
@@ -112,6 +97,7 @@ html {
 
 .hud-input {
     transition: all 0.3s ease;
+    background: rgba(248, 250, 252, 0.5); /* slate-50/50 */
     backdrop-filter: blur(4px);
 }
 
@@ -119,11 +105,6 @@ html {
     background: white;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     transform: translateY(-2px);
-}
-
-.dark .hud-input:focus {
-    background: #0f172a; /* slate-900 */
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Focus Indicator Bar */
@@ -152,10 +133,6 @@ html {
     z-index: 1;
 }
 
-.dark .hud-btn {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
 .hud-btn::before {
     content: '';
     position: absolute;
@@ -176,70 +153,3 @@ html {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
     transform: translateY(-2px);
 }
-
-/*
-    ============================================================================
-    NAVIGATION & MEGA MENU STYLES
-    ============================================================================
-*/
-
-/* Mobile Hamburger Animation */
-.hamburger-active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 6px);
-}
-.hamburger-active span:nth-child(2) {
-    opacity: 0;
-}
-.hamburger-active span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -6px);
-}
-
-/* Search Modal */
-#search-modal-container.visible {
-    display: block;
-    animation: fadeIn 0.2s forwards;
-}
-
-.search-suggestion {
-    border: 1px solid transparent;
-}
-.search-suggestion:hover {
-    border-color: #bfdbfe; /* blue-200 */
-}
-
-/* Drawer Transitions */
-.drawer-open #mobile-backdrop {
-    opacity: 1;
-    pointer-events: auto;
-}
-.drawer-open #mobile-panel {
-    transform: translateX(0);
-}
-
-/* Settings Modal Active State */
-#settings-modal-container.visible {
-    display: flex;
-}
-#settings-modal-container.visible #settings-backdrop {
-    opacity: 1;
-}
-#settings-modal-container.visible #settings-panel {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* Theme Option Active State */
-.theme-opt.active {
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    color: #2563eb;
-}
-.dark .theme-opt.active {
-    background-color: #1e293b;
-    color: #60a5fa;
-}
-
-/* Font Size Scaling Classes (Applied to body via JS) */
-.text-scale-1 { font-size: 0.95em; }
-.text-scale-2 { font-size: 1em; }
-.text-scale-3 { font-size: 1.1em; }
