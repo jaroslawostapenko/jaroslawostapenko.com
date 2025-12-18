@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 
-# Sitemap Location
+# Sitemap Locations
 Sitemap: https://jaroslawostapenko.github.io/jaroslawostapenko.com/sitemap.xml
+Sitemap: https://jaroslawostapenko.github.io/jaroslawostapenko.com/sitemapimages.xml
