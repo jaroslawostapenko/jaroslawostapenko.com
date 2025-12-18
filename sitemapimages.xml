@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://jaroslawostapenko.github.io/jaroslawostapenko.com/</loc>
+    <image:image>
+      <image:loc>https://jaroslawostapenko.github.io/jaroslawostapenko.com/IMG_20251029_104602.webp</image:loc>
+      <image:title>Yaroslav Ostapenko - Full Stack Developer</image:title>
+      <image:caption>Portfolio photo of Yaroslav Ostapenko, Full Stack Developer from Kraków</image:caption>
+    </image:image>
+  </url>
+</urlset>
