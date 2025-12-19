@@ -3,1067 +3,1433 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VS Code Web | Yaroslav Ostapenko</title>
+    <title>Cosmic IDE v2.0 | Yaroslav Ostapenko</title>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600&family=Consolas:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         /* 
          * ==========================================
-         *  VS CODE THEME VARIABLES
+         *  THEME SYSTEM & VARIABLES
          * ==========================================
          */
         :root {
-            --bg-app: #1e1e1e;
-            --bg-activity-bar: #333333;
-            --bg-sidebar: #252526;
-            --bg-editor: #1e1e1e;
-            --bg-panel: #1e1e1e;
-            --bg-status-bar: #007acc;
-            --bg-title-bar: #3c3c3c;
-            --bg-menu: #252526;
-            --bg-input: #3c3c3c;
+            /* Cosmic Dark Theme */
+            --app-bg: #050508;
+            --sidebar-bg: #09090c;
+            --activity-bg: #020203;
+            --panel-bg: #0b0b10;
+            --editor-bg: #08080b;
+            --titlebar-bg: #050508;
             
-            --border-color: #454545;
-            --focus-border: #007acc;
+            /* Borders */
+            --border-subtle: #1f1f2e;
+            --border-light: #2d2d42;
+            --border-focus: #4c4c68;
             
-            --text-primary: #cccccc;
-            --text-secondary: #969696;
+            /* Accents */
+            --accent-primary: #7c3aed; /* Violet */
+            --accent-hover: #6d28d9;
+            --accent-secondary: #db2777; /* Pink */
+            --accent-tertiary: #2563eb; /* Blue */
+            --accent-success: #22c55e;
+            --accent-warning: #eab308;
+            --accent-danger: #ef4444;
+            --accent-glow: rgba(124, 58, 237, 0.15);
+            
+            /* Text */
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
             --text-inverse: #ffffff;
             
-            --highlight-line: #2d2d30;
-            --selection: #264f78;
-            --hover-item: #2a2d2e;
-            --active-item: #37373d;
+            /* Syntax Highlighting Tokens */
+            --tok-comment: #676e95;
+            --tok-keyword: #c084fc;    /* Purple */
+            --tok-string: #a3e635;     /* Lime */
+            --tok-function: #60a5fa;   /* Blue */
+            --tok-class: #fbbf24;      /* Amber */
+            --tok-variable: #e2e8f0;   /* White */
+            --tok-number: #2dd4bf;     /* Teal */
+            --tok-operator: #818cf8;   /* Indigo */
+            --tok-tag: #f87171;        /* Red */
+            --tok-attr: #c4b5fd;       /* Violet Light */
             
-            /* Syntax Colors (Dark+) */
-            --syn-comment: #6a9955;
-            --syn-string: #ce9178;
-            --syn-keyword: #569cd6;
-            --syn-control: #c586c0;
-            --syn-function: #dcdcaa;
-            --syn-variable: #9cdcfe;
-            --syn-type: #4ec9b0;
-            --syn-class: #4ec9b0;
-            --syn-number: #b5cea8;
-            --syn-tag: #569cd6;
-            --syn-attr: #9cdcfe;
+            /* UI Metrics */
+            --font-ui: 'Inter', system-ui, sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+            --header-height: 35px;
+            --status-height: 24px;
+            --activity-width: 50px;
+            --sidebar-width: 260px; /* Default */
             
-            --font-ui: 'Segoe UI', system-ui, sans-serif;
-            --font-code: 'Consolas', 'Courier New', monospace;
+            /* Shadows & Glass */
+            --shadow-float: 0 10px 40px -10px rgba(0,0,0,0.6);
+            --glass-bg: rgba(11, 11, 16, 0.8);
+            --glass-border: 1px solid rgba(255,255,255,0.05);
         }
 
-        * { box-sizing: border-box; outline: none; user-select: none; }
+        * { box-sizing: border-box; outline: none; }
         
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-app);
-            color: var(--text-primary);
+            margin: 0; padding: 0;
+            background-color: var(--app-bg);
+            color: var(--text-main);
             font-family: var(--font-ui);
-            height: 100vh;
-            width: 100vw;
+            height: 100vh; width: 100vw;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
+            user-select: none;
         }
 
         /* Scrollbars */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #424242; }
-        ::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
         ::-webkit-scrollbar-corner { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: #27273a; 
+            border-radius: 5px; 
+            border: 2px solid var(--app-bg); 
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f5a; }
 
-        /* ================= LAYOUT ================= */
-        
+        /* ================= LAYOUT GRID ================= */
+
         /* 1. Title Bar */
-        #title-bar {
-            height: 30px;
-            background-color: var(--bg-title-bar);
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            font-size: 13px;
-            justify-content: center;
-            position: relative;
+        #titlebar {
+            height: var(--header-height);
+            background: var(--titlebar-bg);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 12px; font-size: 13px; z-index: 50;
             -webkit-app-region: drag;
         }
-        .window-controls { position: absolute; right: 0; display: flex; height: 100%; }
-        .win-btn { width: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .win-btn:hover { background-color: rgba(255,255,255,0.1); }
-        .win-btn.close:hover { background-color: #e81123; }
-        
-        .menu-bar { position: absolute; left: 0; display: flex; height: 100%; align-items: center; padding-left: 10px; }
-        .menu-item { padding: 0 8px; cursor: pointer; color: var(--text-primary); }
-        .menu-item:hover { color: var(--text-inverse); }
+        .app-brand { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-main); }
+        .app-icon { color: var(--accent-primary); filter: drop-shadow(0 0 8px var(--accent-glow)); }
+        .menubar { display: flex; gap: 4px; margin-left: 20px; }
+        .menu-btn { 
+            padding: 2px 8px; border-radius: 4px; color: var(--text-muted); cursor: pointer; transition: 0.2s; 
+            -webkit-app-region: no-drag;
+        }
+        .menu-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
 
-        /* 2. Main Workbench */
+        /* 2. Main Workbench Area */
         #workbench {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
+            flex-grow: 1; display: flex; overflow: hidden; position: relative;
         }
 
-        /* Activity Bar */
+        /* Activity Bar (Left Strip) */
         #activity-bar {
-            width: 48px;
-            background-color: var(--bg-activity-bar);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 10px;
+            width: var(--activity-width);
+            background: var(--activity-bg);
+            border-right: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 10px; z-index: 40;
         }
-        .activity-icon {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            opacity: 0.6;
-            border-left: 2px solid transparent;
+        .activity-item {
+            width: 42px; height: 42px;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 8px; border-radius: 8px; cursor: pointer;
+            color: var(--text-dim); transition: 0.2s; position: relative;
         }
-        .activity-icon:hover { opacity: 1; }
-        .activity-icon.active { opacity: 1; border-left-color: var(--text-inverse); }
+        .activity-item:hover { color: var(--text-main); }
+        .activity-item.active { color: var(--text-main); }
+        .activity-item.active::before {
+            content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px;
+            background: var(--accent-primary); border-radius: 0 2px 2px 0;
+        }
 
-        /* Sidebar */
+        /* Sidebar Container */
         #sidebar {
-            width: 250px;
-            background-color: var(--bg-sidebar);
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
+            width: var(--sidebar-width);
+            min-width: 150px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column;
+            transition: width 0.05s ease; /* Smooth toggle, snappy resize */
         }
-        .sidebar-header {
-            height: 35px;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            justify-content: space-between;
+        .sidebar-title {
+            height: 35px; padding: 0 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            text-transform: uppercase; font-size: 11px; font-weight: 700;
+            color: var(--text-dim); letter-spacing: 0.5px;
         }
-        .sidebar-actions i { cursor: pointer; margin-left: 5px; }
-        .sidebar-actions i:hover { color: var(--text-inverse); }
+        .sidebar-actions i { cursor: pointer; margin-left: 8px; transition: 0.2s; }
+        .sidebar-actions i:hover { color: var(--text-main); }
 
-        #explorer-tree {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-top: 5px;
+        /* File Explorer */
+        #explorer-content { flex-grow: 1; overflow-y: auto; padding-top: 4px; }
+        .file-node {
+            display: flex; align-items: center;
+            padding: 3px 0 3px 14px;
+            font-size: 13px; color: var(--text-muted); cursor: pointer;
+            border-left: 2px solid transparent; transition: 0.1s;
         }
-        .tree-node {
-            display: flex;
-            align-items: center;
-            padding: 3px 0;
-            cursor: pointer;
-            font-size: 13px;
-            color: var(--text-primary);
-            border: 1px solid transparent;
+        .file-node:hover { background: rgba(255,255,255,0.03); color: var(--text-main); }
+        .file-node.active { 
+            background: rgba(124, 58, 237, 0.1); color: var(--text-main);
+            border-left-color: var(--accent-primary);
         }
-        .tree-node:hover { background-color: var(--hover-item); }
-        .tree-node.selected { background-color: var(--active-item); border-color: var(--focus-border); }
-        .tree-indent { width: 10px; }
-        .node-icon { margin: 0 5px; width: 16px; display: flex; justify-content: center; }
-        .node-arrow { margin: 0 2px; width: 16px; display: flex; justify-content: center; transform: rotate(0deg); transition: transform 0.1s; }
-        .node-arrow.open { transform: rotate(90deg); }
+        .node-indent { width: 14px; height: 100%; flex-shrink: 0; }
+        .node-icon { margin-right: 6px; width: 16px; display: flex; justify-content: center; }
+        .node-chevron { width: 16px; display: flex; justify-content: center; transition: transform 0.2s; }
+        .node-chevron.open { transform: rotate(90deg); }
+
+        /* Resizer Handle */
+        .resizer-h {
+            width: 4px; cursor: col-resize; z-index: 10;
+            position: absolute; top: 0; bottom: 0; right: -2px;
+        }
+        .resizer-h:hover { background: var(--accent-primary); }
 
         /* Editor Area */
-        #editor-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-editor);
-            position: relative;
+        #main-editor-area {
+            flex-grow: 1; display: flex; flex-direction: column;
+            background: var(--editor-bg); position: relative; min-width: 0;
         }
 
         /* Tabs */
-        #tabs-container {
-            height: 35px;
-            background-color: var(--bg-menu);
-            display: flex;
-            overflow-x: auto;
+        #tabs-bar {
+            height: 35px; background: var(--panel-bg);
+            display: flex; overflow-x: auto;
+            border-bottom: 1px solid var(--border-subtle);
         }
         .tab {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            background-color: #2d2d2d;
-            border-right: 1px solid var(--bg-editor);
-            cursor: pointer;
-            min-width: 120px;
-            max-width: 200px;
-            position: relative;
+            display: flex; align-items: center;
+            padding: 0 10px 0 12px; min-width: 120px; max-width: 200px;
+            font-size: 12px; color: var(--text-muted);
+            border-right: 1px solid var(--border-subtle);
+            border-top: 2px solid transparent; cursor: pointer;
+            background: var(--panel-bg); position: relative;
         }
-        .tab.active { background-color: var(--bg-editor); color: var(--text-inverse); border-top: 2px solid var(--focus-border); }
-        .tab-close { margin-left: auto; opacity: 0; padding: 2px; border-radius: 3px; }
+        .tab:hover { background: var(--editor-bg); }
+        .tab.active { 
+            background: var(--editor-bg); color: var(--text-main);
+            border-top-color: var(--accent-primary);
+        }
+        .tab-close { margin-left: auto; opacity: 0; border-radius: 4px; padding: 2px; }
         .tab:hover .tab-close { opacity: 1; }
-        .tab-close:hover { background-color: rgba(255,255,255,0.2); }
+        .tab-close:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .tab.unsaved .tab-label::after { content: '●'; font-size: 8px; margin-left: 6px; }
 
-        /* Code Editor Wrapper */
-        #code-wrapper {
-            position: relative;
-            flex-grow: 1;
-            display: flex;
-            overflow: hidden;
+        /* Breadcrumbs */
+        #breadcrumbs {
+            height: 22px; display: flex; align-items: center; padding: 0 16px;
+            font-size: 11px; color: var(--text-dim);
+            background: var(--editor-bg);
         }
 
-        /* Line Numbers */
+        /* Editor Surface */
+        #editor-surface {
+            flex-grow: 1; position: relative; display: flex; overflow: hidden;
+        }
         #gutter {
-            width: 50px;
-            background-color: var(--bg-editor);
-            color: #858585;
-            font-family: var(--font-code);
-            font-size: 14px;
-            line-height: 1.5;
-            text-align: right;
-            padding: 10px 15px 10px 0;
-            flex-shrink: 0;
+            width: 55px; flex-shrink: 0;
+            background: var(--editor-bg);
+            border-right: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+            font-family: var(--font-code); font-size: 14px; line-height: 22px;
+            text-align: right; padding: 10px 12px 10px 0;
+            user-select: none;
         }
-
-        /* Main Input & Render */
-        .editor-layer {
-            position: absolute;
-            top: 0; left: 50px; right: 100px; bottom: 0; /* right 100px for minimap */
-            padding: 10px;
-            font-family: var(--font-code);
-            font-size: 14px;
-            line-height: 1.5;
-            white-space: pre;
-            tab-size: 4;
-            overflow: auto;
+        #code-scroll-container {
+            flex-grow: 1; position: relative; overflow: auto; cursor: text;
         }
-        textarea#code-input {
-            z-index: 2;
-            color: transparent;
-            background: transparent;
-            border: none;
-            resize: none;
-            caret-color: var(--text-inverse);
-            user-select: text;
+        .code-layer {
+            position: absolute; top: 0; left: 0; min-width: 100%; min-height: 100%;
+            padding: 10px 10px 10px 10px;
+            font-family: var(--font-code); font-size: 14px; line-height: 22px;
+            white-space: pre; tab-size: 4;
         }
-        #code-render {
-            z-index: 1;
-            pointer-events: none;
+        #renderer { z-index: 1; pointer-events: none; color: var(--text-main); }
+        #input-textarea {
+            z-index: 2; background: transparent; color: transparent;
+            border: none; resize: none; overflow: hidden;
+            caret-color: var(--accent-primary);
         }
+        #input-textarea::selection { background: rgba(124, 58, 237, 0.25); color: transparent; }
 
         /* Minimap */
         #minimap {
-            position: absolute;
-            top: 0; right: 0; bottom: 0;
-            width: 100px;
-            background-color: var(--bg-editor);
-            border-left: 1px solid var(--border-color);
-            z-index: 5;
-            overflow: hidden;
-            opacity: 0.8;
+            width: 60px; flex-shrink: 0;
+            background: var(--editor-bg); border-left: 1px solid var(--border-subtle);
+            opacity: 0.8; position: relative; overflow: hidden;
         }
-        #minimap canvas { width: 100%; height: 100%; }
+        #minimap canvas { display: block; width: 100%; }
         #minimap-slider {
-            position: absolute;
-            left: 0; right: 0;
-            background-color: rgba(120, 120, 120, 0.2);
-            transition: background-color 0.1s;
-            cursor: default;
+            position: absolute; left: 0; right: 0; background: rgba(255,255,255,0.05);
+            transition: 0.1s; cursor: grab;
         }
-        #minimap-slider:hover { background-color: rgba(120, 120, 120, 0.4); }
+        #minimap-slider:hover { background: rgba(255,255,255,0.1); }
 
-        /* Status Bar */
-        #status-bar {
-            height: 22px;
-            background-color: var(--bg-status-bar);
-            color: var(--text-inverse);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-            font-size: 12px;
-            z-index: 50;
+        /* Bottom Panel (Terminal) */
+        #bottom-panel {
+            height: 200px; background: var(--panel-bg);
+            border-top: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column; position: relative;
         }
-        .status-item { margin-left: 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .resizer-v {
+            height: 4px; cursor: row-resize; z-index: 10;
+            position: absolute; top: -2px; left: 0; right: 0;
+        }
+        .resizer-v:hover { background: var(--accent-primary); }
+        
+        .panel-header {
+            height: 30px; display: flex; align-items: center; padding: 0 16px; gap: 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .panel-tab {
+            font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: pointer; padding: 7px 0;
+            border-bottom: 1px solid transparent; text-transform: uppercase;
+        }
+        .panel-tab.active { color: var(--text-main); border-bottom-color: var(--accent-secondary); }
+        .panel-actions { margin-left: auto; display: flex; gap: 10px; }
+        
+        #terminal-container {
+            flex-grow: 1; background: #0c0c10; padding: 8px;
+            font-family: var(--font-code); font-size: 13px; overflow-y: auto;
+        }
+        .term-line { display: flex; margin-bottom: 2px; color: var(--text-main); line-height: 1.4; }
+        .term-ps1 { color: var(--accent-success); margin-right: 8px; font-weight: bold; }
+        .term-path { color: var(--accent-tertiary); font-weight: bold; }
+        .term-input { 
+            background: transparent; border: none; color: var(--text-main); 
+            flex-grow: 1; font-family: inherit; font-size: inherit; 
+        }
+        .term-msg-error { color: var(--accent-danger); }
+        .term-msg-info { color: var(--accent-tertiary); }
+        .term-msg-warn { color: var(--accent-warning); }
+
+        /* 3. Status Bar */
+        #statusbar {
+            height: var(--status-height); background: var(--accent-primary); color: white;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 12px; font-size: 11px; font-weight: 500; z-index: 60;
+        }
+        .status-section { display: flex; gap: 15px; align-items: center; }
+        .status-item { cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .status-item:hover { opacity: 0.8; }
 
-        /* ================= COMPONENTS ================= */
+        /* ================= OVERLAYS & MENUS ================= */
 
         /* Context Menu */
-        .context-menu {
-            position: fixed;
-            background-color: var(--bg-menu);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-            padding: 5px 0;
-            min-width: 180px;
-            z-index: 9999;
-            display: none;
+        .ctx-menu {
+            position: fixed; background: var(--panel-bg);
+            border: 1px solid var(--border-focus); border-radius: 6px;
+            padding: 4px; min-width: 180px;
+            box-shadow: var(--shadow-float); z-index: 1000; display: none;
         }
-        .context-item {
-            padding: 6px 20px;
-            font-size: 13px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
+        .ctx-item {
+            padding: 6px 12px; font-size: 12px; color: var(--text-main);
+            border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between;
         }
-        .context-item:hover { background-color: var(--selection); color: white; }
-        .context-separator { height: 1px; background-color: var(--border-color); margin: 4px 0; }
+        .ctx-item:hover { background: var(--accent-primary); color: white; }
+        .ctx-sep { height: 1px; background: var(--border-subtle); margin: 4px 0; }
+        .ctx-key { opacity: 0.5; font-size: 10px; }
 
-        /* Syntax Highlighting Classes */
-        .tok-kw { color: var(--syn-keyword); font-weight: bold; }
-        .tok-str { color: var(--syn-string); }
-        .tok-com { color: var(--syn-comment); font-style: italic; }
-        .tok-num { color: var(--syn-number); }
-        .tok-typ { color: var(--syn-type); }
-        .tok-func { color: var(--syn-function); }
-        .tok-var { color: var(--syn-variable); }
-        .tok-tag { color: var(--syn-tag); }
-        .tok-attr { color: var(--syn-attr); }
-        .tok-ctrl { color: var(--syn-control); }
+        /* Command Palette */
+        #palette-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+            z-index: 200; display: none; justify-content: center; padding-top: 80px;
+        }
+        #palette {
+            width: 500px; max-height: 400px; background: var(--panel-bg);
+            border: 1px solid var(--border-focus); border-radius: 8px;
+            box-shadow: var(--shadow-float); display: flex; flex-direction: column;
+            overflow: hidden; animation: slideDown 0.15s ease-out;
+        }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+        
+        #palette-search {
+            background: transparent; border: none; padding: 14px;
+            font-size: 16px; color: var(--text-main); border-bottom: 1px solid var(--border-subtle);
+        }
+        #palette-list { overflow-y: auto; padding: 4px; }
+        .pal-item {
+            padding: 8px 12px; font-size: 13px; color: var(--text-muted);
+            border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between;
+        }
+        .pal-item:hover, .pal-item.selected { background: var(--accent-primary); color: white; }
+        .pal-key { font-family: var(--font-code); font-size: 11px; opacity: 0.7; }
 
-        /* Modal / Dialog */
-        #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 2000;
-            display: none; justify-content: center; padding-top: 100px;
+        /* Settings Modal */
+        #settings-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 150; display: none; align-items: center; justify-content: center;
         }
-        .modal-box {
-            background: var(--bg-panel); width: 400px; padding: 15px;
-            border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        #settings-panel {
+            width: 600px; height: 500px; background: var(--panel-bg);
+            border: 1px solid var(--border-focus); border-radius: 8px;
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .modal-header { font-weight: bold; margin-bottom: 10px; font-size: 14px; }
-        .modal-input {
-            width: 100%; background: var(--bg-input); border: 1px solid var(--border-color);
-            color: var(--text-inverse); padding: 5px; margin-bottom: 10px;
+        .set-header { padding: 15px 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between;}
+        .set-body { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .set-group { margin-bottom: 25px; }
+        .set-title { font-size: 12px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 10px; }
+        .set-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .set-label { font-size: 13px; color: var(--text-main); }
+        .set-input { 
+            background: var(--activity-bg); border: 1px solid var(--border-subtle); 
+            color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 12px;
         }
-        .btn {
-            background: var(--focus-border); color: white; border: none; padding: 5px 12px; cursor: pointer;
-        }
-        .btn:hover { opacity: 0.9; }
-        .btn-secondary { background: #3c3c3c; margin-left: 5px; }
+        .set-check { accent-color: var(--accent-primary); }
 
-        /* File Upload Input (Hidden) */
-        #file-upload-input { display: none; }
+        /* Syntax Highlight Colors */
+        .tok-kw { color: var(--tok-keyword); font-weight: bold; }
+        .tok-str { color: var(--tok-string); }
+        .tok-com { color: var(--tok-comment); font-style: italic; }
+        .tok-num { color: var(--tok-number); }
+        .tok-typ { color: var(--tok-class); }
+        .tok-func { color: var(--tok-function); }
+        .tok-var { color: var(--tok-variable); }
+        .tok-op { color: var(--tok-operator); }
+        .tok-tag { color: var(--tok-tag); }
+        .tok-attr { color: var(--tok-attr); }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        input[type="file"] { display: none; }
 
     </style>
 </head>
 <body>
 
-    <!-- 1. Title Bar -->
-    <div id="title-bar">
-        <div class="menu-bar">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg" width="18" style="margin-right: 10px;">
-            <div class="menu-item" onclick="app.actions.triggerUpload()">File</div>
-            <div class="menu-item">Edit</div>
-            <div class="menu-item">Selection</div>
-            <div class="menu-item">View</div>
-            <div class="menu-item">Go</div>
-            <div class="menu-item">Run</div>
-            <div class="menu-item">Terminal</div>
-            <div class="menu-item">Help</div>
+    <!-- Title Bar -->
+    <header id="titlebar">
+        <div class="app-brand">
+            <i data-lucide="cpu" width="16" class="app-icon"></i>
+            <span>COSMIC IDE v2.0</span>
         </div>
-        <span id="title-text">Ultra IDE - Visual Studio Code</span>
-        <div class="window-controls">
-            <div class="win-btn">_</div>
-            <div class="win-btn">□</div>
-            <div class="win-btn close">✕</div>
+        <div class="menubar">
+            <div class="menu-btn" onclick="app.commands.exec('core.upload')">File</div>
+            <div class="menu-btn" onclick="app.commands.exec('core.palette')">Edit</div>
+            <div class="menu-btn" onclick="app.commands.exec('view.toggleSidebar')">View</div>
+            <div class="menu-btn">Go</div>
+            <div class="menu-btn">Run</div>
+            <div class="menu-btn" onclick="app.commands.exec('term.toggle')">Terminal</div>
+            <div class="menu-btn" onclick="app.commands.exec('core.palette')">Help</div>
         </div>
-    </div>
+        <div style="flex-grow:1"></div>
+        <div style="display:flex; gap:10px; opacity:0.5;">
+            <i data-lucide="minus" width="14"></i>
+            <i data-lucide="square" width="12"></i>
+            <i data-lucide="x" width="14"></i>
+        </div>
+    </header>
 
-    <!-- 2. Workbench -->
+    <!-- Main Content -->
     <div id="workbench">
         
         <!-- Activity Bar -->
-        <div id="activity-bar">
-            <div class="activity-icon active" title="Explorer"><i data-lucide="files" width="24"></i></div>
-            <div class="activity-icon" title="Search"><i data-lucide="search" width="24"></i></div>
-            <div class="activity-icon" title="Source Control"><i data-lucide="git-branch" width="24"></i></div>
-            <div class="activity-icon" title="Run and Debug"><i data-lucide="play" width="24"></i></div>
-            <div class="activity-icon" title="Extensions"><i data-lucide="blocks" width="24"></i></div>
-            <div style="flex-grow: 1"></div>
-            <div class="activity-icon" title="Accounts"><i data-lucide="user-circle" width="24"></i></div>
-            <div class="activity-icon" title="Manage" onclick="app.settings.open()"><i data-lucide="settings" width="24"></i></div>
-        </div>
+        <aside id="activity-bar">
+            <div class="activity-item active" title="Explorer" onclick="app.layout.toggleSidebar('explorer')">
+                <i data-lucide="files" width="24"></i>
+            </div>
+            <div class="activity-item" title="Search" onclick="app.commands.exec('core.find')">
+                <i data-lucide="search" width="24"></i>
+            </div>
+            <div class="activity-item" title="Source Control">
+                <i data-lucide="git-branch" width="24"></i>
+            </div>
+            <div class="activity-item" title="Extensions">
+                <i data-lucide="blocks" width="24"></i>
+            </div>
+            <div style="flex-grow:1"></div>
+            <div class="activity-item" title="Settings" onclick="app.commands.exec('core.settings')">
+                <i data-lucide="settings" width="24"></i>
+            </div>
+            <div class="activity-item" title="Account">
+                <i data-lucide="user-circle" width="24"></i>
+            </div>
+        </aside>
 
         <!-- Sidebar -->
-        <div id="sidebar">
-            <div class="sidebar-header">
+        <aside id="sidebar">
+            <div class="sidebar-title">
                 <span>Explorer</span>
                 <div class="sidebar-actions">
-                    <i data-lucide="file-plus" width="14" title="New File" onclick="app.vfs.createFile()"></i>
-                    <i data-lucide="folder-plus" width="14" title="New Folder" onclick="app.vfs.createFolder()"></i>
+                    <i data-lucide="file-plus" width="14" title="New File" onclick="app.commands.exec('file.new')"></i>
+                    <i data-lucide="folder-plus" width="14" title="New Folder" onclick="app.commands.exec('file.newFolder')"></i>
                     <i data-lucide="refresh-cw" width="14" title="Refresh"></i>
-                    <i data-lucide="upload" width="14" title="Upload Files" onclick="app.actions.triggerUpload()"></i>
+                    <i data-lucide="chevrons-left" width="14" title="Collapse" onclick="app.layout.toggleSidebar()"></i>
                 </div>
             </div>
-            <div id="explorer-tree">
-                <!-- Tree Content -->
+            <div id="explorer-content">
+                <!-- Tree rendered by JS -->
             </div>
-        </div>
+            <div class="resizer-h" id="sidebar-resizer"></div>
+        </aside>
 
         <!-- Editor Area -->
-        <div id="editor-area">
-            <div id="tabs-container">
-                <!-- Tabs -->
+        <main id="main-editor-area">
+            <div id="tabs-bar">
+                <!-- Tabs rendered by JS -->
+            </div>
+            <div id="breadcrumbs">
+                Project <i data-lucide="chevron-right" width="12" style="margin:0 4px"></i> src <i data-lucide="chevron-right" width="12" style="margin:0 4px"></i> <span id="crumb-file">...</span>
             </div>
             
-            <div id="code-wrapper">
+            <div id="editor-surface">
                 <div id="gutter"></div>
-                <!-- Render Layer -->
-                <div id="code-render" class="editor-layer"></div>
-                <!-- Input Layer -->
-                <textarea id="code-input" class="editor-layer" spellcheck="false" wrap="off"></textarea>
-                
-                <!-- Minimap -->
+                <div id="code-scroll-container">
+                    <div id="renderer" class="code-layer"></div>
+                    <textarea id="input-textarea" class="code-layer" spellcheck="false" wrap="off"></textarea>
+                </div>
                 <div id="minimap">
                     <canvas id="minimap-canvas"></canvas>
                     <div id="minimap-slider"></div>
                 </div>
             </div>
-        </div>
 
+            <!-- Terminal Panel -->
+            <div id="bottom-panel">
+                <div class="resizer-v" id="panel-resizer"></div>
+                <div class="panel-header">
+                    <div class="panel-tab" onclick="app.layout.switchPanel('problems')">Problems</div>
+                    <div class="panel-tab" onclick="app.layout.switchPanel('output')">Output</div>
+                    <div class="panel-tab" onclick="app.layout.switchPanel('debug')">Debug Console</div>
+                    <div class="panel-tab active" onclick="app.layout.switchPanel('terminal')">Terminal</div>
+                    <div class="panel-actions">
+                        <i data-lucide="plus" width="14" style="cursor:pointer"></i>
+                        <i data-lucide="trash-2" width="14" style="cursor:pointer" onclick="app.term.clear()"></i>
+                        <i data-lucide="x" width="14" style="cursor:pointer" onclick="app.layout.togglePanel()"></i>
+                    </div>
+                </div>
+                <div id="terminal-container">
+                    <!-- Terminal Lines -->
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- 3. Status Bar -->
-    <footer id="status-bar">
-        <div style="display:flex; gap:10px;">
-            <div class="status-item" style="margin-left:0; background:#007acc; padding:0 10px; height:22px;"><i data-lucide="remote" width="14"></i></div>
+    <!-- Status Bar -->
+    <footer id="statusbar">
+        <div class="status-section">
             <div class="status-item"><i data-lucide="git-branch" width="12"></i> main</div>
-            <div class="status-item"><i data-lucide="alert-circle" width="12"></i> 0 <i data-lucide="alert-triangle" width="12"></i> 0</div>
+            <div class="status-item"><i data-lucide="refresh-cw" width="12"></i> Sync</div>
+            <div class="status-item" id="status-diagnostics"><i data-lucide="x-circle" width="12"></i> 0 <i data-lucide="alert-triangle" width="12"></i> 0</div>
         </div>
-        <div style="display:flex;">
+        <div class="status-section">
             <div class="status-item" id="status-cursor">Ln 1, Col 1</div>
-            <div class="status-item">UTF-8</div>
-            <div class="status-item">LF</div>
+            <div class="status-item" id="status-spaces">Spaces: 4</div>
+            <div class="status-item" id="status-encoding">UTF-8</div>
             <div class="status-item" id="status-lang">Plain Text</div>
             <div class="status-item"><i data-lucide="bell" width="12"></i></div>
         </div>
     </footer>
 
-    <!-- Hidden Input for Upload -->
-    <input type="file" id="file-upload-input" multiple webkitdirectory />
-
-    <!-- Context Menus -->
-    <div id="ctx-explorer" class="context-menu">
-        <div class="context-item" onclick="app.ctx.action('newFile')">New File</div>
-        <div class="context-item" onclick="app.ctx.action('newFolder')">New Folder</div>
-        <div class="context-separator"></div>
-        <div class="context-item" onclick="app.ctx.action('download')">Download</div>
-        <div class="context-item" onclick="app.ctx.action('rename')">Rename</div>
-        <div class="context-item" onclick="app.ctx.action('delete')" style="color:#f48771">Delete</div>
+    <!-- Command Palette -->
+    <div id="palette-overlay">
+        <div id="palette">
+            <input type="text" id="palette-search" placeholder="> Type a command...">
+            <div id="palette-list"></div>
+        </div>
     </div>
 
-    <!-- Modals -->
-    <div id="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header" id="modal-title">Title</div>
-            <input type="text" class="modal-input" id="modal-input">
-            <div style="text-align: right;">
-                <button class="btn" id="modal-ok">OK</button>
-                <button class="btn btn-secondary" onclick="document.getElementById('modal-overlay').style.display='none'">Cancel</button>
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div id="settings-panel">
+            <div class="set-header">
+                <span>Settings</span>
+                <i data-lucide="x" width="18" style="cursor:pointer" onclick="app.commands.exec('core.settings')"></i>
+            </div>
+            <div class="set-body">
+                <div class="set-group">
+                    <div class="set-title">Editor</div>
+                    <div class="set-row">
+                        <span class="set-label">Font Size</span>
+                        <input type="number" class="set-input" value="14" onchange="app.settings.update('fontSize', this.value)">
+                    </div>
+                    <div class="set-row">
+                        <span class="set-label">Tab Size</span>
+                        <input type="number" class="set-input" value="4" onchange="app.settings.update('tabSize', this.value)">
+                    </div>
+                    <div class="set-row">
+                        <span class="set-label">Word Wrap</span>
+                        <input type="checkbox" class="set-check" onchange="app.settings.update('wordWrap', this.checked)">
+                    </div>
+                    <div class="set-row">
+                        <span class="set-label">Mini Map</span>
+                        <input type="checkbox" class="set-check" checked onchange="app.settings.update('minimap', this.checked)">
+                    </div>
+                </div>
+                <div class="set-group">
+                    <div class="set-title">Terminal</div>
+                    <div class="set-row">
+                        <span class="set-label">Font Family</span>
+                        <input type="text" class="set-input" value="JetBrains Mono">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Context Menu (Generic) -->
+    <div id="ctx-menu" class="ctx-menu">
+        <!-- Injected via JS -->
+    </div>
+
+    <input type="file" id="file-upload" multiple webkitdirectory />
+
     <script>
         /**
          * ============================================================================
-         * MODULE 1: LANGUAGE DEFINITIONS & TOKENIZER
+         * COSMIC IDE CORE v2.0
+         * Architected with modular services.
          * ============================================================================
          */
-        const LangDefs = {
-            c: {
-                keywords: 'auto break case char const continue default do double else enum extern float for goto if int long register return short signed sizeof static struct switch typedef union unsigned void volatile while',
-                types: 'int float double char void long short',
-            },
-            cpp: {
-                keywords: 'asm auto bool break case catch char class const const_cast continue default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new operator private protected public register reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while',
-                types: 'std vector string map set',
-            },
-            csharp: {
-                keywords: 'abstract as base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long namespace new null object operator out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while',
-            },
-            php: {
-                keywords: 'abstract and array as break callable case catch class clone const continue declare default die do echo else elseif empty enddeclare endfor endforeach endif endswitch endwhile eval exit extends final finally for foreach function global goto if implements include include_once instanceof insteadof interface isset list namespace new or print private protected public require require_once return static switch throw trait try unset use var while xor yield',
-                vars: true
-            },
-            python: {
-                keywords: 'and as assert break class continue def del elif else except exec finally for from global if import in is lambda not or pass print raise return try while with yield',
-                special: ['self', 'True', 'False', 'None']
-            },
-            js: {
-                keywords: 'async await break case catch class const continue debugger default delete do else export extends false finally for function if import in instanceof new null return super switch this throw true try typeof var void while with let yield',
-                builtins: 'console window document'
+
+        /* --- 1. Event Bus --- */
+        class EventBus {
+            constructor() { this.listeners = {}; }
+            on(event, callback) {
+                if (!this.listeners[event]) this.listeners[event] = [];
+                this.listeners[event].push(callback);
+            }
+            emit(event, data) {
+                if (this.listeners[event]) this.listeners[event].forEach(cb => cb(data));
+            }
+        }
+
+        /* --- 2. Utils --- */
+        const Utils = {
+            id: () => Math.random().toString(36).substr(2, 9),
+            sanitize: (str) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+            debounce: (func, wait) => {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func(...args), wait);
+                };
             }
         };
 
-        class Tokenizer {
-            constructor() {
-                // Pre-compile regexes
+        /* --- 3. Settings Store --- */
+        class SettingsStore {
+            constructor(bus) {
+                this.bus = bus;
+                this.config = {
+                    fontSize: 14,
+                    tabSize: 4,
+                    wordWrap: false,
+                    minimap: true,
+                    theme: 'cosmic-dark'
+                };
+                // Load from storage
+                const saved = localStorage.getItem('cosmic_settings');
+                if (saved) this.config = { ...this.config, ...JSON.parse(saved) };
+                
+                this.apply();
             }
 
-            tokenize(text, lang) {
-                if (!lang || lang === 'txt') return this.escapeHtml(text);
+            update(key, value) {
+                this.config[key] = value;
+                localStorage.setItem('cosmic_settings', JSON.stringify(this.config));
+                this.apply();
+                this.bus.emit('settings-changed', this.config);
+            }
+
+            apply() {
+                const root = document.documentElement;
+                // Font Size handled by CSS variable or direct style injection in editor
+                document.getElementById('editor-surface').style.setProperty('--font-size', this.config.fontSize + 'px');
                 
-                let html = this.escapeHtml(text);
+                // Minimap Toggle
+                const mm = document.getElementById('minimap');
+                if (mm) mm.style.display = this.config.minimap ? 'block' : 'none';
                 
-                // Generic String/Comment/Number Highlighting (Simplified for performance)
-                // Order: Comments -> Strings -> Numbers -> Keywords -> Functions
+                // Propagate font size to editor elements
+                const layers = document.querySelectorAll('.code-layer, #gutter');
+                layers.forEach(el => el.style.fontSize = this.config.fontSize + 'px');
+            }
+        }
+
+        /* --- 4. Language & Grammar Registry --- */
+        const GrammarRegistry = {
+            // C/C++
+            cpp: {
+                keywords: /\b(auto|break|case|catch|char|class|const|continue|default|delete|do|double|else|enum|explicit|export|extern|false|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|operator|private|protected|public|return|short|signed|sizeof|static|struct|switch|template|this|throw|true|try|typedef|union|unsigned|using|virtual|void|volatile|while)\b/g,
+                types: /\b(std::\w+|vector|string|map|int|float|bool|void|size_t)\b/g,
+                preproc: /^\s*#\w+/gm,
+                comment: /(\/\/.*|\/\*[\s\S]*?\*\/)/g,
+                string: /(".*?"|'.*?')/g,
+                number: /\b\d+(\.\d+)?\b/g
+            },
+            // C#
+            csharp: {
+                keywords: /\b(abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|virtual|void|volatile|while)\b/g,
+                comment: /(\/\/.*|\/\*[\s\S]*?\*\/)/g,
+                string: /(@?".*?")/g,
+                number: /\b\d+\b/g
+            },
+            // Python
+            python: {
+                keywords: /\b(and|as|assert|break|class|continue|def|del|elif|else|except|exec|finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|raise|return|try|while|with|yield)\b/g,
+                builtins: /\b(True|False|None|self)\b/g,
+                comment: /(#.*)/g,
+                string: /(".*?"|'.*?'|""".*?""")/g,
+                decorator: /(@\w+)/g,
+                number: /\b\d+\b/g
+            },
+            // JavaScript / TypeScript
+            js: {
+                keywords: /\b(async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|false|finally|for|function|if|import|in|instanceof|new|null|return|super|switch|this|throw|true|try|typeof|var|void|while|with|let|yield|interface|type|implements|public|private|protected)\b/g,
+                comment: /(\/\/.*|\/\*[\s\S]*?\*\/)/g,
+                string: /(".*?"|'.*?'|`[\s\S]*?`)/g,
+                operator: /(=>|===|!==|\+=|-=)/g,
+                number: /\b\d+\b/g
+            },
+            // HTML
+            html: {
+                tag: /(&lt;\/?)(\w+)(.*?)(&gt;)/g,
+                attr: /\b([a-zA-Z0-9-]+)(=)/g,
+                comment: /(&lt;!--[\s\S]*?--&gt;)/g,
+                string: /(".*?")/g
+            },
+            // CSS
+            css: {
+                keywords: /(@import|@media|@font-face|!important)/g,
+                props: /([a-z-]+)(:)/g,
+                comment: /(\/\*[\s\S]*?\*\/)/g,
+                string: /(".*?"|'.*?')/g,
+                units: /\b(\d+)(px|em|rem|%|vh|vw)\b/g
+            },
+            // SQL
+            sql: {
+                keywords: /\b(SELECT|FROM|WHERE|INSERT|INTO|UPDATE|DELETE|CREATE|TABLE|DROP|ALTER|INDEX|JOIN|INNER|LEFT|RIGHT|OUTER|ON|GROUP|BY|ORDER|HAVING|LIMIT|OFFSET|UNION|ALL|DISTINCT|AS|AND|OR|NOT|NULL|IS|PRIMARY|KEY|FOREIGN|REFERENCES|DEFAULT|VALUES)\b/gi,
+                types: /\b(INT|VARCHAR|TEXT|DATE|DATETIME|BOOLEAN|FLOAT|DECIMAL)\b/gi,
+                comment: /(--.*)/g,
+                string: /('.*?')/g
+            },
+            // PHP
+            php: {
+                keywords: /\b(echo|print|if|else|elseif|while|do|for|foreach|break|continue|switch|case|default|function|return|include|require|include_once|require_once|class|public|private|protected|static|new|this)\b/g,
+                vars: /(\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g,
+                comment: /(\/\/.*|\/\*[\s\S]*?\*\/|#.*)/g,
+                string: /(".*?"|'.*?')/g
+            }
+        };
+
+        class Lexer {
+            highlight(code, lang) {
+                // Determine language mode
+                let mode = 'txt';
+                if (['c', 'cpp', 'h', 'hpp'].includes(lang)) mode = 'cpp';
+                else if (['cs'].includes(lang)) mode = 'csharp';
+                else if (['py'].includes(lang)) mode = 'python';
+                else if (['js', 'ts', 'jsx', 'tsx'].includes(lang)) mode = 'js';
+                else if (['html', 'xml'].includes(lang)) mode = 'html';
+                else if (['css'].includes(lang)) mode = 'css';
+                else if (['sql'].includes(lang)) mode = 'sql';
+                else if (['php'].includes(lang)) mode = 'php';
+
+                // Basic sanitation
+                let html = Utils.sanitize(code);
+                const g = GrammarRegistry[mode];
+                if (!g) return html;
+
+                // Application Order (Strategy: protect strings/comments first usually, but simplified regex here)
+                // We use simple regex replacement. Note: This is fragile for nested structures but works for visual demo.
                 
-                // 1. Comments
-                if (['c', 'cpp', 'csharp', 'php', 'js', 'java'].includes(lang)) {
-                    html = html.replace(/(\/\/.*)/g, '<span class="tok-com">$1</span>');
-                    html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="tok-com">$1</span>');
-                } else if (lang === 'python') {
-                    html = html.replace(/(#.*)/g, '<span class="tok-com">$1</span>');
-                } else if (lang === 'html') {
-                    html = html.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="tok-com">$1</span>');
+                if (mode === 'html') {
+                    html = html.replace(g.comment, '<span class="tok-com">$1</span>');
+                    html = html.replace(g.tag, '$1<span class="tok-tag">$2</span>$3$4');
+                    html = html.replace(g.attr, '<span class="tok-attr">$1</span>$2');
+                    html = html.replace(g.string, '<span class="tok-str">$1</span>');
+                } else if (mode === 'css') {
+                    html = html.replace(g.comment, '<span class="tok-com">$1</span>');
+                    html = html.replace(g.string, '<span class="tok-str">$1</span>');
+                    html = html.replace(g.keywords, '<span class="tok-kw">$1</span>');
+                    html = html.replace(g.units, '<span class="tok-num">$1$2</span>');
+                    html = html.replace(g.props, '<span class="tok-attr">$1</span>$2');
+                } else {
+                    // Generic programming languages
+                    if (g.comment) html = html.replace(g.comment, '<span class="tok-com">$1</span>');
+                    if (g.string) html = html.replace(g.string, '<span class="tok-str">$1</span>');
+                    if (g.preproc) html = html.replace(g.preproc, '<span class="tok-typ">$1</span>');
+                    if (g.keywords) html = html.replace(g.keywords, '<span class="tok-kw">$1</span>');
+                    if (g.types) html = html.replace(g.types, '<span class="tok-typ">$1</span>');
+                    if (g.vars) html = html.replace(g.vars, '<span class="tok-var">$1</span>');
+                    if (g.builtins) html = html.replace(g.builtins, '<span class="tok-kw">$1</span>');
+                    if (g.number) html = html.replace(g.number, '<span class="tok-num">$1</span>');
+                    if (g.decorator) html = html.replace(g.decorator, '<span class="tok-func">$1</span>');
+                    if (g.operator) html = html.replace(g.operator, '<span class="tok-op">$1</span>');
+                    // Simple function call heuristic
+                    html = html.replace(/\b([a-zA-Z_]\w*)(?=\()/g, '<span class="tok-func">$1</span>');
                 }
-
-                // 2. Strings
-                html = html.replace(/(['"])(?:(?=(\\?))\2.)*?\1/g, '<span class="tok-str">$&</span>');
-
-                // 3. Keywords based on lang
-                if (LangDefs[lang]) {
-                    const kws = LangDefs[lang].keywords.split(' ').join('|');
-                    const regex = new RegExp(`\\b(${kws})\\b`, 'g');
-                    html = html.replace(regex, '<span class="tok-kw">$1</span>');
-                    
-                    if (LangDefs[lang].vars) {
-                        html = html.replace(/(\$[a-zA-Z_]\w*)/g, '<span class="tok-var">$1</span>');
-                    }
-                }
-
-                // 4. HTML/XML specific
-                if (lang === 'html' || lang === 'xml') {
-                    html = html.replace(/(&lt;\/?)(\w+)(.*?)(&gt;)/g, '$1<span class="tok-tag">$2</span>$3$4');
-                    html = html.replace(/\b([a-zA-Z-]+)(=)/g, '<span class="tok-attr">$1</span>$2');
-                }
-
-                // 5. CSS specific
-                if (lang === 'css') {
-                    html = html.replace(/([\.#][\w-]+)/g, '<span class="tok-func">$1</span>'); // Selectors
-                    html = html.replace(/([\w-]+)(:)/g, '<span class="tok-attr">$1</span>$2'); // Properties
-                    html = html.replace(/(\d+(px|em|%|rem))/g, '<span class="tok-num">$1</span>');
-                }
-
-                // 6. Generic Numbers
-                html = html.replace(/\b(\d+)\b/g, '<span class="tok-num">$1</span>');
 
                 return html;
             }
-
-            escapeHtml(str) {
-                return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            }
         }
 
-        /**
-         * ============================================================================
-         * MODULE 2: FILE SYSTEM (VFS) with Upload/Download
-         * ============================================================================
-         */
-        class FileSystem {
+        /* --- 5. Virtual File System --- */
+        class VirtualFileSystem extends EventEmitter {
             constructor() {
-                // Init with persistent store or default
-                const saved = localStorage.getItem('vscode_vfs');
-                this.tree = saved ? JSON.parse(saved) : {
-                    id: 'root', name: 'Project', type: 'folder', children: [
-                        { id: 'f1', name: 'main.cpp', type: 'file', content: '#include <iostream>\n\nint main() {\n    std::cout << "Hello World!";\n    return 0;\n}' },
-                        { id: 'f2', name: 'script.js', type: 'file', content: 'console.log("Loaded");' },
-                        { id: 'f3', name: 'style.css', type: 'file', content: 'body { background: #333; }' },
-                        { id: 'f4', name: 'settings.json', type: 'file', content: '{\n    "fontSize": 14,\n    "minimap": true,\n    "theme": "dark"\n}' }
-                    ]
-                };
+                super();
+                this.load();
+            }
+
+            load() {
+                const saved = localStorage.getItem('cosmic_fs_v2');
+                if (saved) {
+                    this.root = JSON.parse(saved);
+                } else {
+                    // Default Project Structure
+                    this.root = {
+                        id: 'root', name: 'Project', type: 'folder', children: [
+                            { id: 'f1', name: 'main.js', type: 'file', content: 'console.log("Hello Universe");\n\nfunction init() {\n    // Start engine\n}' },
+                            { id: 'f2', name: 'styles.css', type: 'file', content: 'body {\n    background: #000;\n    color: #fff;\n}' },
+                            { id: 'f3', name: 'index.html', type: 'file', content: '<!DOCTYPE html>\n<html>\n<body>\n    <h1>Hello</h1>\n</body>\n</html>' },
+                            { id: 'd1', name: 'src', type: 'folder', children: [
+                                { id: 'f4', name: 'utils.cpp', type: 'file', content: '#include <iostream>\n\nint main() {\n    return 0;\n}' }
+                            ]}
+                        ]
+                    };
+                }
             }
 
             save() {
-                localStorage.setItem('vscode_vfs', JSON.stringify(this.tree));
-                app.ui.renderExplorer();
+                localStorage.setItem('cosmic_fs_v2', JSON.stringify(this.root));
+                this.emit('change');
             }
 
-            findNode(id, node = this.tree) {
-                if (node.id === id) return node;
+            // Recursive finder
+            findNode(id, node = this.root, parent = null) {
+                if (node.id === id) return { node, parent };
                 if (node.children) {
                     for (let child of node.children) {
-                        const found = this.findNode(id, child);
-                        if (found) return found;
+                        const res = this.findNode(id, child, node);
+                        if (res) return res;
                     }
                 }
                 return null;
             }
 
-            findParent(id, node = this.tree) {
-                if (node.children) {
-                    for (let child of node.children) {
-                        if (child.id === id) return node;
-                        const found = this.findParent(id, child);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            }
-
-            createFile(parentId = 'root') {
-                app.ui.prompt('New File Name:', (name) => {
-                    if (!name) return;
-                    const parent = parentId === 'root' ? this.tree : this.findNode(parentId);
-                    const newFile = { id: Date.now().toString(), name, type: 'file', content: '' };
+            createFile(parentId, name, content = '') {
+                const { node: parent } = this.findNode(parentId);
+                if (parent && parent.type === 'folder') {
+                    const newFile = { id: Utils.id(), name, type: 'file', content };
                     parent.children.push(newFile);
                     this.save();
-                    app.editor.open(newFile.id);
-                });
+                    return newFile;
+                }
             }
 
-            createFolder(parentId = 'root') {
-                app.ui.prompt('New Folder Name:', (name) => {
-                    if (!name) return;
-                    const parent = parentId === 'root' ? this.tree : this.findNode(parentId);
-                    parent.children.push({ id: Date.now().toString(), name, type: 'folder', children: [] });
+            createFolder(parentId, name) {
+                const { node: parent } = this.findNode(parentId);
+                if (parent && parent.type === 'folder') {
+                    const newFolder = { id: Utils.id(), name, type: 'folder', children: [] };
+                    parent.children.push(newFolder);
                     this.save();
-                });
+                    return newFolder;
+                }
             }
 
-            deleteNode(id) {
-                const parent = this.findParent(id);
+            delete(id) {
+                const { parent } = this.findNode(id);
                 if (parent) {
-                    parent.children = parent.children.filter(n => n.id !== id);
+                    parent.children = parent.children.filter(c => c.id !== id);
                     this.save();
-                    app.editor.close(id);
                 }
             }
 
-            renameNode(id) {
-                const node = this.findNode(id);
-                if (node) {
-                    app.ui.prompt('Rename to:', (name) => {
-                        if (name) {
-                            node.name = name;
-                            this.save();
-                        }
-                    }, node.name);
-                }
-            }
-
-            updateContent(id, content) {
-                const node = this.findNode(id);
-                if (node) {
+            updateFile(id, content) {
+                const { node } = this.findNode(id);
+                if (node && node.type === 'file') {
                     node.content = content;
                     this.save();
-                    // Check if settings.json
-                    if (node.name === 'settings.json') app.settings.apply(content);
                 }
             }
 
-            // Download Handling
-            download(id) {
-                const node = this.findNode(id);
-                if (!node) return;
-
-                if (node.type === 'file') {
-                    this.triggerDownload(node.name, node.content);
-                } else {
-                    alert("Folder download not implemented in this demo (requires zip lib).");
+            rename(id, newName) {
+                const { node } = this.findNode(id);
+                if (node) {
+                    node.name = newName;
+                    this.save();
                 }
-            }
-
-            triggerDownload(filename, content) {
-                const element = document.createElement('a');
-                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-                element.setAttribute('download', filename);
-                element.style.display = 'none';
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
-            }
-
-            // Upload Handling
-            handleUpload(files) {
-                // Simplified: Put everything in root or currently selected folder
-                const target = this.tree; // Default to root for demo
-                
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        // Check if exists
-                        const existing = target.children.find(c => c.name === file.name);
-                        if(!existing) {
-                            target.children.push({
-                                id: Date.now().toString() + Math.random(),
-                                name: file.name,
-                                type: 'file',
-                                content: e.target.result
-                            });
-                        }
-                        this.save();
-                    };
-                    reader.readAsText(file);
-                });
             }
         }
 
-        /**
-         * ============================================================================
-         * MODULE 3: EDITOR ENGINE
-         * ============================================================================
-         */
-        class Editor {
-            constructor() {
-                this.el = document.getElementById('code-input');
-                this.renderEl = document.getElementById('code-render');
-                this.gutterEl = document.getElementById('gutter');
-                this.activeId = null;
-                this.openFiles = [];
-                this.tokenizer = new Tokenizer();
-                this.minimap = new Minimap();
+        /* --- 6. Editor Engine (Text Buffer & History) --- */
+        class EditorEngine {
+            constructor(bus, vfs) {
+                this.bus = bus;
+                this.vfs = vfs;
+                this.activeFileId = null;
+                this.history = {}; // Map fileId -> { stack: [], ptr: -1 }
+                
+                this.lexer = new Lexer();
+                
+                // Elements
+                this.textarea = document.getElementById('input-textarea');
+                this.renderer = document.getElementById('renderer');
+                this.gutter = document.getElementById('gutter');
+                this.minimapCanvas = document.getElementById('minimap-canvas');
+                this.minimapCtx = this.minimapCanvas.getContext('2d');
+                
+                this.bindEvents();
+            }
 
-                this.el.addEventListener('input', () => this.update());
-                this.el.addEventListener('scroll', () => this.syncScroll());
-                this.el.addEventListener('keydown', (e) => this.handleKey(e));
+            bindEvents() {
+                this.textarea.addEventListener('input', () => this.handleInput());
+                this.textarea.addEventListener('keydown', (e) => this.handleKey(e));
+                this.textarea.addEventListener('scroll', () => this.syncScroll());
+                this.textarea.addEventListener('click', () => this.updateStatus());
+                this.textarea.addEventListener('keyup', () => this.updateStatus());
             }
 
             open(id) {
-                const node = app.vfs.findNode(id);
-                if (!node || node.type !== 'file') return;
+                const { node: file } = this.vfs.findNode(id);
+                if (!file || file.type !== 'file') return;
 
-                if (!this.openFiles.includes(id)) {
-                    this.openFiles.push(id);
+                this.activeFileId = id;
+                this.textarea.value = file.content;
+                
+                // Init history for this file if needed
+                if (!this.history[id]) {
+                    this.history[id] = { stack: [file.content], ptr: 0 };
                 }
-                this.activeId = id;
-                this.el.value = node.content;
-                
-                app.ui.renderTabs();
-                this.update();
-                
-                // Set language in status bar
-                const ext = node.name.split('.').pop();
-                document.getElementById('status-lang').textContent = ext.toUpperCase();
+
+                this.updateView();
+                this.bus.emit('file-opened', file);
             }
 
-            close(id) {
-                this.openFiles = this.openFiles.filter(fid => fid !== id);
-                if (this.activeId === id) {
-                    this.activeId = this.openFiles.length > 0 ? this.openFiles[0] : null;
-                    if (this.activeId) {
-                        this.open(this.activeId);
-                    } else {
-                        this.el.value = '';
-                        this.renderEl.innerHTML = '';
-                        this.gutterEl.innerHTML = '';
-                    }
+            handleInput() {
+                if (!this.activeFileId) return;
+                const content = this.textarea.value;
+                
+                // Update VFS
+                this.vfs.updateFile(this.activeFileId, content);
+                
+                // Push to History (Debounce logic implied or explicit)
+                const hist = this.history[this.activeFileId];
+                // Slice future if we were back in time
+                if (hist.ptr < hist.stack.length - 1) {
+                    hist.stack = hist.stack.slice(0, hist.ptr + 1);
                 }
-                app.ui.renderTabs();
-            }
+                hist.stack.push(content);
+                hist.ptr++;
+                if (hist.stack.length > 50) { hist.stack.shift(); hist.ptr--; }
 
-            update() {
-                if (!this.activeId) return;
-                
-                const code = this.el.value;
-                const node = app.vfs.findNode(this.activeId);
-                const lang = node.name.split('.').pop();
-
-                // 1. Update Render Layer (Syntax Highlight)
-                this.renderEl.innerHTML = this.tokenizer.tokenize(code, lang) + '<br>'; // Extra line for scroll
-
-                // 2. Update Gutter
-                const lineCount = code.split('\n').length;
-                this.gutterEl.innerHTML = Array(lineCount).fill(0).map((_, i) => `<div>${i+1}</div>`).join('');
-
-                // 3. Save
-                app.vfs.updateContent(this.activeId, code);
-
-                // 4. Update Minimap
-                this.minimap.update(code);
-                
-                // 5. Update Status
-                this.updateCursorStatus();
-            }
-
-            syncScroll() {
-                this.renderEl.scrollTop = this.el.scrollTop;
-                this.renderEl.scrollLeft = this.el.scrollLeft;
-                this.gutterEl.scrollTop = this.el.scrollTop;
-                this.minimap.scroll(this.el.scrollTop / this.el.scrollHeight);
+                this.updateView();
             }
 
             handleKey(e) {
+                // Tab Indentation
                 if (e.key === 'Tab') {
                     e.preventDefault();
                     document.execCommand('insertText', false, '    ');
                 }
-                this.updateCursorStatus();
+                
+                // Undo: Ctrl+Z
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                    e.preventDefault();
+                    this.undo();
+                }
+                
+                // Redo: Ctrl+Y
+                if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+                    e.preventDefault();
+                    this.redo();
+                }
             }
 
-            updateCursorStatus() {
-                const pos = this.el.selectionStart;
-                const text = this.el.value.substring(0, pos);
-                const lines = text.split('\n');
-                const line = lines.length;
-                const col = lines[lines.length-1].length + 1;
-                document.getElementById('status-cursor').textContent = `Ln ${line}, Col ${col}`;
-            }
-        }
-
-        /**
-         * ============================================================================
-         * MODULE 4: MINIMAP RENDERER
-         * ============================================================================
-         */
-        class Minimap {
-            constructor() {
-                this.canvas = document.getElementById('minimap-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.slider = document.getElementById('minimap-slider');
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
+            undo() {
+                if (!this.activeFileId) return;
+                const hist = this.history[this.activeFileId];
+                if (hist.ptr > 0) {
+                    hist.ptr--;
+                    const val = hist.stack[hist.ptr];
+                    this.textarea.value = val;
+                    this.vfs.updateFile(this.activeFileId, val);
+                    this.updateView();
+                }
             }
 
-            resize() {
-                this.canvas.width = 100;
-                this.canvas.height = document.getElementById('code-wrapper').clientHeight;
+            redo() {
+                if (!this.activeFileId) return;
+                const hist = this.history[this.activeFileId];
+                if (hist.ptr < hist.stack.length - 1) {
+                    hist.ptr++;
+                    const val = hist.stack[hist.ptr];
+                    this.textarea.value = val;
+                    this.vfs.updateFile(this.activeFileId, val);
+                    this.updateView();
+                }
             }
 
-            update(code) {
-                const lines = code.split('\n');
-                const ctx = this.ctx;
-                const w = this.canvas.width;
-                const h = this.canvas.height;
+            updateView() {
+                const code = this.textarea.value;
+                const { node } = this.vfs.findNode(this.activeFileId);
+                const ext = node.name.split('.').pop().toLowerCase();
+
+                // Syntax Highlight
+                this.renderer.innerHTML = this.lexer.highlight(code, ext) + '<br>'; // Trailing break for scroll
+
+                // Line Numbers
+                const lines = code.split('\n').length;
+                this.gutter.innerHTML = Array(lines).fill(0).map((_, i) => `<div>${i + 1}</div>`).join('');
+
+                // Minimap
+                this.drawMinimap(code);
+                this.updateStatus();
+            }
+
+            syncScroll() {
+                this.renderer.scrollTop = this.textarea.scrollTop;
+                this.renderer.scrollLeft = this.textarea.scrollLeft;
+                this.gutter.scrollTop = this.textarea.scrollTop;
+                
+                // Sync Minimap Slider
+                const slider = document.getElementById('minimap-slider');
+                const ratio = this.textarea.scrollTop / this.textarea.scrollHeight;
+                const mapHeight = this.minimapCanvas.height;
+                const viewHeight = this.textarea.clientHeight;
+                const sliderHeight = (viewHeight / this.textarea.scrollHeight) * mapHeight;
+                
+                slider.style.height = Math.max(20, sliderHeight) + 'px';
+                slider.style.top = (ratio * mapHeight) + 'px';
+            }
+
+            drawMinimap(code) {
+                const ctx = this.minimapCtx;
+                const w = this.minimapCanvas.width = 60;
+                const h = this.minimapCanvas.height = document.getElementById('editor-surface').clientHeight;
                 
                 ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = '#666';
                 
-                // Determine scale (fit whole file if possible, or scroll)
-                // Simplified: Draw pixels representing code structure
-                const lineHeight = 2; // tiny lines
-                const charWidth = 1.5;
-                
-                ctx.fillStyle = '#888';
+                const lines = code.split('\n');
+                const lineHeight = 3;
                 
                 lines.forEach((line, i) => {
-                    if (i * 3 > h) return; // Clip if too long for simple demo
-                    
+                    const y = i * lineHeight;
+                    if (y > h) return;
+                    // Draw a simplified representation of the line
+                    // Very abstract: just blocks for non-whitespace
                     let x = 0;
-                    // Mock tokenization for minimap colors
-                    for (let j=0; j<line.length; j++) {
+                    for (let j = 0; j < line.length && x < w; j++) {
                         if (line[j] !== ' ') {
-                            ctx.fillRect(x, i * 3, charWidth, lineHeight);
+                            ctx.fillRect(x, y, 2, 2);
                         }
-                        x += charWidth;
+                        x += 2;
                     }
                 });
             }
 
-            scroll(pct) {
-                const h = this.canvas.height;
-                const sliderH = h * 0.1; // 10% viewport height
-                this.slider.style.height = sliderH + 'px';
-                this.slider.style.top = (pct * (h - sliderH)) + 'px';
+            updateStatus() {
+                const el = this.textarea;
+                const val = el.value;
+                const sel = el.selectionStart;
+                const line = val.substr(0, sel).split('\n').length;
+                const col = sel - val.lastIndexOf('\n', sel - 1);
+                const { node } = this.vfs.findNode(this.activeFileId);
+                const ext = node.name.split('.').pop().toUpperCase();
+
+                document.getElementById('status-cursor').innerText = `Ln ${line}, Col ${col}`;
+                document.getElementById('status-lang').innerText = ext || 'TXT';
             }
         }
 
-        /**
-         * ============================================================================
-         * MODULE 5: UI & SETTINGS
-         * ============================================================================
-         */
-        class SettingsManager {
-            constructor() {
-                // Apply defaults
-                this.apply(JSON.stringify({ fontSize: 14, minimap: true }));
+        /* --- 7. Terminal Service --- */
+        class TerminalService {
+            constructor(vfs) {
+                this.vfs = vfs;
+                this.container = document.getElementById('terminal-container');
+                this.cwd = ['root']; // Current Working Directory Path (IDs)
+                this.cwdPath = '/';
+                this.init();
             }
 
-            apply(jsonStr) {
-                try {
-                    const settings = JSON.parse(jsonStr);
-                    const root = document.documentElement;
-                    
-                    if (settings.fontSize) {
-                        root.style.setProperty('--font-code', `'Consolas', monospace`);
-                        document.querySelectorAll('.editor-layer').forEach(el => el.style.fontSize = settings.fontSize + 'px');
-                        document.getElementById('gutter').style.fontSize = settings.fontSize + 'px';
-                    }
-                    
-                    const minimapEl = document.getElementById('minimap');
-                    if (settings.minimap === false) {
-                        minimapEl.style.display = 'none';
-                        document.querySelectorAll('.editor-layer').forEach(el => el.style.right = '0');
-                    } else {
-                        minimapEl.style.display = 'block';
-                        document.querySelectorAll('.editor-layer').forEach(el => el.style.right = '100px');
-                    }
-
-                } catch (e) { console.error("Invalid Settings JSON"); }
+            init() {
+                this.print("Cosmic Shell v1.0.0");
+                this.print("Type 'help' to see available commands.");
+                this.prompt();
             }
 
-            open() {
-                // Check if settings file exists
-                let node = app.vfs.findNode('settings.json'); // simplistic find
-                if (!node) {
-                    // Search in root
-                    node = app.vfs.tree.children.find(c => c.name === 'settings.json');
-                }
+            print(text, type = '') {
+                const div = document.createElement('div');
+                div.className = 'term-line ' + type;
+                div.innerText = text;
+                this.container.insertBefore(div, this.currentInputLine);
+                this.container.scrollTop = this.container.scrollHeight;
+            }
+
+            prompt() {
+                const div = document.createElement('div');
+                div.className = 'term-line';
+                div.innerHTML = `<span class="term-ps1">➜</span><span class="term-path">${this.cwdPath}</span> $ <input class="term-input" type="text">`;
+                this.container.appendChild(div);
+                this.currentInputLine = div;
                 
-                if (node) {
-                    app.editor.open(node.id);
-                } else {
-                    alert("settings.json not found in root.");
-                }
-            }
-        }
-
-        class UIManager {
-            constructor() {
-                this.explorer = document.getElementById('explorer-tree');
-                this.tabs = document.getElementById('tabs-container');
-            }
-
-            renderExplorer() {
-                this.explorer.innerHTML = this.buildTree(app.vfs.tree.children);
-                lucide.createIcons();
-            }
-
-            buildTree(nodes, indent = 0) {
-                return nodes.map(node => {
-                    const pad = indent * 10;
-                    if (node.type === 'folder') {
-                        return `
-                            <div class="tree-node" oncontextmenu="app.ctx.show(event, '${node.id}')">
-                                <div class="tree-indent" style="width:${pad}px"></div>
-                                <div class="node-arrow"><i data-lucide="chevron-right" width="12"></i></div>
-                                <div class="node-icon"><i data-lucide="folder" width="14" color="#dcb67a"></i></div>
-                                <span>${node.name}</span>
-                            </div>
-                            <div class="tree-children">${this.buildTree(node.children, indent + 1)}</div>
-                        `;
-                    } else {
-                        const icon = this.getFileIcon(node.name);
-                        return `
-                            <div class="tree-node" onclick="app.editor.open('${node.id}')" oncontextmenu="app.ctx.show(event, '${node.id}')">
-                                <div class="tree-indent" style="width:${pad}px"></div>
-                                <div class="node-arrow"></div>
-                                <div class="node-icon">${icon}</div>
-                                <span>${node.name}</span>
-                            </div>
-                        `;
-                    }
-                }).join('');
-            }
-
-            getFileIcon(name) {
-                const ext = name.split('.').pop();
-                let color = '#ccc';
-                let icon = 'file';
-                
-                switch(ext) {
-                    case 'html': color = '#e34c26'; icon='file-code'; break;
-                    case 'css': color = '#563d7c'; icon='palette'; break;
-                    case 'js': color = '#f1e05a'; icon='file-json'; break;
-                    case 'cpp': case 'c': case 'h': color = '#519aba'; icon='file-cog'; break;
-                    case 'py': color = '#3572A5'; icon='file-terminal'; break;
-                    case 'php': color = '#4F5D95'; icon='server'; break;
-                    case 'json': color = '#F1E05A'; icon='braces'; break;
-                }
-                return `<i data-lucide="${icon}" width="14" color="${color}"></i>`;
-            }
-
-            renderTabs() {
-                this.tabs.innerHTML = app.editor.openFiles.map(id => {
-                    const node = app.vfs.findNode(id);
-                    if (!node) return '';
-                    const active = id === app.editor.activeId ? 'active' : '';
-                    return `
-                        <div class="tab ${active}" onclick="app.editor.open('${id}')" oncontextmenu="app.ctx.show(event, '${id}')">
-                            ${this.getFileIcon(node.name)}
-                            <span style="margin-left:5px">${node.name}</span>
-                            <span class="tab-close" onclick="event.stopPropagation(); app.editor.close('${id}')">✕</span>
-                        </div>
-                    `;
-                }).join('');
-                lucide.createIcons();
-            }
-
-            prompt(msg, callback, defaultVal = '') {
-                const modal = document.getElementById('modal-overlay');
-                const title = document.getElementById('modal-title');
-                const input = document.getElementById('modal-input');
-                const btn = document.getElementById('modal-ok');
-
-                title.textContent = msg;
-                input.value = defaultVal;
-                modal.style.display = 'flex';
+                const input = div.querySelector('input');
                 input.focus();
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const cmd = input.value.trim();
+                        input.disabled = true;
+                        this.exec(cmd);
+                    }
+                });
+            }
 
-                btn.onclick = () => {
-                    modal.style.display = 'none';
-                    callback(input.value);
+            resolvePath(pathStr) {
+                // Simplified path resolution
+                if (pathStr === '/') return this.vfs.root;
+                // For now, assume relative to current folder or just searching immediate children
+                const currentFolderId = this.cwd[this.cwd.length - 1];
+                const { node } = this.vfs.findNode(currentFolderId);
+                if (node && node.children) {
+                    const found = node.children.find(c => c.name === pathStr);
+                    return found;
+                }
+                return null;
+            }
+
+            exec(cmdStr) {
+                if (!cmdStr) { this.prompt(); return; }
+                const [cmd, ...args] = cmdStr.split(' ');
+                
+                switch(cmd) {
+                    case 'help':
+                        this.print("Commands: ls, cd, mkdir, touch, rm, cat, clear, date, whoami", 'term-msg-info');
+                        break;
+                    case 'clear':
+                        this.container.innerHTML = '';
+                        break;
+                    case 'date':
+                        this.print(new Date().toString());
+                        break;
+                    case 'whoami':
+                        this.print("cosmic_user");
+                        break;
+                    case 'ls':
+                        const currId = this.cwd[this.cwd.length - 1];
+                        const { node } = this.vfs.findNode(currId);
+                        if (node && node.children) {
+                            const list = node.children.map(c => c.name + (c.type==='folder'?'/':'')).join('  ');
+                            this.print(list || '(empty)');
+                        }
+                        break;
+                    case 'touch':
+                        if (args[0]) {
+                            const curr = this.cwd[this.cwd.length-1];
+                            this.vfs.createFile(curr, args[0]);
+                            this.print(`Created file ${args[0]}`);
+                        } else this.print("Usage: touch <filename>", 'term-msg-warn');
+                        break;
+                    case 'mkdir':
+                        if (args[0]) {
+                            const curr = this.cwd[this.cwd.length-1];
+                            this.vfs.createFolder(curr, args[0]);
+                            this.print(`Created folder ${args[0]}`);
+                        }
+                        break;
+                    case 'cat':
+                        if (args[0]) {
+                            const target = this.resolvePath(args[0]);
+                            if (target && target.type === 'file') this.print(target.content);
+                            else this.print(`File not found: ${args[0]}`, 'term-msg-error');
+                        }
+                        break;
+                    case 'cd':
+                        if (!args[0] || args[0] === '/') {
+                            this.cwd = ['root']; this.cwdPath = '/';
+                        } else if (args[0] === '..') {
+                            if (this.cwd.length > 1) {
+                                this.cwd.pop();
+                                // Reconstruct path string simplified
+                                this.cwdPath = '/'; // Hacky reset
+                            }
+                        } else {
+                            const target = this.resolvePath(args[0]);
+                            if (target && target.type === 'folder') {
+                                this.cwd.push(target.id);
+                                this.cwdPath += target.name + '/';
+                            } else {
+                                this.print(`Directory not found: ${args[0]}`, 'term-msg-error');
+                            }
+                        }
+                        break;
+                    default:
+                        this.print(`Command not found: ${cmd}`, 'term-msg-error');
+                }
+                
+                this.prompt();
+            }
+            
+            clear() {
+                this.container.innerHTML = '';
+                this.prompt();
+            }
+        }
+
+        /* --- 8. UI Layout Controller --- */
+        class LayoutController {
+            constructor() {
+                this.sidebar = document.getElementById('sidebar');
+                this.panel = document.getElementById('bottom-panel');
+                
+                // Sidebar Resizing
+                const sResizer = document.getElementById('sidebar-resizer');
+                sResizer.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    const resize = (ev) => {
+                        this.sidebar.style.width = ev.clientX + 'px';
+                    };
+                    const stop = () => {
+                        document.removeEventListener('mousemove', resize);
+                        document.removeEventListener('mouseup', stop);
+                    };
+                    document.addEventListener('mousemove', resize);
+                    document.addEventListener('mouseup', stop);
+                });
+
+                // Panel Resizing
+                const pResizer = document.getElementById('panel-resizer');
+                pResizer.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    const startY = e.clientY;
+                    const startH = this.panel.clientHeight;
+                    const resize = (ev) => {
+                        const newH = startH - (ev.clientY - startY);
+                        this.panel.style.height = newH + 'px';
+                    };
+                    const stop = () => {
+                        document.removeEventListener('mousemove', resize);
+                        document.removeEventListener('mouseup', stop);
+                    };
+                    document.addEventListener('mousemove', resize);
+                    document.addEventListener('mouseup', stop);
+                });
+            }
+
+            toggleSidebar(viewId) {
+                const w = this.sidebar.style.width;
+                if (w === '0px') {
+                    this.sidebar.style.width = '260px';
+                } else if (!viewId) {
+                    this.sidebar.style.width = '0px';
+                }
+                // Handle tab switching inside sidebar if implemented
+            }
+
+            togglePanel() {
+                if (this.panel.style.display === 'none') this.panel.style.display = 'flex';
+                else this.panel.style.display = 'none';
+            }
+
+            switchPanel(tabId) {
+                document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+                event.target.classList.add('active');
+                // Logic to swap panel content would go here
+            }
+        }
+
+        /* --- 9. Command & Context Services --- */
+        class CommandService {
+            constructor() {
+                this.registry = {
+                    'core.upload': () => document.getElementById('file-upload').click(),
+                    'core.settings': () => {
+                        const el = document.getElementById('settings-modal');
+                        el.style.display = el.style.display==='flex' ? 'none' : 'flex';
+                    },
+                    'core.palette': () => {
+                        const el = document.getElementById('palette-overlay');
+                        el.style.display = 'flex';
+                        document.getElementById('palette-search').focus();
+                        this.renderPalette();
+                    },
+                    'core.find': () => alert("Find widget coming soon!"),
+                    'view.toggleSidebar': () => app.layout.toggleSidebar(),
+                    'term.toggle': () => app.layout.togglePanel(),
+                    'file.new': () => app.vfs.createFilePrompt(),
+                    'file.newFolder': () => app.vfs.createFolderPrompt(),
+                    'editor.undo': () => app.editor.undo(),
+                    'editor.redo': () => app.editor.redo(),
+                };
+            }
+
+            exec(id) {
+                if (this.registry[id]) this.registry[id]();
+            }
+
+            renderPalette() {
+                const list = document.getElementById('palette-list');
+                const commands = Object.keys(this.registry).map(k => ({ id: k, label: k }));
+                list.innerHTML = commands.map(c => `
+                    <div class="pal-item" onclick="app.commands.exec('${c.id}'); document.getElementById('palette-overlay').style.display='none'">
+                        <span>${c.label}</span>
+                    </div>
+                `).join('');
+                
+                const input = document.getElementById('palette-search');
+                input.oninput = () => {
+                    const val = input.value.toLowerCase();
+                    const filtered = commands.filter(c => c.label.toLowerCase().includes(val));
+                    list.innerHTML = filtered.map(c => `
+                        <div class="pal-item" onclick="app.commands.exec('${c.id}'); document.getElementById('palette-overlay').style.display='none'">
+                            <span>${c.label}</span>
+                        </div>
+                    `).join('');
                 };
             }
         }
 
-        class ContextMenu {
-            constructor() {
-                this.el = document.getElementById('ctx-explorer');
-                this.targetId = null;
-                document.addEventListener('click', () => this.hide());
-            }
-
-            show(e, id) {
-                e.preventDefault();
-                this.targetId = id;
-                this.el.style.left = e.clientX + 'px';
-                this.el.style.top = e.clientY + 'px';
-                this.el.style.display = 'block';
-            }
-
-            hide() {
-                this.el.style.display = 'none';
-            }
-
-            action(act) {
-                if (!this.targetId) return;
-                
-                switch(act) {
-                    case 'newFile': app.vfs.createFile(this.targetId); break;
-                    case 'newFolder': app.vfs.createFolder(this.targetId); break;
-                    case 'delete': app.vfs.deleteNode(this.targetId); break;
-                    case 'rename': app.vfs.renameNode(this.targetId); break;
-                    case 'download': app.vfs.download(this.targetId); break;
-                }
-                this.hide();
-            }
-        }
-
-        /**
-         * ============================================================================
-         * MAIN APP
-         * ============================================================================
-         */
+        /* --- Main App Controller --- */
         const app = {
-            vfs: new FileSystem(),
-            editor: new Editor(),
-            ui: new UIManager(),
-            settings: new SettingsManager(),
-            ctx: new ContextMenu(),
+            bus: new EventBus(),
             
-            actions: {
-                triggerUpload: () => document.getElementById('file-upload-input').click()
+            init() {
+                this.vfs = new VirtualFileSystem();
+                this.settings = new SettingsStore(this.bus);
+                this.layout = new LayoutController();
+                this.editor = new EditorEngine(this.bus, this.vfs);
+                this.term = new TerminalService(this.vfs);
+                this.commands = new CommandService();
+                
+                this.tabs = [];
+                
+                // Initial Render
+                this.renderExplorer();
+                
+                // Open default file
+                this.openFile('f1');
+
+                // Global Shortcuts
+                document.addEventListener('keydown', e => {
+                    if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                        e.preventDefault();
+                        this.commands.exec('core.palette');
+                    }
+                    if (e.key === 'Escape') {
+                        document.getElementById('palette-overlay').style.display = 'none';
+                        document.getElementById('settings-modal').style.display = 'none';
+                        document.getElementById('ctx-menu').style.display = 'none';
+                    }
+                });
+
+                // VFS Events
+                this.vfs.on('change', () => this.renderExplorer());
+                
+                // Context Menu Closer
+                document.addEventListener('click', () => {
+                    document.getElementById('ctx-menu').style.display = 'none';
+                });
+                
+                lucide.createIcons();
+            },
+
+            openFile(id) {
+                if (!this.tabs.includes(id)) {
+                    this.tabs.push(id);
+                    this.renderTabs();
+                }
+                this.editor.open(id);
+                // Update Breadcrumb
+                const { node } = this.vfs.findNode(id);
+                document.getElementById('crumb-file').innerText = node.name;
+                
+                // Update active tab visual
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                const tabEl = document.querySelector(`.tab[data-id="${id}"]`);
+                if(tabEl) tabEl.classList.add('active');
+            },
+
+            closeTab(id, e) {
+                if(e) e.stopPropagation();
+                this.tabs = this.tabs.filter(t => t !== id);
+                if (this.editor.activeFileId === id) {
+                    if (this.tabs.length > 0) this.openFile(this.tabs[this.tabs.length-1]);
+                    else {
+                        // Empty state
+                        this.editor.textarea.value = '';
+                        this.editor.renderer.innerHTML = '';
+                        this.editor.activeFileId = null;
+                    }
+                }
+                this.renderTabs();
+            },
+
+            renderTabs() {
+                const container = document.getElementById('tabs-bar');
+                container.innerHTML = this.tabs.map(id => {
+                    const { node } = this.vfs.findNode(id);
+                    if (!node) return '';
+                    return `
+                        <div class="tab ${this.editor.activeFileId === id ? 'active' : ''}" data-id="${id}" onclick="app.openFile('${id}')">
+                            <i data-lucide="file" width="12" style="margin-right:6px"></i>
+                            <span class="tab-label">${node.name}</span>
+                            <span class="tab-close" onclick="app.closeTab('${id}', event)">×</span>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            },
+
+            renderExplorer() {
+                const container = document.getElementById('explorer-content');
+                const renderNode = (node, depth) => {
+                    const pad = depth * 14 + 10;
+                    if (node.type === 'folder') {
+                        let html = `
+                            <div class="file-node" style="padding-left:${pad}px" oncontextmenu="app.showCtx(event, '${node.id}')">
+                                <div class="node-chevron open"><i data-lucide="chevron-right" width="12"></i></div>
+                                <div class="node-icon"><i data-lucide="folder" width="14" color="#eab308"></i></div>
+                                <span>${node.name}</span>
+                            </div>
+                        `;
+                        node.children.forEach(child => {
+                            html += renderNode(child, depth + 1);
+                        });
+                        return html;
+                    } else {
+                        // File icons based on extension
+                        const ext = node.name.split('.').pop();
+                        let icon = 'file';
+                        let color = '#94a3b8';
+                        if(ext === 'js') { color = '#fcd34d'; icon = 'file-json'; }
+                        if(ext === 'html') { color = '#f97316'; icon = 'file-code'; }
+                        if(ext === 'css') { color = '#3b82f6'; icon = 'file-code'; }
+                        if(ext === 'cpp') { color = '#60a5fa'; icon = 'cpu'; }
+
+                        return `
+                            <div class="file-node ${this.editor.activeFileId === node.id ? 'active' : ''}" style="padding-left:${pad}px" onclick="app.openFile('${node.id}')" oncontextmenu="app.showCtx(event, '${node.id}')">
+                                <div class="node-indent"></div>
+                                <div class="node-icon"><i data-lucide="${icon}" width="14" color="${color}"></i></div>
+                                <span>${node.name}</span>
+                            </div>
+                        `;
+                    }
+                };
+                
+                container.innerHTML = this.vfs.root.children.map(c => renderNode(c, 0)).join('');
+                lucide.createIcons();
+            },
+
+            showCtx(e, id) {
+                e.preventDefault();
+                e.stopPropagation();
+                const menu = document.getElementById('ctx-menu');
+                menu.style.display = 'block';
+                menu.style.left = e.clientX + 'px';
+                menu.style.top = e.clientY + 'px';
+                
+                menu.innerHTML = `
+                    <div class="ctx-item" onclick="app.vfs.delete('${id}')">Delete <span class="ctx-key">Del</span></div>
+                    <div class="ctx-item" onclick="const n=prompt('Rename'); if(n) app.vfs.rename('${id}', n)">Rename <span class="ctx-key">F2</span></div>
+                    <div class="ctx-sep"></div>
+                    <div class="ctx-item">Copy Path</div>
+                `;
             }
         };
 
-        // Init
-        app.ui.renderExplorer();
-        app.editor.open('f1'); // Open main.cpp
-
-        // Bind Upload
-        document.getElementById('file-upload-input').addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                app.vfs.handleUpload(e.target.files);
-            }
-        });
+        // Initialize App
+        app.init();
 
     </script>
 </body>
