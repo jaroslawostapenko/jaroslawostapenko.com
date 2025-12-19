@@ -1,0 +1,6 @@
+{
+  "name": "AI Poker Challenge",
+  "description": "A 2D Texas Hold'em poker game against an AI opponent, designed for mobile.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
