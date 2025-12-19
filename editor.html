@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>Edytor Tekstu | Yaroslav Ostapenko</title>
+    <meta name="description" content="Prosty i szybki edytor tekstu online. Otwieraj, edytuj i zapisuj pliki .txt bezpośrednio w przeglądarce." />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+                slate: { 850: '#1e293b' } // Custom dark shade
+            }
+          },
+        },
+      };
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono-font { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 flex flex-col h-screen overflow-hidden">
+
+    <!-- Header (Simplified for Tool) -->
+    <header class="bg-slate-900 text-white py-4 shadow-md shrink-0">
+        <div class="container mx-auto px-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="bg-blue-600 p-1.5 rounded-lg group-hover:scale-110 transition-transform">
+                    <i data-lucide="arrow-left" width="20" height="20"></i>
+                </div>
+                <span class="font-bold tracking-tight">Powrót</span>
+            </a>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i data-lucide="file-edit" class="text-blue-400"></i>
+                Edytor Tekstu
+            </h1>
+            <div class="w-24"></div> <!-- Spacer for centering -->
+        </div>
+    </header>
+
+    <!-- Main Editor Interface -->
+    <main class="flex-grow flex flex-col container mx-auto px-4 py-4 h-full max-h-[calc(100vh-80px)]">
+        
+        <!-- Toolbar -->
+        <div class="bg-white border border-slate-200 rounded-t-xl p-3 flex flex-wrap gap-2 items-center shadow-sm z-10">
+            <button id="btn-open" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="folder-open" width="16" height="16"></i>
+                Otwórz .txt
+            </button>
+            <input type="file" id="file-input" accept=".txt" class="hidden" />
+
+            <button id="btn-save" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="save" width="16" height="16"></i>
+                Zapisz .txt
+            </button>
+
+            <div class="w-px h-6 bg-slate-300 mx-1"></div>
+
+            <button id="btn-copy" class="flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm transition-colors" title="Kopiuj do schowka">
+                <i data-lucide="copy" width="16" height="16"></i>
+            </button>
+            
+            <button id="btn-clear" class="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg text-sm transition-colors" title="Wyczyść wszystko">
+                <i data-lucide="trash-2" width="16" height="16"></i>
+            </button>
+
+            <div class="ml-auto flex items-center gap-2 text-xs text-slate-400 font-mono hidden sm:flex">
+                <span id="status-msg">Gotowy</span>
+            </div>
+        </div>
+
+        <!-- Editor Area -->
+        <div class="relative flex-grow flex flex-col">
+            <textarea 
+                id="editor" 
+                class="w-full h-full p-6 resize-none bg-white border-x border-b border-slate-200 outline-none text-slate-800 leading-relaxed mono-font text-sm sm:text-base focus:ring-2 focus:ring-inset focus:ring-blue-100/50 shadow-inner"
+                placeholder="Zacznij pisać lub wgraj plik tekstowy..."
+                spellcheck="false"
+            ></textarea>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="bg-slate-100 border-x border-b border-slate-200 rounded-b-xl px-4 py-2 flex justify-between items-center text-xs text-slate-500 font-medium">
+            <div class="flex gap-4">
+                <span>Znaki: <span id="char-count" class="text-slate-900">0</span></span>
+                <span>Słowa: <span id="word-count" class="text-slate-900">0</span></span>
+                <span>Linie: <span id="line-count" class="text-slate-900">1</span></span>
+            </div>
+            <div>
+                UTF-8
+            </div>
+        </div>
+        
+        <div class="text-center py-2 text-xs text-slate-400">
+            &copy; 2025 Yaroslav Ostapenko
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+
+        const editor = document.getElementById('editor');
+        const fileInput = document.getElementById('file-input');
+        const btnOpen = document.getElementById('btn-open');
+        const btnSave = document.getElementById('btn-save');
+        const btnCopy = document.getElementById('btn-copy');
+        const btnClear = document.getElementById('btn-clear');
+        const statusMsg = document.getElementById('status-msg');
+
+        const charCount = document.getElementById('char-count');
+        const wordCount = document.getElementById('word-count');
+        const lineCount = document.getElementById('line-count');
+
+        let currentFileName = 'dokument.txt';
+
+        // --- Stats Update ---
+        function updateStats() {
+            const text = editor.value;
+            charCount.textContent = text.length;
+            
+            // Words
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            wordCount.textContent = words;
+
+            // Lines
+            const lines = text.split('\n').length;
+            lineCount.textContent = lines;
+        }
+
+        editor.addEventListener('input', updateStats);
+
+        // --- Open File ---
+        btnOpen.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'text/plain') {
+                showStatus('Błąd: Wybierz plik .txt', true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editor.value = e.target.result;
+                currentFileName = file.name;
+                updateStats();
+                showStatus(`Wczytano: ${file.name}`);
+            };
+            reader.onerror = () => {
+                showStatus('Błąd odczytu pliku', true);
+            };
+            reader.readAsText(file);
+            
+            // Reset input so same file can be selected again
+            fileInput.value = ''; 
+        });
+
+        // --- Save File ---
+        btnSave.addEventListener('click', () => {
+            const text = editor.value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentFileName;
+            document.body.appendChild(a);
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showStatus('Plik zapisany!');
+        });
+
+        // --- Copy ---
+        btnCopy.addEventListener('click', () => {
+            editor.select();
+            document.execCommand('copy');
+            // Deselect
+            window.getSelection().removeAllRanges();
+            showStatus('Skopiowano do schowka');
+        });
+
+        // --- Clear ---
+        btnClear.addEventListener('click', () => {
+            if(confirm("Czy na pewno chcesz wyczyścić edytor?")) {
+                editor.value = '';
+                currentFileName = 'dokument.txt';
+                updateStats();
+                showStatus('Wyczyszczono');
+            }
+        });
+
+        // --- Helper: Status Message ---
+        let statusTimeout;
+        function showStatus(msg, isError = false) {
+            statusMsg.textContent = msg;
+            statusMsg.className = isError ? 'text-red-500 font-bold' : 'text-slate-500';
+            
+            clearTimeout(statusTimeout);
+            statusTimeout = setTimeout(() => {
+                statusMsg.textContent = 'Gotowy';
+                statusMsg.className = 'text-slate-400';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

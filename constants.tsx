@@ -15,18 +15,20 @@ export const NAV_ITEMS = [
 ];
 
 export const SKILLS: Skill[] = [
-  { name: 'HTML5', level: 90, category: 'frontend', description: 'Semantyka, SEO' },
-  { name: 'CSS3', level: 85, category: 'frontend', description: 'Flexbox, Grid, RWD' },
-  { name: 'JavaScript (ES6+)', level: 80, category: 'frontend', description: 'DOM, Eventy, Async' },
-  { name: 'React', level: 75, category: 'frontend', description: 'Hooks, Components' },
-  { name: 'PHP', level: 60, category: 'backend', description: 'Podstawy, Skrypty' },
-  { name: 'MySQL', level: 70, category: 'backend', description: 'Relacyjne bazy danych' },
-  { name: 'Python', level: 50, category: 'backend', description: 'Podstawy' },
-  { name: 'C / C++', level: 40, category: 'backend', description: 'Podstawy algorytmiki' },
-  { name: 'Git', level: 75, category: 'tools', description: 'Kontrola wersji' },
-  { name: 'Bootstrap', level: 80, category: 'frontend', description: 'Framework CSS' },
-  { name: 'Angielski (B2)', level: 75, category: 'language' },
+  { name: 'HTML5', level: 95, category: 'frontend', description: 'Semantyka i struktura' },
+  { name: 'CSS3', level: 90, category: 'frontend', description: 'Flexbox, Grid, RWD' },
+  { name: 'JavaScript', level: 85, category: 'frontend', description: 'ES6+, DOM API' },
+  { name: 'PHP', level: 75, category: 'backend', description: 'Programowanie backendowe' },
+  { name: 'MySQL', level: 80, category: 'backend', description: 'Zarządzanie relacyjnymi bazami danych' },
+  { name: 'Python', level: 80, category: 'backend', description: 'Skrypty i analiza' },
+  { name: 'C', level: 70, category: 'backend', description: 'Programowanie niskopoziomowe' },
+  { name: 'C++', level: 75, category: 'backend', description: 'Algorytmy i struktury danych' },
+  { name: 'C#', level: 65, category: 'backend', description: 'Aplikacje desktopowe' },
+  { name: 'Git', level: 80, category: 'tools', description: 'Kontrola wersji' },
+  { name: 'Bootstrap', level: 80, category: 'frontend', description: 'Framework UI' },
+  { name: 'React', level: 75, category: 'frontend', description: 'Tworzenie komponentów' },
   { name: 'Polski (C1)', level: 90, category: 'language' },
+  { name: 'Angielski (B2)', level: 75, category: 'language' },
   { name: 'Ukraiński (C2)', level: 100, category: 'language' },
   { name: 'Rosyjski (C2)', level: 100, category: 'language' },
 ];
@@ -39,10 +41,10 @@ export const EXPERIENCE_DATA: ExperienceItem[] = [
     period: 'Październik 2024 - Obecnie', 
     type: 'work',
     description: [
-      'Tworzenie i rozwój aplikacji webowych z wykorzystaniem HTML, CSS, JavaScript, jQuery oraz PHP, MySQL.',
-      'Projektowanie, implementacja i zarządzanie relacyjnymi bazami danych.',
-      'Aktywna praca z systemem kontroli wersji Git w środowisku zespołowym.',
-      'Współpraca przy optymalizacji i utrzymaniu istniejących projektów.'
+      'Tworzenie i rozwój aplikacji webowych.',
+      'Obsługa backendu w PHP.',
+      'Zarządzanie bazami danych MySQL.',
+      'Praca z systemem Git.'
     ]
   },
   {
@@ -53,18 +55,7 @@ export const EXPERIENCE_DATA: ExperienceItem[] = [
     type: 'education',
     description: [
       'Profil: Programista',
-      'Nauka zaawansowanych technologii webowych i inżynierii oprogramowania.'
-    ]
-  },
-  {
-    id: 'edu-2',
-    title: 'Liceum Ogólnokształcące',
-    organization: 'Liceum nr. 3 miasto Mikołajów, Ukraina',
-    period: '01.09.2022 - 16.06.2025',
-    type: 'education',
-    description: [
-      'Nauczanie online',
-      'Profil ogólny z naciskiem na nauki ścisłe.'
+      'Nauka języków: C, C++, C#, Python, SQL.'
     ]
   }
 ];
