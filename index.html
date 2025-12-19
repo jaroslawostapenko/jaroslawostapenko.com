@@ -86,14 +86,15 @@
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Removed Vite scripts as this is a static build now -->
 <script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "path": "https://esm.sh/path@^0.12.7",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "url": "https://esm.sh/url@^0.11.4"
+    "url": "https://esm.sh/url@^0.11.4",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
@@ -105,10 +106,12 @@
     <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 bg-transparent">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
+                <!-- Logo -->
                 <a href="#" class="flex items-center gap-2 group">
                     <div class="bg-blue-600 p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
                         <i data-lucide="code-2" width="24" height="24"></i>
                     </div>
+                    <!-- The logo text color is managed by script.js based on scroll -->
                     <span id="logo-text" class="text-xl font-bold tracking-tight text-slate-900 lg:text-white transition-colors">
                         Yaroslav<span class="text-blue-600">.dev</span>
                     </span>
@@ -116,24 +119,26 @@
 
                 <!-- Desktop Nav -->
                 <nav class="hidden md:flex items-center gap-8">
-                    <a href="#hero" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Start</a>
-                    <a href="#about" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">O mnie</a>
-                    <a href="#skills" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Umiejętności</a>
-                    <a href="#projects" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Projekty</a>
-                    <a href="#experience" class="nav-link text-sm font-medium text-slate-200 hover:text-white transition-colors">Doświadczenie</a>
+                    <!-- Note: Nav text color handling for scroll is complex with Tailwind classes alone, 
+                         simplified here to Slate-600 for visibility on white, and relying on header transparency for dark bg -->
+                    <a href="#hero" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Start</a>
+                    <a href="#about" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">O mnie</a>
+                    <a href="#skills" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Umiejętności</a>
+                    <a href="#projects" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Projekty</a>
+                    <a href="#experience" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Doświadczenie</a>
                     <a href="#contact" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all hover:shadow-lg hover:-translate-y-0.5">
                         Zatrudnij mnie
                     </a>
                 </nav>
 
                 <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:text-blue-600 transition-colors" aria-label="Toggle menu">
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 transition-colors" aria-label="Toggle menu">
                     <i data-lucide="menu" id="menu-icon" class="lg:text-white"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Nav -->
+        <!-- Mobile Nav Menu (Hidden by default) -->
         <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 shadow-xl transition-all duration-300 origin-top">
             <nav class="flex flex-col p-4 space-y-4">
                 <a href="#hero" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Start</a>

@@ -4,197 +4,175 @@
  * ============================================================================
  */
 
-lucide.createIcons();
-
-class ThemeManager {
-    constructor() {
-        this.html = document.documentElement;
-        this.buttons = document.querySelectorAll('.theme-opt');
-        this.quickToggle = document.getElementById('theme-toggle-quick');
-        this.currentTheme = localStorage.getItem('theme') || 'system';
-        this.init();
-    }
-    init() {
-        this.applyTheme(this.currentTheme);
-        this.bindEvents();
-    }
-    bindEvents() {
-        this.buttons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const theme = btn.dataset.value;
-                this.setTheme(theme);
-            });
-        });
-        if (this.quickToggle) {
-            this.quickToggle.addEventListener('click', () => {
-                const isDark = this.html.classList.contains('dark');
-                this.setTheme(isDark ? 'light' : 'dark');
-            });
-        }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            if (this.currentTheme === 'system') this.applyTheme('system');
-        });
-    }
-    setTheme(theme) {
-        this.currentTheme = theme;
-        localStorage.setItem('theme', theme);
-        this.applyTheme(theme);
-    }
-    applyTheme(theme) {
-        this.buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.value === theme));
-        if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            this.html.classList.add('dark');
-        } else {
-            this.html.classList.remove('dark');
-        }
-    }
+// Initialize Lucide Icons
+if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
 }
 
 class NavigationController {
     constructor() {
-        this.header = document.getElementById('main-nav-wrapper');
-        this.navbar = document.getElementById('main-navbar');
-        this.topBar = document.getElementById('top-utility-bar');
-        this.drawer = document.getElementById('mobile-drawer');
-        this.trigger = document.getElementById('mobile-menu-trigger');
-        this.closeBtn = document.getElementById('mobile-close-btn');
-        this.backdrop = document.getElementById('mobile-backdrop');
-        this.lastScrollY = window.scrollY;
+        // Elements defined in index.html
+        this.header = document.getElementById('main-header');
+        this.mobileBtn = document.getElementById('mobile-menu-btn');
+        this.mobileMenu = document.getElementById('mobile-menu');
+        this.logoText = document.getElementById('logo-text');
+        this.menuIcon = document.getElementById('menu-icon');
+        
         this.init();
     }
+
     init() {
         this.bindScroll();
         this.bindMobileMenu();
+        this.bindSmoothScroll();
     }
+
     bindScroll() {
+        if (!this.header) return;
+
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY;
+
             if (currentScrollY > 20) {
-                this.navbar?.classList.add('bg-white/90', 'dark:bg-slate-900/90', 'shadow-md');
-                this.navbar?.classList.remove('bg-white/5', 'border-white/10');
+                // Scrolled State: White background, shadow, smaller padding
+                this.header.classList.add('bg-white/90', 'backdrop-blur-md', 'shadow-sm', 'py-4');
+                this.header.classList.remove('bg-transparent', 'py-6');
+                
+                // Change logo text color for visibility on white background
+                if (this.logoText) {
+                    this.logoText.classList.remove('lg:text-white');
+                    this.logoText.classList.add('text-slate-900');
+                }
+                
+                // Change menu icon color
+                if (this.menuIcon) {
+                    this.menuIcon.classList.remove('lg:text-white');
+                    this.menuIcon.classList.add('text-slate-900');
+                }
+
             } else {
-                this.navbar?.classList.remove('bg-white/90', 'dark:bg-slate-900/90', 'shadow-md');
-                this.navbar?.classList.add('bg-white/5', 'border-white/10');
+                // Top State: Transparent background, larger padding
+                this.header.classList.remove('bg-white/90', 'backdrop-blur-md', 'shadow-sm', 'py-4');
+                this.header.classList.add('bg-transparent', 'py-6');
+
+                // Revert text colors
+                if (this.logoText) {
+                    this.logoText.classList.add('lg:text-white');
+                }
+                
+                if (this.menuIcon) {
+                    this.menuIcon.classList.add('lg:text-white');
+                }
             }
-            if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
-                if (this.header) this.header.style.transform = 'translateY(-100%)';
-            } else {
-                if (this.header) this.header.style.transform = 'translateY(0)';
-            }
-            this.lastScrollY = currentScrollY;
         });
     }
+
     bindMobileMenu() {
-        const toggleMenu = () => {
-            if (!this.drawer) return;
-            const isOpen = this.drawer.classList.contains('drawer-open');
-            if (isOpen) {
-                this.drawer.classList.remove('drawer-open');
-                document.body.style.overflow = '';
-            } else {
-                this.drawer.classList.add('drawer-open');
-                document.body.style.overflow = 'hidden';
+        if (!this.mobileBtn || !this.mobileMenu) return;
+
+        this.mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.mobileMenu.classList.toggle('hidden');
+            
+            // Optional: Toggle icon between menu and x
+            // const isHidden = this.mobileMenu.classList.contains('hidden');
+            // if (this.menuIcon) {
+            //     this.menuIcon.setAttribute('data-lucide', isHidden ? 'menu' : 'x');
+            //     lucide.createIcons();
+            // }
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.mobileMenu.classList.contains('hidden') && 
+                !this.mobileMenu.contains(e.target) && 
+                !this.mobileBtn.contains(e.target)) {
+                this.mobileMenu.classList.add('hidden');
             }
-        };
-        this.trigger?.addEventListener('click', toggleMenu);
-        this.closeBtn?.addEventListener('click', toggleMenu);
-        this.backdrop?.addEventListener('click', toggleMenu);
+        });
+
+        // Close menu when a link is clicked
+        const mobileLinks = this.mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                this.mobileMenu.classList.add('hidden');
+            });
+        });
+    }
+
+    bindSmoothScroll() {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    // Offset for fixed header
+                    const headerOffset = 80;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.scrollY - headerOffset;
+    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
     }
 }
 
-class SearchSystem {
+class ContactForm {
     constructor() {
-        this.container = document.getElementById('search-modal-container');
-        this.trigger = document.getElementById('search-trigger');
-        this.closeBtn = document.getElementById('close-search');
-        this.input = document.getElementById('global-search-input');
-        this.resultsContainer = document.getElementById('results-list');
-        this.backdrop = document.getElementById('search-backdrop');
-        this.index = [
-            { title: 'Start', url: 'index.html#hero', type: 'Sekcja' },
-            { title: 'O mnie', url: 'index.html#about', type: 'Sekcja' },
-            { title: 'Umiejętności', url: 'index.html#skills', type: 'Sekcja' },
-            { title: 'Projekty', url: 'index.html#projects', type: 'Sekcja' },
-            { title: 'Kontakt', url: 'index.html#contact', type: 'Sekcja' },
-            { title: 'Edytor Tekstu', url: 'editor.html', type: 'Narzędzie' },
-            { title: 'HTML5', url: 'index.html#skills', type: 'Język' },
-            { title: 'CSS3', url: 'index.html#skills', type: 'Język' },
-            { title: 'JavaScript', url: 'index.html#skills', type: 'Język' },
-            { title: 'PHP', url: 'index.html#skills', type: 'Język' },
-            { title: 'MySQL', url: 'index.html#skills', type: 'Technologia' },
-            { title: 'Python', url: 'index.html#skills', type: 'Język' },
-            { title: 'C', url: 'index.html#skills', type: 'Język' },
-            { title: 'C++', url: 'index.html#skills', type: 'Język' },
-            { title: 'C#', url: 'index.html#skills', type: 'Język' },
-            { title: 'AI Ping Pong', url: 'pong.html', type: 'Gra' },
-            { title: 'Russian Checkers AI', url: 'checkers.html', type: 'Gra' },
-            { title: '2D City Taxi', url: 'taxi.html', type: 'Gra' },
-            { title: 'Loto Blast', url: 'loto.html', type: 'Gra' },
-            { title: '2D Uno', url: 'uno.html', type: 'Gra' }
-        ];
+        this.form = document.getElementById('contact-form');
+        this.submitBtn = document.getElementById('submit-btn');
         this.init();
     }
+
     init() {
-        this.trigger?.addEventListener('click', () => this.open());
-        this.closeBtn?.addEventListener('click', () => this.close());
-        this.backdrop?.addEventListener('click', () => this.close());
-        this.input?.addEventListener('input', (e) => this.handleSearch(e.target.value));
-    }
-    open() {
-        this.container.classList.remove('hidden');
-        setTimeout(() => { this.container.style.opacity = '1'; }, 10);
-        this.input.focus();
-        document.body.style.overflow = 'hidden';
-    }
-    close() {
-        this.container.style.opacity = '0';
-        setTimeout(() => { this.container.classList.add('hidden'); }, 200);
-        document.body.style.overflow = '';
-    }
-    handleSearch(query) {
-        if (!query) { this.resultsContainer.innerHTML = ''; return; }
-        const results = this.index.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
-        this.renderResults(results);
-    }
-    renderResults(results) {
-        this.resultsContainer.innerHTML = '';
-        this.resultsContainer.classList.remove('hidden');
-        results.forEach(res => {
-            const li = document.createElement('li');
-            li.innerHTML = `<a href="${res.url}" class="block p-3 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg text-sm">${res.title} <span class="text-xs text-slate-400 float-right">${res.type}</span></a>`;
-            li.addEventListener('click', () => this.close());
-            this.resultsContainer.appendChild(li);
+        if (!this.form || !this.submitBtn) return;
+
+        this.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSubmit();
         });
+    }
+
+    handleSubmit() {
+        const originalContent = this.submitBtn.innerHTML;
+        
+        // Loading State
+        this.submitBtn.innerHTML = `
+            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            <span>Wysyłanie...</span>
+        `;
+        this.submitBtn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            // Success State
+            this.submitBtn.innerHTML = `
+                <span>Wysłano!</span>
+                <i data-lucide="check" width="18" height="18"></i>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            this.form.reset();
+
+            // Reset button after delay
+            setTimeout(() => {
+                this.submitBtn.innerHTML = originalContent;
+                this.submitBtn.disabled = false;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }, 3000);
+        }, 1500);
     }
 }
 
-const initContactForm = () => {
-    const contactForm = document.getElementById('contact-form');
-    const submitBtn = document.getElementById('submit-btn');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const originalContent = submitBtn.innerHTML;
-            submitBtn.innerHTML = `Wysyłanie...`;
-            submitBtn.disabled = true;
-            setTimeout(() => {
-                submitBtn.innerHTML = `Wysłano! <i data-lucide="check" width="18" height="18"></i>`;
-                lucide.createIcons();
-                contactForm.reset();
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalContent;
-                    submitBtn.disabled = false;
-                    lucide.createIcons();
-                }, 3000);
-            }, 1500);
-        });
-    }
-};
-
+// Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-    new ThemeManager();
     new NavigationController();
-    new SearchSystem();
-    initContactForm();
-    console.log("Yaroslav.dev System Online");
+    new ContactForm();
+    console.log("Portfolio System Online");
 });
