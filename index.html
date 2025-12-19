@@ -5,26 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- SEO Meta Tags -->
-    <title>Yaroslav Ostapenko - Portfolio | Full Stack Developer</title>
-    <meta name="description" content="Portfolio Yaroslava Ostapenko - Ambitnego Full Stack Developera z Krakowa. Specjalizacja: HTML, CSS, JavaScript, PHP, MySQL. Tworzenie nowoczesnych stron internetowych." />
-    <meta name="keywords" content="Yaroslav Ostapenko, technikum, Chemobudowa-Kraków, ZST Chemobudowa, Full Stack Developer, Programista, Web Developer, Portfolio, Kraków, HTML, CSS, JavaScript, PHP, MySQL" />
+    <title>Yaroslav Ostapenko - Portfolio | Junior Frontend Developer</title>
+    <meta name="description" content="Portfolio Yaroslava Ostapenko - Junior Frontend Developera z Krakowa. Specjalizacja: HTML, CSS, JavaScript, PHP, MySQL, React. Tworzenie wydajnych i bezpiecznych stron internetowych." />
+    <meta name="keywords" content="Yaroslav Ostapenko, Zespół Szkół Technicznych Chemobudowa-Kraków, Full Stack Developer, Programista, Web Developer, Portfolio, Kraków, HTML, CSS, JavaScript, PHP, MySQL" />
     <meta name="author" content="Yaroslav Ostapenko" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://jaroslawostapenko.github.io/jaroslawostapenko.com/" />
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="favi.webp">
+    <link rel="apple-touch-icon" href="favi.webp">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jaroslawostapenko.github.io/jaroslawostapenko.com/" />
-    <meta property="og:title" content="Yaroslav Ostapenko - Portfolio | Full Stack Developer" />
-    <meta property="og:description" content="Portfolio Yaroslava Ostapenko. Nowoczesne strony WWW, aplikacje webowe i bazy danych. Zobacz moje projekty i umiejętności." />
-    <meta property="og:image" content="https://picsum.photos/1200/630?grayscale" />
+    <meta property="og:title" content="Yaroslav Ostapenko - Portfolio | Junior Frontend Developer" />
+    <meta property="og:description" content="Portfolio Yaroslava Ostapenko. Nowoczesne strony WWW, optymalizacja wydajności i aplikacje webowe." />
+    <meta property="og:image" content="https://jaroslawostapenko.github.io/jaroslawostapenko.com/IMG_20251029_104602.webp" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://jaroslawostapenko.github.io/jaroslawostapenko.com/" />
-    <meta property="twitter:title" content="Yaroslav Ostapenko - Portfolio | Full Stack Developer" />
-    <meta property="twitter:description" content="Portfolio Yaroslava Ostapenko. Nowoczesne strony WWW, aplikacje webowe i bazy danych." />
-    <meta property="twitter:image" content="https://picsum.photos/1200/630?grayscale" />
+    <meta property="twitter:title" content="Yaroslav Ostapenko - Portfolio | Junior Frontend Developer" />
+    <meta property="twitter:description" content="Portfolio Yaroslava Ostapenko. Nowoczesne strony WWW, optymalizacja wydajności i aplikacje webowe." />
+    <meta property="twitter:image" content="https://jaroslawostapenko.github.io/jaroslawostapenko.com/IMG_20251029_104602.webp" />
 
     <!-- Schema.org JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -34,17 +38,18 @@
       "mainEntity": {
         "@type": "Person",
         "name": "Yaroslav Ostapenko",
-        "jobTitle": "Full Stack Developer",
+        "alternateName": "Yaroslav.dev",
+        "jobTitle": "Junior Frontend Developer",
         "url": "https://jaroslawostapenko.github.io/jaroslawostapenko.com/",
-        "image": "https://picsum.photos/600/600?grayscale",
-        "description": "Ambitny i zmotywowany 18-letni programista z Ukrainy. Full Stack Developer specjalizujący się w HTML, CSS, JavaScript, PHP i MySQL.",
+        "image": "https://jaroslawostapenko.github.io/jaroslawostapenko.com/IMG_20251029_104602.webp",
+        "description": "Ambitny i zmotywowany 18-letni programista z Ukrainy. Junior Frontend Developer specjalizujący się w HTML, CSS, JavaScript, PHP i MySQL.",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Kraków",
           "addressRegion": "Małopolskie",
           "addressCountry": "PL"
         },
-        "knowsAbout": ["HTML5", "CSS3", "JavaScript", "React", "PHP", "MySQL", "Git", "Responsive Web Design"],
+        "knowsAbout": ["HTML5", "CSS3", "JavaScript", "React", "PHP", "MySQL", "Git", "Responsive Web Design", "TypeScript", "Python"],
         "email": "yaroslav.ostapenko16@gmail.com",
         "telephone": "+48513815774"
       }
@@ -85,7 +90,9 @@
 {
   "imports": {
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "vite": "https://aistudiocdn.com/vite@^7.2.6"
+    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "path": "https://esm.sh/path@^0.12.7",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
@@ -162,7 +169,7 @@
                                 </span>
                             </h1>
                             <p class="text-xl text-slate-300 max-w-lg leading-relaxed">
-                                Full Stack Developer. Ambitny 18-letni programista tworzący nowoczesne rozwiązania webowe.
+                                Junior Frontend Developer. Ambitny 18-letni programista tworzący nowoczesne rozwiązania webowe.
                             </p>
                         </div>
 
@@ -192,12 +199,12 @@
                     <div class="relative hidden lg:block">
                         <div class="relative w-full aspect-square max-w-md mx-auto">
                             <div class="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full opacity-20 blur-2xl animate-pulse"></div>
-                            <!-- Placeholder for Profile Image -->
+                            <!-- Updated Profile Image -->
                             <div class="relative w-full h-full rounded-2xl overflow-hidden border-2 border-slate-700/50 shadow-2xl bg-slate-800 flex items-center justify-center group">
-                                <img src="https://picsum.photos/600/600?grayscale" alt="Yaroslav Ostapenko" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                                <img src="IMG_20251029_104602.webp" alt="Yaroslav Ostapenko - Junior Frontend Developer Portfolio Photo" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500" />
                                 <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-900 to-transparent">
-                                    <p class="text-white font-medium text-lg">Full Stack Developer</p>
-                                    <p class="text-slate-400 text-sm">HTML • CSS • JS • PHP</p>
+                                    <p class="text-white font-medium text-lg">Junior Frontend Developer</p>
+                                    <p class="text-slate-400 text-sm">HTML • CSS • JS • React</p>
                                 </div>
                             </div>
                         </div>
@@ -223,7 +230,7 @@
                     <div class="space-y-6 text-slate-600 text-lg leading-relaxed">
                         <p>
                             Jestem ambitnym i zmotywowanym 18-letnim programistą z Ukrainy, obecnie uczniem trzeciej klasy technikum. 
-                            Posiadam solidną wiedzę z zakresu technologii webowych oraz praktyczne doświadczenie na stanowisku Full Stack Developer, 
+                            Posiadam solidną wiedzę z zakresu technologii webowych oraz praktyczne doświadczenie na stanowisku Junior Frontend Developer, 
                             zdobyte podczas praktyk zawodowych.
                         </p>
                         <p>
@@ -239,16 +246,6 @@
                                 <div>
                                     <p class="text-sm text-slate-500 font-medium">Lokalizacja</p>
                                     <p class="text-slate-900 font-semibold">Kraków, Małopolskie</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <div class="p-2.5 bg-blue-100 text-blue-600 rounded-lg">
-                                    <i data-lucide="calendar" width="20" height="20"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-slate-500 font-medium">Data urodzenia</p>
-                                    <p class="text-slate-900 font-semibold">06.09.2007</p>
                                 </div>
                             </div>
 
@@ -287,22 +284,17 @@
                                 </li>
                                 <li class="flex gap-4">
                                     <span class="w-2 h-2 mt-2.5 bg-blue-500 rounded-full shrink-0"></span>
-                                    <p class="text-slate-300">Projektowanie i wdrażanie relacyjnymi baz danych MySQL.</p>
+                                    <p class="text-slate-300">Optymalizacja wydajności, Clean Code i SEO.</p>
                                 </li>
                                 <li class="flex gap-4">
                                     <span class="w-2 h-2 mt-2.5 bg-blue-500 rounded-full shrink-0"></span>
-                                    <p class="text-slate-300">Optymalizacja wydajności i utrzymanie kodu w środowisku Git.</p>
+                                    <p class="text-slate-300">Projektowanie i wdrażanie relacyjnymi baz danych MySQL.</p>
                                 </li>
                                 <li class="flex gap-4">
                                     <span class="w-2 h-2 mt-2.5 bg-blue-500 rounded-full shrink-0"></span>
                                     <p class="text-slate-300">Współpraca w zespole nad innowacyjnymi rozwiązaniami webowymi.</p>
                                 </li>
                             </ul>
-                            <div class="pt-4">
-                               <a href="/cv.pdf" download class="inline-flex items-center justify-center w-full py-3 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-200 transition-colors">
-                                 Pobierz moje CV
-                               </a>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -320,9 +312,9 @@
 
                 <div class="grid lg:grid-cols-2 gap-12">
                     
-                    <!-- Frontend & Backend Skills -->
+                    <!-- Left Col: Programming Languages -->
                     <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-                        <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-blue-500">Technologie Webowe</h3>
+                        <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-blue-500">Języki Programowania</h3>
                         <div class="space-y-6">
                             
                             <!-- Skill Item -->
@@ -348,6 +340,16 @@
 
                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-slate-700">XML</span>
+                                    <span class="text-sm font-bold text-blue-600">85%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-2">
                                     <span class="font-semibold text-slate-700">JavaScript (ES6+)</span>
                                     <span class="text-sm font-bold text-blue-600">80%</span>
                                 </div>
@@ -358,7 +360,7 @@
 
                             <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-slate-700">React</span>
+                                    <span class="font-semibold text-slate-700">TypeScript</span>
                                     <span class="text-sm font-bold text-blue-600">75%</span>
                                 </div>
                                 <div class="w-full bg-slate-100 rounded-full h-2.5">
@@ -376,6 +378,16 @@
                                 </div>
                             </div>
 
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-slate-700">Python</span>
+                                    <span class="text-sm font-bold text-indigo-600">65%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+
                              <div class="skill-item">
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="font-semibold text-slate-700">PHP</span>
@@ -386,21 +398,144 @@
                                 </div>
                             </div>
 
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-slate-700">C#</span>
+                                    <span class="text-sm font-bold text-indigo-600">60%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-slate-700">C++</span>
+                                    <span class="text-sm font-bold text-indigo-600">55%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 55%"></div>
+                                </div>
+                            </div>
+
+                            <div class="skill-item">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-slate-700">C</span>
+                                    <span class="text-sm font-bold text-indigo-600">50%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                    <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 50%"></div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
-                    <!-- Languages & Tools -->
+                    <!-- Right Col: Libraries, Tools, Languages -->
                     <div class="space-y-8">
+                        
+                        <!-- Libraries & Frameworks -->
+                         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                            <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-rose-500">Biblioteki i Frameworki</h3>
+                            <div class="space-y-6">
+                                
+                                <div class="skill-item">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-slate-700">Tailwind CSS</span>
+                                        <span class="text-sm font-bold text-rose-500">85%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="skill-item">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-slate-700">Bootstrap</span>
+                                        <span class="text-sm font-bold text-rose-500">80%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="skill-item">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-slate-700">React</span>
+                                        <span class="text-sm font-bold text-rose-500">75%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="skill-item">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-slate-700">jQuery</span>
+                                        <span class="text-sm font-bold text-rose-500">75%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="skill-item">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-slate-700">W3.CSS</span>
+                                        <span class="text-sm font-bold text-rose-500">70%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: 70%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="skill-item">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-semibold text-slate-700">Tone.js</span>
+                                        <span class="text-sm font-bold text-rose-500">60%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                                        <div class="bg-rose-500 h-2.5 rounded-full" style="width: 60%"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
                         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
                              <h3 class="text-xl font-bold text-slate-800 mb-8 pl-2 border-l-4 border-emerald-500">Narzędzia</h3>
                              <div class="grid grid-cols-2 gap-4">
                                 <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
-                                    <div class="font-bold text-slate-800 mb-1">Git</div>
+                                    <div class="font-bold text-slate-800 mb-1 break-words">Git</div>
                                     <div class="text-sm text-slate-500">Kontrola wersji</div>
                                 </div>
                                 <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
-                                    <div class="font-bold text-slate-800 mb-1">Bootstrap</div>
-                                    <div class="text-sm text-slate-500">Framework CSS</div>
+                                    <div class="font-bold text-slate-800 mb-1 break-words">VS Code</div>
+                                    <div class="text-sm text-slate-500">Edytor Kodu</div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
+                                    <div class="font-bold text-slate-800 mb-1 break-words">Visual Studio</div>
+                                    <div class="text-sm text-slate-500">IDE</div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
+                                    <div class="font-bold text-slate-800 mb-1 break-words">Code::Blocks</div>
+                                    <div class="text-sm text-slate-500">IDE C++</div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
+                                    <div class="font-bold text-slate-800 mb-1 break-words">XAMPP</div>
+                                    <div class="text-sm text-slate-500">Serwer lokalny</div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
+                                    <div class="font-bold text-slate-800 mb-1 break-words">Notepad++</div>
+                                    <div class="text-sm text-slate-500">Edytor tekstu</div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
+                                    <div class="font-bold text-slate-800 mb-1 break-words">Access</div>
+                                    <div class="text-sm text-slate-500">Bazy danych</div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
+                                    <div class="font-bold text-slate-800 mb-1 break-words">Total Commander</div>
+                                    <div class="text-sm text-slate-500">Menedżer plików</div>
                                 </div>
                              </div>
                         </div>
@@ -410,7 +545,16 @@
                             <div class="space-y-4">
                                 <div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="font-medium">Ukraiński / Rosyjski</span>
+                                        <span class="font-medium">Ukraiński</span>
+                                        <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">C2 (Ojczysty)</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="font-medium">Rosyjski</span>
                                         <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">C2 (Ojczysty)</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5">
@@ -433,6 +577,15 @@
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5">
                                         <div class="bg-purple-500 h-1.5 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="font-medium">Niemiecki</span>
+                                        <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">A1 (Podstawowy)</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: 15%"></div>
                                     </div>
                                 </div>
                             </div>
@@ -470,7 +623,7 @@
                                 <a href="pong.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="pong.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Ai-ping-pong" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
@@ -493,7 +646,7 @@
                                 <a href="loto.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="loto.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Loto" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
@@ -516,7 +669,7 @@
                                 <a href="uno.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="uno.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Uno" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
@@ -539,7 +692,7 @@
                                 <a href="taxi.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="taxi.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Taxi" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
@@ -562,7 +715,7 @@
                                 <a href="checkers.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
-                                <a href="checkers.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
+                                <a href="https://github.com/YaroslavOstapenko5/Checkers" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
                                     <i data-lucide="code-2" width="16" height="16"></i> Kod
                                 </a>
                             </div>
@@ -582,7 +735,7 @@
                                 <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">Board Game</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <a href="monopoly/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
+                                <a href="./poker/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors">
                                     <i data-lucide="play" width="16" height="16"></i> Graj
                                 </a>
                                 <a href="monopoly/index.html" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">
@@ -675,22 +828,26 @@
                             </div>
                             <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1">
-                                    <h3 class="font-bold text-slate-900 text-lg">Full Stack Developer (Praktykant)</h3>
+                                    <h3 class="font-bold text-slate-900 text-lg">Junior Frontend Developer (Praktykant)</h3>
                                     <span class="inline-block px-2 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-500 whitespace-nowrap">Październik 2025 - Obecnie</span>
                                 </div>
                                 <div class="text-blue-600 font-medium text-sm mb-4">AKTRU sp. z o.o.</div>
                                 <ul class="space-y-2">
                                     <li class="text-slate-600 text-sm flex items-start gap-2">
                                         <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                                        <span class="leading-relaxed">Tworzenie i rozwój aplikacji webowych (HTML, CSS, JS, PHP, MySQL).</span>
+                                        <span class="leading-relaxed">Tworzenie nowoczesnych stron internetowych dla klientów firmy.</span>
                                     </li>
                                     <li class="text-slate-600 text-sm flex items-start gap-2">
                                         <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                                        <span class="leading-relaxed">Projektowanie i zarządzanie relacyjnymi bazami danych.</span>
+                                        <span class="leading-relaxed">Optymalizacja wydajności: poprawa szybkości ładowania, dbanie o Clean Code oraz wyniki 100/100 w Google Lighthouse.</span>
                                     </li>
                                     <li class="text-slate-600 text-sm flex items-start gap-2">
                                         <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                                        <span class="leading-relaxed">Aktywna praca z systemem kontroli wersji Git.</span>
+                                        <span class="leading-relaxed">Walidacja i jakość kodu: praca z walidatorami, usuwanie błędów technicznych (0 błędów w kodzie) i audyty bezpieczeństwa (Security A+).</span>
+                                    </li>
+                                    <li class="text-slate-600 text-sm flex items-start gap-2">
+                                        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
+                                        <span class="leading-relaxed">Wdrożenia wielojęzyczne: dostosowywanie serwisów do 25 wersji językowych z pełną lokalizacją.</span>
                                     </li>
                                 </ul>
                             </div>
@@ -747,8 +904,6 @@
 
         <!-- Contact Section -->
         <section id="contact" class="py-20 lg:py-32 bg-slate-50 relative overflow-hidden">
-            <!-- Canvas for ContactOS Engine -->
-            <canvas id="contact-canvas" class="absolute inset-0 z-0 pointer-events-none"></canvas>
             
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 contact-hud-container">
                 <div class="mb-16 max-w-2xl">
@@ -763,7 +918,7 @@
                         <div class="prose prose-slate">
                             <h3 class="text-2xl font-bold text-slate-900 mb-4">Porozmawiajmy o projektach</h3>
                             <p class="text-slate-600 leading-relaxed">
-                                Szukam możliwości rozwoju jako Full Stack Developer. Jeśli masz pytania dotyczące mojego doświadczenia 
+                                Szukam możliwości rozwoju jako Junior Frontend Developer. Jeśli masz pytania dotyczące mojego doświadczenia 
                                 lub chcesz omówić potencjalną współpracę, jestem do dyspozycji.
                             </p>
                         </div>
@@ -852,7 +1007,6 @@
     </footer>
 
     <!-- Logic Script -->
-    <script src="contact-engine.js"></script>
     <script src="script.js"></script>
 <script type="module" src="/index.tsx"></script>
 </body>
