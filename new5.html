@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProMessenger - Realtime Chat</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. CSS RESET & VARIABLES
+           ========================================= */
+        :root {
+            /* Color Palette - Dark Modern Theme */
+            --bg-body: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-input: #334155;
+            --bg-hover: #334155;
+            --bg-message-sent: #3b82f6;
+            --bg-message-received: #334155;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-inverse: #ffffff;
+            
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+
+            /* Spacing & Sizing */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 20px;
+            
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-input);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* =========================================
+           2. UTILITY CLASSES
+           ========================================= */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .text-center { text-align: center; }
+        .cursor-pointer { cursor: pointer; }
+
+        /* =========================================
+           3. AUTHENTICATION SCREENS (Login/Reg)
+           ========================================= */
+        #auth-container {
+            width: 100%;
+            max-width: 420px;
+            padding: var(--spacing-lg);
+            background-color: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .auth-header {
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: border 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--text-inverse);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .auth-toggle {
+            margin-top: var(--spacing-md);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .auth-toggle a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================================
+           4. MAIN APP LAYOUT
+           ========================================= */
+        #app-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            width: 95vw;
+            height: 90vh;
+            background-color: var(--bg-panel);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .current-username {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+        }
+        .logout-btn:hover { color: var(--danger-color); background: rgba(255,255,255,0.05); }
+
+        .search-container {
+            padding: var(--spacing-md);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+        }
+
+        /* User List / Chat List */
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-xs);
+        }
+
+        .chat-item {
+            padding: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: background 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .chat-item:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .chat-item.active {
+            background-color: var(--bg-input);
+        }
+
+        .chat-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: var(--text-main);
+        }
+
+        .chat-last-msg {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Search Results Overlay */
+        #search-results {
+            padding: var(--spacing-xs);
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .search-result-item {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+        .search-result-item:hover { background-color: var(--bg-hover); }
+
+        /* Chat Area */
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-body);
+            position: relative;
+        }
+
+        /* Empty State */
+        .no-chat-selected {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .no-chat-selected svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        /* Chat Window */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: var(--spacing-md);
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: var(--spacing-lg);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .message {
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .msg-bubble {
+            padding: 10px 16px;
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .sent .msg-bubble {
+            background-color: var(--bg-message-sent);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .received .msg-bubble {
+            background-color: var(--bg-message-received);
+            color: var(--text-main);
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .input-area {
+            padding: var(--spacing-md);
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .msg-input {
+            flex: 1;
+            padding: 12px;
+            background-color: var(--bg-input);
+            border: 1px solid transparent;
+            border-radius: var(--radius-xl);
+            color: var(--text-main);
+        }
+        .msg-input:focus { outline: none; border-color: var(--accent-color); }
+
+        .send-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .send-btn:hover { background-color: var(--accent-hover); transform: scale(1.05); }
+
+        /* =========================================
+           5. TOAST NOTIFICATIONS
+           ========================================= */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background-color: var(--bg-panel);
+            border-left: 4px solid var(--accent-color);
+            padding: 16px 24px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            color: var(--text-main);
+            min-width: 250px;
+            animation: slideIn 0.3s ease forwards;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toast.error { border-left-color: var(--danger-color); }
+        .toast.success { border-left-color: var(--success-color); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            #app-container {
+                grid-template-columns: 1fr;
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .sidebar.hidden-mobile { display: none; }
+            .chat-area.hidden-mobile { display: none; }
+            
+            .back-btn { display: block !important; margin-right: 10px; }
+        }
+        
+        .back-btn { display: none; background: none; border: none; color: white; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- AUTHENTICATION VIEW -->
+    <div id="auth-container">
+        <!-- Login Form -->
+        <div id="login-view">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue chatting</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn-login">Sign In</button>
+            </form>
+            <div class="auth-toggle">
+                Don't have an account? <a href="#" id="to-register">Register</a>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-view" class="hidden">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Join the conversation today</p>
+            </div>
+            <form id="register-form">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="reg-username" class="form-input" placeholder="johndoe" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="reg-email" class="form-input" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="reg-password" class="form-input" placeholder="Minimum 6 characters" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn-register">Create Account</button>
+            </form>
+            <div class="auth-toggle">
+                Already have an account? <a href="#" id="to-login">Sign In</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP VIEW -->
+    <div id="app-container" class="hidden">
+        
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <div class="avatar" id="current-user-avatar">?</div>
+                    <div>
+                        <div class="current-username" id="current-user-name">Loading...</div>
+                        <div style="font-size:0.75rem; color: var(--success-color);">Online</div>
+                    </div>
+                </div>
+                <button class="logout-btn" id="btn-logout" title="Logout">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="user-search" class="search-input" placeholder="Search users by email...">
+            </div>
+            
+            <div id="search-results" class="hidden"></div>
+
+            <div class="chat-list" id="chat-list">
+                <!-- Chat items populated by JS -->
+            </div>
+        </div>
+
+        <!-- CHAT AREA -->
+        <div class="chat-area" id="chat-area">
+            
+            <!-- No Chat Selected State -->
+            <div id="empty-state" class="no-chat-selected">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <h2>Pick a conversation</h2>
+                <p>Select a contact to start chatting</p>
+            </div>
+
+            <!-- Active Chat Window -->
+            <div id="chat-window" class="chat-window hidden">
+                <div class="chat-header">
+                    <button class="back-btn" id="mobile-back">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <div class="avatar" id="chat-header-avatar" style="width: 32px; height: 32px; font-size: 0.9rem;">U</div>
+                    <div>
+                        <div class="chat-name" id="chat-header-name">User</div>
+                        <div class="chat-time" id="chat-header-status">Unknown</div>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messages-container">
+                    <!-- Messages populated by JS -->
+                </div>
+
+                <form class="input-area" id="message-form">
+                    <input type="text" id="message-input" class="msg-input" placeholder="Type your message..." autocomplete="off">
+                    <button type="submit" class="send-btn">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script type="module">
+        /**
+         * ==========================================
+         * 1. FIREBASE CONFIGURATION & IMPORTS
+         * ==========================================
+         */
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            push, 
+            onValue, 
+            serverTimestamp, 
+            query,
+            orderByChild,
+            equalTo,
+            get,
+            update
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+        // Configuration object provided by user
+        const firebaseConfig = {
+            apiKey: "AIzaSyDaiBKYAuOk3IlvmzUPa9bYkLBjv1HFtfw",
+            authDomain: "chat-9190c.firebaseapp.com",
+            databaseURL: "https://chat-9190c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chat-9190c",
+            storageBucket: "chat-9190c.firebasestorage.app",
+            messagingSenderId: "286119817322",
+            appId: "1:286119817322:web:c000b1e72fc08a4a74da13",
+            measurementId: "G-XL6NFXTX0W"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        /**
+         * ==========================================
+         * 2. STATE MANAGEMENT
+         * ==========================================
+         */
+        const state = {
+            currentUser: null,
+            currentChatId: null,
+            currentRecipient: null, // { uid, username, email }
+            usersCache: {},
+            listeners: [] // To store off() functions for cleanup
+        };
+
+        /**
+         * ==========================================
+         * 3. DOM ELEMENT REFERENCES
+         * ==========================================
+         */
+        // Containers
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const loginView = document.getElementById('login-view');
+        const registerView = document.getElementById('register-view');
+
+        // Forms
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const messageForm = document.getElementById('message-form');
+
+        // Inputs
+        const loginEmail = document.getElementById('login-email');
+        const loginPass = document.getElementById('login-password');
+        const regUsername = document.getElementById('reg-username');
+        const regEmail = document.getElementById('reg-email');
+        const regPass = document.getElementById('reg-password');
+        const msgInput = document.getElementById('message-input');
+        const searchInput = document.getElementById('user-search');
+
+        // Chat UI
+        const sidebar = document.getElementById('sidebar');
+        const chatArea = document.getElementById('chat-area');
+        const chatList = document.getElementById('chat-list');
+        const searchResults = document.getElementById('search-results');
+        const emptyState = document.getElementById('empty-state');
+        const chatWindow = document.getElementById('chat-window');
+        const messagesContainer = document.getElementById('messages-container');
+        
+        // Headers
+        const myAvatar = document.getElementById('current-user-avatar');
+        const myName = document.getElementById('current-user-name');
+        const headerAvatar = document.getElementById('chat-header-avatar');
+        const headerName = document.getElementById('chat-header-name');
+
+        /**
+         * ==========================================
+         * 4. UTILITY FUNCTIONS
+         * ==========================================
+         */
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <span class="cursor-pointer" onclick="this.parentElement.remove()">×</span>
+            `;
+            container.appendChild(toast);
+            
+            // Auto remove after 3s
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Toggle Auth Screens
+        document.getElementById('to-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginView.classList.add('hidden');
+            registerView.classList.remove('hidden');
+        });
+
+        document.getElementById('to-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            registerView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
+
+        // Date Formatter
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            // Is it today?
+            if (date.toDateString() === now.toDateString()) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            // Is it this week?
+            if (diff < 7 * 24 * 60 * 60 * 1000) {
+                return date.toLocaleDateString([], { weekday: 'short' });
+            }
+            return date.toLocaleDateString();
+        }
+
+        // Generate Initials
+        function getInitials(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        // Generate Chat ID (Lexicographically smaller UID first to ensure consistency)
+        function getChatId(uid1, uid2) {
+            return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+        }
+
+        /**
+         * ==========================================
+         * 5. AUTHENTICATION LOGIC
+         * ==========================================
+         */
+
+        // Sign Up
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = regUsername.value.trim();
+            const email = regEmail.value.trim();
+            const password = regPass.value;
+
+            if (!username) return showToast('Username required', 'error');
+
+            try {
+                // 1. Create Auth User
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Update Profile Display Name
+                await updateProfile(user, { displayName: username });
+
+                // 3. Save to Realtime Database
+                await set(ref(db, 'users/' + user.uid), {
+                    username: username,
+                    email: email,
+                    uid: user.uid,
+                    lastOnline: serverTimestamp()
+                });
+
+                showToast('Account created! Welcome.', 'success');
+                // Auth state listener will handle redirection
+            } catch (error) {
+                console.error(error);
+                let msg = "Registration failed.";
+                if (error.code === 'auth/email-already-in-use') msg = "Email already in use.";
+                if (error.code === 'auth/weak-password') msg = "Password too weak.";
+                showToast(msg, 'error');
+            }
+        });
+
+        // Sign In
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginEmail.value.trim();
+            const password = loginPass.value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast('Logged in successfully', 'success');
+            } catch (error) {
+                console.error(error);
+                let msg = "Login failed.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = "Invalid email or password.";
+                showToast(msg, 'error');
+            }
+        });
+
+        // Sign Out
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                showToast('Logged out', 'info');
+                // Cleanup listeners
+                state.listeners.forEach(unsub => unsub());
+                state.listeners = [];
+            });
+        });
+
+        // Auth Listener - Main Entry Point
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                state.currentUser = user;
+                // Switch UI
+                authContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                
+                // Init App Data
+                setupUserProfile(user);
+                loadChatList(user.uid);
+            } else {
+                state.currentUser = null;
+                authContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                
+                // Reset State
+                chatList.innerHTML = '';
+                messagesContainer.innerHTML = '';
+                resetChatView();
+            }
+        });
+
+        function setupUserProfile(user) {
+            myName.textContent = user.displayName || user.email;
+            myAvatar.textContent = getInitials(user.displayName || user.email);
+        }
+
+        /**
+         * ==========================================
+         * 6. CHAT LIST & SEARCH LOGIC
+         * ==========================================
+         */
+
+        // Search Users
+        searchInput.addEventListener('input', async (e) => {
+            const term = e.target.value.toLowerCase();
+            if (term.length < 3) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+
+            // Query users by email (Note: Ideally index this in Firebase rules)
+            // Realtime DB doesn't support "contains", so we use basic equalTo or just fetch all for this demo (not scalable for millions, but fine here)
+            // For efficient search, usually use Algolia or store a searchable index.
+            // Here we will fetch all users once and filter client side (Simplest for single file demo)
+            
+            const usersRef = ref(db, 'users');
+            try {
+                const snapshot = await get(usersRef);
+                const results = [];
+                snapshot.forEach(child => {
+                    const u = child.val();
+                    if (u.uid !== state.currentUser.uid && 
+                       (u.email.toLowerCase().includes(term) || u.username.toLowerCase().includes(term))) {
+                        results.push(u);
+                    }
+                });
+                renderSearchResults(results);
+            } catch (err) {
+                console.error("Search error", err);
+            }
+        });
+
+        function renderSearchResults(users) {
+            searchResults.innerHTML = '';
+            if (users.length === 0) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            searchResults.classList.remove('hidden');
+
+            users.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.innerHTML = `
+                    <div class="avatar" style="width:30px; height:30px; font-size:0.8rem">${getInitials(u.username)}</div>
+                    <div>${u.username} <small style="color:var(--text-muted)">(${u.email})</small></div>
+                `;
+                div.addEventListener('click', () => {
+                    initiateChat(u);
+                    searchInput.value = '';
+                    searchResults.classList.add('hidden');
+                });
+                searchResults.appendChild(div);
+            });
+        }
+
+        // Start or Open Chat
+        async function initiateChat(targetUser) {
+            const chatId = getChatId(state.currentUser.uid, targetUser.uid);
+            
+            // Check if we already have this chat in our list (Visual selection)
+            const existingItem = document.querySelector(`.chat-item[data-chat="${chatId}"]`);
+            if (existingItem) {
+                existingItem.click();
+            } else {
+                // It's a new interaction visually, but data might exist.
+                // We just switch the view directly.
+                selectChat(chatId, targetUser);
+            }
+        }
+
+        // Load Recent Chats (Sidebar)
+        function loadChatList(userId) {
+            const userChatsRef = ref(db, `user-chats/${userId}`);
+            
+            const unsub = onValue(userChatsRef, async (snapshot) => {
+                const chats = [];
+                snapshot.forEach(child => {
+                    chats.push({ ...child.val(), key: child.key }); // key is recipientUID
+                });
+
+                // Sort by timestamp desc
+                chats.sort((a, b) => b.timestamp - a.timestamp);
+
+                chatList.innerHTML = ''; // Clear and rebuild
+                
+                for (const chat of chats) {
+                    // Fetch recipient details
+                    const recipientRef = ref(db, `users/${chat.key}`);
+                    const recipientSnap = await get(recipientRef);
+                    
+                    if (recipientSnap.exists()) {
+                        const recipient = recipientSnap.val();
+                        renderChatItem(recipient, chat);
+                    }
+                }
+            });
+            state.listeners.push(unsub);
+        }
+
+        function renderChatItem(recipient, chatData) {
+            const chatId = getChatId(state.currentUser.uid, recipient.uid);
+            const div = document.createElement('div');
+            div.className = `chat-item ${state.currentChatId === chatId ? 'active' : ''}`;
+            div.dataset.chat = chatId;
+            
+            const lastMsg = chatData.lastMessage || "Start a conversation";
+            const time = formatTime(chatData.timestamp);
+
+            div.innerHTML = `
+                <div class="avatar">${getInitials(recipient.username)}</div>
+                <div class="chat-info">
+                    <div class="flex justify-between items-center">
+                        <div class="chat-name">${recipient.username}</div>
+                        <div class="chat-time">${time}</div>
+                    </div>
+                    <div class="chat-last-msg">${lastMsg}</div>
+                </div>
+            `;
+
+            div.addEventListener('click', () => selectChat(chatId, recipient));
+            chatList.appendChild(div);
+        }
+
+        /**
+         * ==========================================
+         * 7. MESSAGING LOGIC
+         * ==========================================
+         */
+
+        let messageListenerUnsub = null;
+
+        function selectChat(chatId, recipient) {
+            // UI Updates
+            state.currentChatId = chatId;
+            state.currentRecipient = recipient;
+
+            // Highlight in sidebar
+            document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+            const activeItem = document.querySelector(`.chat-item[data-chat="${chatId}"]`);
+            if (activeItem) activeItem.classList.add('active');
+
+            // Switch to Mobile View logic
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('hidden-mobile');
+                chatArea.classList.remove('hidden-mobile');
+            }
+
+            // Show Chat Window
+            emptyState.classList.add('hidden');
+            chatWindow.classList.remove('hidden');
+
+            // Update Header
+            headerName.textContent = recipient.username;
+            headerAvatar.textContent = getInitials(recipient.username);
+
+            // Load Messages
+            loadMessages(chatId);
+        }
+
+        function loadMessages(chatId) {
+            if (messageListenerUnsub) messageListenerUnsub(); // Detach previous listener
+            messagesContainer.innerHTML = ''; // Clear view
+
+            const messagesRef = query(ref(db, `chats/${chatId}`), orderByChild('timestamp'));
+            
+            messageListenerUnsub = onValue(messagesRef, (snapshot) => {
+                messagesContainer.innerHTML = ''; // Re-render (simplest approach for this scale)
+                
+                snapshot.forEach(child => {
+                    const msg = child.val();
+                    renderMessage(msg);
+                });
+
+                scrollToBottom();
+            });
+            state.listeners.push(messageListenerUnsub); // Track for cleanup
+        }
+
+        function renderMessage(msg) {
+            const isMe = msg.senderId === state.currentUser.uid;
+            const div = document.createElement('div');
+            div.className = `message ${isMe ? 'sent' : 'received'}`;
+            
+            const time = formatTime(msg.timestamp);
+            
+            div.innerHTML = `
+                <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+                <div class="msg-meta">${time}</div>
+            `;
+            messagesContainer.appendChild(div);
+        }
+
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send Message
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = msgInput.value.trim();
+            if (!text || !state.currentChatId) return;
+
+            const chatId = state.currentChatId;
+            const recipientId = state.currentRecipient.uid;
+            const myId = state.currentUser.uid;
+            const timestamp = Date.now(); // Client timestamp, serverTimestamp is better for ordering but this is simpler for local optimistic UI
+
+            msgInput.value = '';
+
+            try {
+                // 1. Add Message to Chats collection
+                const newMsgRef = push(ref(db, `chats/${chatId}`));
+                await set(newMsgRef, {
+                    senderId: myId,
+                    text: text,
+                    timestamp: timestamp // or serverTimestamp()
+                });
+
+                // 2. Update User-Chats metadata for ME
+                await update(ref(db, `user-chats/${myId}/${recipientId}`), {
+                    lastMessage: "You: " + text,
+                    timestamp: timestamp
+                });
+
+                // 3. Update User-Chats metadata for RECIPIENT
+                await update(ref(db, `user-chats/${recipientId}/${myId}`), {
+                    lastMessage: text,
+                    timestamp: timestamp
+                });
+
+            } catch (err) {
+                console.error("Send failed", err);
+                showToast('Failed to send message', 'error');
+            }
+        });
+
+        // Mobile Back Button
+        document.getElementById('mobile-back').addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('hidden-mobile');
+                chatArea.classList.add('hidden-mobile');
+                resetChatView();
+            }
+        });
+
+        function resetChatView() {
+            state.currentChatId = null;
+            state.currentRecipient = null;
+            if (messageListenerUnsub) messageListenerUnsub();
+            emptyState.classList.remove('hidden');
+            chatWindow.classList.add('hidden');
+            document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('acti
