@@ -3,1324 +3,1428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether P2P Messenger - Pro</title>
-    <!-- PeerJS -->
+    <title>Aether P2P Messenger [E2EE Pro]</title>
+    <!-- PeerJS for WebRTC Negotiation -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <!-- FontAwesome -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- 
+        ========================================================================
+        STYLESHEET (UNCHANGED STRUCTURE)
+        ========================================================================
+    -->
     <style>
-        /* 
-         * ==================================================================
-         * 1. THEME & VARIABLES
-         * ==================================================================
-         */
         :root {
-            /* Palette */
+            /* Theme Variables */
             --primary-hue: 250;
             --primary: hsl(var(--primary-hue), 80%, 60%);
             --primary-dark: hsl(var(--primary-hue), 80%, 50%);
             --primary-light: hsl(var(--primary-hue), 80%, 75%);
             --primary-fade: hsla(var(--primary-hue), 80%, 60%, 0.1);
             
-            --accent-hue: 330; /* Pink/Red for actions */
-            --accent: hsl(var(--accent-hue), 80%, 60%);
-
             --bg-body: #f0f2f5;
             --bg-surface: #ffffff;
             --bg-surface-2: #f7f9fc;
-            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-surface-blur: rgba(255, 255, 255, 0.85);
             
             --text-main: #1a1b1e;
             --text-muted: #888888;
-            --text-inv: #ffffff;
+            --text-light: #ffffff;
             
             --border: #e1e4e8;
-            
-            /* Shadows & Depth */
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
             --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
-            --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.05);
             
-            /* Spacing & Radius */
             --radius-sm: 8px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-full: 9999px;
             
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
 
-            /* Animations */
-            --anim-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             --anim-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --anim-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="dark"] {
             --bg-body: #121212;
             --bg-surface: #1e1e1e;
             --bg-surface-2: #2c2c2c;
-            --bg-glass: rgba(30, 30, 30, 0.85);
-            
+            --bg-surface-blur: rgba(30, 30, 30, 0.85);
             --text-main: #e0e0e0;
             --text-muted: #a0a0a0;
-            
             --border: #333333;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
         }
 
-        /* 
-         * ==================================================================
-         * 2. RESET & LAYOUT
-         * ==================================================================
-         */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-        html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-body); color: var(--text-main); transition: 0.3s; }
 
-        /* Helpers */
+        html, body {
+            width: 100%; height: 100%; overflow: hidden;
+            background-color: var(--bg-body); color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; opacity: 0.2; }
+
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
         .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
         .w-full { width: 100%; }
-        .h-full { height: 100%; }
-        .relative { position: relative; }
         .text-center { text-align: center; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-4 { gap: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .p-4 { padding: 1rem; }
+        .text-sm { font-size: 0.85rem; }
+        .opacity-50 { opacity: 0.5; }
 
-        /* Scrollbars */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; opacity: 0.3; }
-
-        /* 
-         * ==================================================================
-         * 3. COMPONENTS
-         * ==================================================================
-         */
-        
-        /* Buttons */
-        .btn { border: none; outline: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; position: relative; overflow: hidden; transition: 0.2s; }
+        .btn {
+            border: none; outline: none; padding: 12px 24px;
+            border-radius: var(--radius-md); font-weight: 600; font-size: 1rem;
+            cursor: pointer; transition: transform 0.1s ease, box-shadow 0.2s ease;
+            position: relative; overflow: hidden; user-select: none;
+        }
         .btn:active { transform: scale(0.96); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 15px var(--primary-fade); }
-        .btn-secondary { background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); }
-        .btn-accent { background: var(--accent); color: white; }
         
-        .btn-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); color: var(--text-muted); box-shadow: var(--shadow-sm); border: none; cursor: pointer; transition: 0.2s; }
-        .btn-icon:hover { color: var(--primary); background: var(--bg-surface-2); }
-        .btn-icon.active { color: white; background: var(--primary); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 4px 15px var(--primary-fade);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-surface); color: var(--text-main);
+            border: 1px solid var(--border);
+        }
 
-        /* Inputs */
+        .btn-icon {
+            width: 44px; height: 44px; border-radius: 50%;
+            padding: 0; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-surface); color: var(--text-muted);
+            box-shadow: var(--shadow-sm); border: none; cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-icon:hover { color: var(--primary); transform: translateY(-2px); }
+        .btn-icon:active { transform: translateY(0); }
+
         .input-group { position: relative; margin-bottom: 1.5rem; width: 100%; }
-        .input-field { width: 100%; padding: 16px; border-radius: var(--radius-md); border: 2px solid transparent; background: var(--bg-surface); color: var(--text-main); font-size: 1rem; box-shadow: var(--shadow-sm); transition: 0.3s; }
-        .input-field:focus { outline: none; border-color: var(--primary); }
-        .input-label { position: absolute; left: 16px; top: 16px; color: var(--text-muted); pointer-events: none; transition: 0.2s; background: transparent; }
-        .input-field:focus ~ .input-label, .input-field:not(:placeholder-shown) ~ .input-label { top: -10px; left: 12px; font-size: 0.75rem; background: var(--bg-body); padding: 0 6px; color: var(--primary); font-weight: 600; }
+        .input-field {
+            width: 100%; padding: 16px; border-radius: var(--radius-md);
+            border: 2px solid transparent; background: var(--bg-surface);
+            color: var(--text-main); font-size: 1rem; box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+        .input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-fade); }
+        .input-label {
+            position: absolute; left: 16px; top: 16px; color: var(--text-muted);
+            pointer-events: none; transition: 0.2s ease all; background: transparent;
+        }
+        .input-field:focus ~ .input-label, .input-field:not(:placeholder-shown) ~ .input-label {
+            top: -10px; left: 12px; font-size: 0.75rem; background: var(--bg-body);
+            padding: 0 6px; color: var(--primary); font-weight: 600;
+        }
 
-        /* App Container */
-        #app { position: relative; width: 100%; max-width: 600px; margin: 0 auto; height: 100%; background: var(--bg-surface-2); box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; }
+        #app {
+            position: relative; width: 100%; max-width: 600px;
+            margin: 0 auto; height: 100%; background: var(--bg-surface-2);
+            box-shadow: var(--shadow-lg); overflow: hidden;
+            display: flex; flex-direction: column;
+        }
 
-        /* Header */
-        .app-header { height: 70px; background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; padding-top: var(--safe-top); position: absolute; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        .header-title { font-size: 1.2rem; font-weight: 700; }
-        .header-actions { display: flex; gap: 10px; }
+        .app-header {
+            height: 70px; background: var(--bg-surface-blur);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; padding-top: var(--safe-area-top);
+            position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
 
-        /* Connection Dot */
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff4757; box-shadow: 0 0 8px rgba(255, 71, 87, 0.5); transition: 0.3s; }
-        .status-dot.online { background: #2ed573; box-shadow: 0 0 8px rgba(46, 213, 115, 0.5); }
-        .status-dot.secure { background: #3742fa; box-shadow: 0 0 8px rgba(55, 66, 250, 0.5); } /* Blue for E2EE */
+        .header-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .app-avatar-small { width: 30px; height: 30px; border-radius: 50%; display: inline-block; }
+        
+        .header-status {
+            width: 10px; height: 10px; border-radius: 50%;
+            background-color: #ff4757; box-shadow: 0 0 8px rgba(255, 71, 87, 0.5);
+            transition: background-color 0.3s;
+        }
+        .header-status.online { background-color: #2ed573; box-shadow: 0 0 8px rgba(46, 213, 115, 0.5); }
+        .header-status.connecting { background-color: #ffa502; animation: pulse-status 1s infinite; }
 
-        /* Views */
-        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 70px; display: flex; flex-direction: column; background: var(--bg-body); transition: 0.4s ease; opacity: 0; transform: translateX(20px); pointer-events: none; z-index: 10; }
+        @keyframes pulse-status { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding-top: 70px; padding-bottom: 20px;
+            overflow-y: auto; opacity: 0; transform: translateX(20px);
+            pointer-events: none; transition: opacity 0.4s var(--anim-smooth), transform 0.4s var(--anim-smooth);
+            display: flex; flex-direction: column; background: var(--bg-body); z-index: 10;
+        }
         .view.active { opacity: 1; transform: translateX(0); pointer-events: all; z-index: 20; }
 
-        /* 
-         * ==================================================================
-         * 4. SPECIFIC VIEWS
-         * ==================================================================
-         */
-        
-        /* Login */
-        #view-login { justify-content: center; padding: 40px; z-index: 50; }
-        .logo { width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; margin-bottom: 2rem; box-shadow: 0 10px 30px var(--primary-fade); animation: float 6s infinite ease-in-out; }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        #view-login { z-index: 50; padding: 40px; justify-content: center; align-items: center; }
+        .logo-container {
+            width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 30px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 2rem; font-size: 3rem; color: white;
+            box-shadow: 0 10px 30px var(--primary-fade); animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* Home */
-        .id-card { background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: var(--shadow-sm); }
-        .id-text { font-family: monospace; font-size: 1.4rem; color: var(--primary); margin: 10px 0; word-break: break-all; }
-        .history-list { flex: 1; overflow-y: auto; padding: 0 20px; }
-        .history-item { background: var(--bg-surface); padding: 15px; border-radius: var(--radius-sm); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .history-item:hover { border-color: var(--primary); transform: translateX(5px); }
-        .history-avatar { width: 40px; height: 40px; background: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; }
-        .history-info { flex: 1; }
-        .history-name { font-weight: 600; font-size: 0.95rem; }
-        .history-last { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        .id-card {
+            background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md);
+            margin: 20px; box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border);
+        }
+        .id-display { font-family: monospace; font-size: 1.4rem; color: var(--primary); margin: 10px 0; word-break: break-all; }
+        .connect-section {
+            padding: 20px; background: var(--bg-surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            margin-top: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
 
-        /* Chat */
-        #view-chat { background: var(--bg-surface-2); padding-bottom: 0; }
-        .chat-header-info { margin-left: 10px; }
-        .chat-header-name { font-weight: 700; font-size: 1rem; }
-        .chat-header-status { font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        #view-chat { padding-bottom: 0; background: var(--bg-surface-2); }
+        .chat-header-bar {
+            padding: 10px 20px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .chat-avatar-container { position: relative; width: 40px; height: 40px; }
+        .chat-area {
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column;
+            gap: 15px; scroll-behavior: smooth;
+        }
         
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
-        
-        /* Message Bubbles */
-        .msg { max-width: 75%; padding: 12px 16px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 0.95rem; animation: popIn 0.3s var(--anim-bounce); box-shadow: var(--shadow-sm); }
+        .message-bubble {
+            max-width: 75%; padding: 12px 16px; font-size: 0.95rem; line-height: 1.4;
+            position: relative; word-wrap: break-word; animation: popIn 0.3s var(--anim-bounce);
+        }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        
-        .msg.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
-        .msg.other { align-self: flex-start; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-        .msg-meta { font-size: 0.65rem; opacity: 0.7; text-align: right; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
-        .msg-image { max-width: 100%; border-radius: 10px; margin-bottom: 5px; cursor: pointer; }
-        .msg-file { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.1); padding: 8px; border-radius: 8px; }
-        .msg-audio { display: flex; align-items: center; gap: 10px; min-width: 150px; }
-        
-        /* System Message */
-        .msg-sys { align-self: center; background: rgba(128,128,128,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; color: var(--text-muted); text-align: center; margin: 10px 0; max-width: 90%; }
-        
-        /* Input Area */
-        .chat-controls { background: var(--bg-surface); padding: 10px; border-top: 1px solid var(--border); padding-bottom: max(10px, var(--safe-bottom)); }
-        .chat-controls-top { display: flex; align-items: center; gap: 8px; }
-        .chat-input-wrapper { flex: 1; position: relative; }
-        .chat-input { width: 100%; padding: 12px 40px 12px 15px; background: var(--bg-body); border: 1px solid var(--border); border-radius: 24px; outline: none; transition: 0.2s; color: var(--text-main); }
+
+        .msg-system {
+            align-self: center; background: rgba(0,0,0,0.05); color: var(--text-muted);
+            font-size: 0.8rem; border-radius: 20px; padding: 6px 15px; max-width: 90%;
+        }
+        [data-theme="dark"] .msg-system { background: rgba(255,255,255,0.1); }
+
+        .msg-me {
+            align-self: flex-end; background: var(--primary); color: white;
+            border-radius: 18px 18px 4px 18px; box-shadow: 0 4px 10px var(--primary-fade);
+        }
+        .msg-other {
+            align-self: flex-start; background: var(--bg-surface); color: var(--text-main);
+            border-radius: 18px 18px 18px 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+        }
+
+        .msg-image {
+            max-width: 100%; border-radius: 12px; margin-top: 5px; cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .msg-link { text-decoration: underline; color: inherit; font-weight: 500; }
+        .msg-meta {
+            font-size: 0.7rem; opacity: 0.7; margin-top: 4px;
+            display: flex; justify-content: flex-end; align-items: center; gap: 4px;
+        }
+        .msg-status i { font-size: 0.65rem; }
+
+        .chat-input-area {
+            background: var(--bg-surface); padding: 15px;
+            padding-bottom: max(15px, var(--safe-area-bottom));
+            display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border);
+            position: relative; z-index: 100;
+        }
+        .chat-input {
+            flex: 1; background: var(--bg-body); border: 1px solid var(--border);
+            padding: 12px 20px; border-radius: 24px; color: var(--text-main);
+            outline: none; transition: border-color 0.2s;
+        }
         .chat-input:focus { border-color: var(--primary); }
-        .btn-send { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px var(--primary-fade); transition: 0.2s; }
-        .btn-send:hover { transform: scale(1.1); }
-        
-        /* Expanded Menu (Attachments) */
-        .attach-drawer { height: 0; overflow: hidden; transition: height 0.3s ease; background: var(--bg-surface-2); display: flex; justify-content: space-around; align-items: center; }
-        .attach-drawer.open { height: 80px; padding: 10px 0; border-top: 1px solid var(--border); }
-        .attach-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--text-muted); background: none; border: none; cursor: pointer; }
-        .attach-btn i { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-surface); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-main); box-shadow: var(--shadow-sm); }
-        
-        /* 
-         * ==================================================================
-         * 5. OVERLAYS (CALL, MODALS, ETC)
-         * ==================================================================
-         */
-        
-        /* Call Overlay */
-        #call-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 300; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: 0.3s; }
-        #call-overlay.active { opacity: 1; pointer-events: all; }
-        .video-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        video#remote-video { width: 100%; height: 100%; object-fit: cover; }
-        video#local-video { position: absolute; bottom: 100px; right: 20px; width: 100px; height: 140px; object-fit: cover; border-radius: 12px; border: 2px solid white; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 310; transition: 0.3s; }
-        .call-controls { height: 90px; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; gap: 30px; padding-bottom: var(--safe-bottom); }
-        .btn-call-action { width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 1.2rem; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
-        .btn-hangup { background: #ff4757; }
-        .btn-mute { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
-        .btn-mute.muted { background: white; color: black; }
 
-        /* Voice Note Recorder */
-        #voice-recorder-ui { position: absolute; bottom: 80px; left: 20px; right: 20px; background: var(--bg-surface); padding: 15px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); z-index: 200; display: flex; flex-direction: column; align-items: center; gap: 10px; transform: translateY(150%); transition: 0.3s; }
-        #voice-recorder-ui.active { transform: translateY(0); }
-        canvas#audio-visualizer { width: 100%; height: 50px; background: var(--bg-surface-2); border-radius: 8px; }
-        .recorder-timer { font-family: monospace; font-weight: bold; color: #ff4757; }
+        .emoji-picker {
+            position: absolute; bottom: 80px; left: 10px; width: 300px;
+            background: var(--bg-surface); border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+            display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; padding: 10px;
+            height: 200px; overflow-y: auto; opacity: 0; pointer-events: none;
+            transform: translateY(20px); transition: 0.3s ease;
+        }
+        .emoji-picker.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .emoji-item {
+            cursor: pointer; padding: 5px; text-align: center; border-radius: 5px;
+            font-size: 1.2rem; transition: background 0.2s;
+        }
+        .emoji-item:hover { background: var(--bg-body); }
 
-        /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 400; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; backdrop-filter: blur(4px); }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; display: flex; justify-content: center; align-items: center;
+        }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal-box { width: 85%; max-width: 400px; background: var(--bg-surface); border-radius: var(--radius-lg); padding: 24px; transform: scale(0.9); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: var(--shadow-lg); }
-        .modal-overlay.open .modal-box { transform: scale(1); }
+        .modal-card {
+            width: 85%; max-width: 400px; background: var(--bg-surface);
+            border-radius: var(--radius-lg); padding: 24px;
+            transform: translateY(50px); transition: transform 0.3s var(--anim-bounce);
+            box-shadow: var(--shadow-lg);
+        }
+        .modal-overlay.open .modal-card { transform: translateY(0); }
+
         .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .switch { position: relative; width: 50px; height: 26px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; cursor: pointer; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(24px); }
 
-        /* Toast */
-        #toast-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 500; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 350px; }
-        .toast { background: rgba(20,20,20,0.95); color: white; padding: 12px 20px; border-radius: var(--radius-md); font-size: 0.9rem; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease forwards; backdrop-filter: blur(5px); }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #toast-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 500; display: flex; flex-direction: column; gap: 10px;
+            width: 90%; max-width: 350px; pointer-events: none;
+        }
+        .toast {
+            background: rgba(30,30,30,0.95); color: white; padding: 14px 20px;
+            border-radius: var(--radius-md); font-size: 0.9rem; box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease forwards; backdrop-filter: blur(4px);
+            display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary);
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Credits */
-        .credits { font-size: 0.8rem; color: var(--text-muted); margin-top: 2rem; text-align: center; }
-        
-        /* Hidden file input */
-        #file-input { display: none; }
+        .typing-indicator { padding: 10px; display: none; margin-left: 20px; }
+        .typing-indicator.active { display: block; }
+        .dots { display: flex; gap: 4px; }
+        .dot { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: pulse 1s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        .credits-footer {
+            position: absolute; bottom: 30px; text-align: center; width: 100%; left: 0;
+            font-size: 0.85rem; color: var(--text-muted); opacity: 0.8;
+        }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- --- HEADER --- -->
+    <!-- Main Header -->
     <header class="app-header">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div class="status-dot" id="connection-status"></div>
-            <div class="header-title">Aether</div>
+        <div class="header-status" id="connection-status"></div>
+        <div class="header-title">
+            <div id="header-avatar" class="app-avatar-small"></div>
+            <span>Aether Pro</span>
         </div>
-        <div class="header-actions">
-            <button class="btn-icon" id="btn-theme"><i class="fas fa-moon"></i></button>
-            <button class="btn-icon" id="btn-settings"><i class="fas fa-cog"></i></button>
-        </div>
+        <button class="btn-icon" id="btn-settings" title="Settings">
+            <i class="fas fa-cog"></i>
+        </button>
     </header>
 
-    <!-- --- VIEW: LOGIN --- -->
+    <!-- VIEW 1: LOGIN -->
     <section id="view-login" class="view active">
-        <div class="logo"><i class="fas fa-bolt"></i></div>
-        <h2 class="text-center mb-4" style="margin-bottom:1rem;">Welcome Back</h2>
-        <p class="text-center" style="color:var(--text-muted); margin-bottom:2rem;">
-            End-to-End Encrypted P2P Messenger<br>
-            <span style="font-size:0.8rem; opacity:0.7;">Secure • Fast • Private</span>
-        </p>
+        <div class="logo-container"><i class="fas fa-bolt"></i></div>
+        <h2 class="text-center mb-4">Welcome Back</h2>
+        <p class="text-center mb-4" style="color:var(--text-muted)">Secure, Encrypted P2P Messaging</p>
         
         <div class="input-group">
             <input type="text" id="input-username" class="input-field" placeholder=" " autocomplete="off">
-            <label class="input-label">Create Username</label>
+            <label class="input-label">Enter Username</label>
         </div>
         
-        <button id="btn-login" class="btn btn-primary w-full">Start Secure Session</button>
-        
-        <div class="credits">
-            Created by <strong>Yaroslav Ostapenko</strong><br>v2.0 Pro
+        <button id="btn-login" class="btn btn-primary w-full">Initialize Session</button>
+
+        <div class="credits-footer">
+            Created by <strong>Yaroslav Ostapenko</strong>
         </div>
     </section>
 
-    <!-- --- VIEW: HOME --- -->
+    <!-- VIEW 2: HOME (Connection Manager) -->
     <section id="view-home" class="view">
-        <div class="p-4" style="padding:20px; display:flex; flex-direction:column; height:100%;">
-            <!-- User Card -->
+        <div class="p-4 flex-col h-full">
+            <h3 class="mb-2 text-center">Your Identity</h3>
             <div class="id-card">
-                <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">My Secure ID</div>
-                <div class="id-text" id="my-peer-id">Generating...</div>
-                <div style="display:flex; gap:10px; justify-content:center;">
-                    <button class="btn btn-secondary btn-sm" id="btn-copy-id"><i class="fas fa-copy"></i> Copy</button>
-                    <button class="btn btn-secondary btn-sm" id="btn-share-id"><i class="fas fa-share-alt"></i> Share</button>
-                </div>
+                <div id="home-avatar-display" style="width:60px; height:60px; margin:0 auto 10px auto; border-radius:50%;"></div>
+                <div class="id-display" id="my-peer-id">Generating...</div>
+                <button class="btn btn-secondary" id="btn-copy-id">
+                    <i class="fas fa-copy"></i> Copy ID
+                </button>
+                <p class="copy-hint">Share this ID securely with a peer.</p>
             </div>
 
-            <!-- Connect Section -->
-            <h3 style="margin:20px 0 10px 0;">New Connection</h3>
-            <div style="display:flex; gap:10px;">
-                <div class="input-group" style="margin:0;">
-                    <input type="text" id="input-remote-id" class="input-field" placeholder=" " style="padding:12px;">
-                    <label class="input-label" style="top:12px;">Remote ID</label>
-                </div>
-                <button id="btn-connect" class="btn btn-primary"><i class="fas fa-arrow-right"></i></button>
+            <div class="flex-col justify-center" style="flex:1; align-items:center; opacity:0.3; margin: 20px 0;">
+                <i class="fas fa-satellite-dish" style="font-size:3rem; margin-bottom:1rem;"></i>
+                <p>Waiting for incoming signal...</p>
             </div>
 
-            <!-- History List -->
-            <h3 style="margin:20px 0 10px 0;">Recent Chats</h3>
-            <div class="history-list" id="history-container">
-                <div class="text-center" style="color:var(--text-muted); margin-top:40px; opacity:0.5;">
-                    <i class="fas fa-history" style="font-size:2rem; margin-bottom:10px;"></i>
-                    <p>No recent history</p>
+            <div class="connect-section">
+                <h3 class="mb-4">Establish Connection</h3>
+                <div class="input-group">
+                    <input type="text" id="input-remote-id" class="input-field" placeholder=" ">
+                    <label class="input-label">Remote Peer ID</label>
                 </div>
+                <button id="btn-connect" class="btn btn-primary w-full">
+                    Connect <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
         </div>
     </section>
 
-    <!-- --- VIEW: CHAT --- -->
+    <!-- VIEW 3: CHAT INTERFACE -->
     <section id="view-chat" class="view">
-        <div style="background:var(--bg-surface); border-bottom:1px solid var(--border); padding:10px 15px; display:flex; align-items:center; justify-content:space-between;">
-            <div style="display:flex; align-items:center;">
-                <button class="btn-icon" id="btn-back-chat" style="margin-right:10px; width:36px; height:36px;"><i class="fas fa-arrow-left"></i></button>
-                <div class="chat-header-info">
-                    <div class="chat-header-name" id="chat-partner-name">...</div>
-                    <div class="chat-header-status" id="chat-encryption-status">
-                        <i class="fas fa-lock"></i> Encrypted
-                    </div>
-                </div>
-            </div>
-            <div style="display:flex; gap:5px;">
-                <button class="btn-icon" id="btn-call-audio"><i class="fas fa-phone"></i></button>
-                <button class="btn-icon" id="btn-call-video"><i class="fas fa-video"></i></button>
+        <div class="chat-header-bar">
+            <button class="btn-icon" id="btn-back-chat"><i class="fas fa-arrow-left"></i></button>
+            <div class="chat-avatar-container" id="chat-partner-avatar"></div>
+            <div>
+                <h4 id="chat-partner-name">Unknown</h4>
+                <div class="text-sm text-muted" id="chat-status-text">Encrypted Channel</div>
             </div>
         </div>
 
-        <div id="chat-messages" class="chat-messages"></div>
+        <div id="messages-container" class="chat-area">
+            <!-- Messages injected here -->
+        </div>
 
-        <div class="chat-controls">
-            <!-- Typing indicator -->
-            <div id="typing-indicator" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:5px; height:15px; opacity:0; transition:0.2s;">
-                Partner is typing...
-            </div>
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </div>
+
+        <!-- Hidden Emoji Picker -->
+        <div class="emoji-picker" id="emoji-picker-container"></div>
+
+        <div class="chat-input-area">
+            <input type="file" id="file-input" hidden accept="image/png, image/jpeg">
+            <button class="btn-icon" id="btn-attach" title="Send Image"><i class="fas fa-image"></i></button>
+            <button class="btn-icon" id="btn-emoji" title="Insert Emoji"><i class="far fa-smile"></i></button>
             
-            <div class="chat-controls-top">
-                <button class="btn-icon" id="btn-toggle-attach" style="width:40px; height:40px;"><i class="fas fa-plus"></i></button>
-                <div class="chat-input-wrapper">
-                    <input type="text" id="msg-input" class="chat-input" placeholder="Message..." autocomplete="off">
-                </div>
-                <button id="btn-send-msg" class="btn-send"><i class="fas fa-paper-plane"></i></button>
-            </div>
+            <input type="text" id="msg-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
             
-            <!-- Attachment Drawer -->
-            <div class="attach-drawer" id="attach-drawer">
-                <button class="attach-btn" id="btn-attach-image">
-                    <i class="fas fa-image" style="color:#2ed573;"></i> Image
-                </button>
-                <button class="attach-btn" id="btn-attach-file">
-                    <i class="fas fa-file-alt" style="color:#ffa502;"></i> File
-                </button>
-                <button class="attach-btn" id="btn-attach-voice">
-                    <i class="fas fa-microphone" style="color:#ff4757;"></i> Voice
-                </button>
-                <button class="attach-btn" id="btn-send-sticker">
-                    <i class="fas fa-smile" style="color:#1e90ff;"></i> Sticker
-                </button>
-            </div>
+            <button id="btn-send-msg" class="btn-icon active" style="background:var(--primary); color:white;">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </section>
 
-    <!-- --- OVERLAYS --- -->
-    
-    <!-- 1. Voice Recorder -->
-    <div id="voice-recorder-ui">
-        <div style="font-weight:bold;">Recording Voice Note</div>
-        <canvas id="audio-visualizer"></canvas>
-        <div class="recorder-timer" id="recorder-timer">00:00</div>
-        <div style="display:flex; gap:20px; width:100%; justify-content:center; margin-top:10px;">
-            <button class="btn btn-secondary" id="btn-cancel-rec" style="color:#ff4757;">Cancel</button>
-            <button class="btn btn-primary" id="btn-send-rec">Send</button>
-        </div>
-    </div>
-
-    <!-- 2. Settings Modal -->
+    <!-- Settings Modal -->
     <div class="modal-overlay" id="settings-modal">
-        <div class="modal-box">
-            <div class="flex justify-between items-center" style="margin-bottom:20px;">
-                <h3>Settings</h3>
-                <button class="btn-icon" id="btn-close-settings" style="width:30px; height:30px;"><i class="fas fa-times"></i></button>
+        <div class="modal-card">
+            <div class="flex justify-between items-center mb-4">
+                <div class="modal-title" style="margin:0; font-weight:700; font-size:1.2rem;">Settings</div>
+                <button class="btn-icon" id="btn-close-settings"><i class="fas fa-times"></i></button>
             </div>
             
             <div class="setting-row">
-                <span>Sound Effects</span>
-                <label class="switch"><input type="checkbox" id="chk-sound" checked><span class="slider"></span></label>
+                <span><i class="fas fa-moon"></i> Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
             </div>
+            
             <div class="setting-row">
-                <span>Notifications</span>
-                <label class="switch"><input type="checkbox" id="chk-notif" checked><span class="slider"></span></label>
+                <span><i class="fas fa-volume-up"></i> Sound Effects</span>
+                <label class="switch">
+                    <input type="checkbox" checked id="sound-toggle">
+                    <span class="slider"></span>
+                </label>
             </div>
+
             <div class="setting-row">
-                <span style="color:#ff4757;">Clear All History</span>
-                <button class="btn btn-secondary" id="btn-clear-data" style="padding:5px 10px; font-size:0.8rem;">Clear</button>
+                <span><i class="fas fa-history"></i> Save History (IndexedDB)</span>
+                <label class="switch">
+                    <input type="checkbox" checked id="history-toggle">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <div style="margin-top:20px; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-                Security: AES-GCM (128-bit) encryption enabled.<br>Keys are ephemeral (per session).
+            
+            <button id="btn-clear-history" class="btn btn-secondary w-full" style="margin-top:20px; color:#ff4757; border-color:#ff4757;">
+                <i class="fas fa-trash"></i> Clear Database
+            </button>
+
+            <div class="p-4 text-center" style="margin-top:20px; background:var(--bg-body); border-radius:var(--radius-sm);">
+                <small style="color:var(--text-muted)">
+                    Aether Messenger Pro v2.5<br>
+                    <strong>Created by Yaroslav Ostapenko</strong><br>
+                    Encryption: AES-GCM 256
+                </small>
             </div>
-        </div>
-    </div>
-    
-    <!-- 3. Sticker Picker (Simple Modal) -->
-    <div class="modal-overlay" id="sticker-modal">
-        <div class="modal-box" style="text-align:center;">
-            <h3>Pick a Sticker</h3>
-            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; margin-top:20px; font-size:2rem;">
-                <div class="sticker-opt" data-emoji="👍">👍</div>
-                <div class="sticker-opt" data-emoji="❤️">❤️</div>
-                <div class="sticker-opt" data-emoji="😂">😂</div>
-                <div class="sticker-opt" data-emoji="😮">😮</div>
-                <div class="sticker-opt" data-emoji="😢">😢</div>
-                <div class="sticker-opt" data-emoji="😡">😡</div>
-                <div class="sticker-opt" data-emoji="🎉">🎉</div>
-                <div class="sticker-opt" data-emoji="🔥">🔥</div>
-            </div>
-            <button class="btn btn-secondary w-full" id="btn-close-stickers" style="margin-top:20px;">Close</button>
         </div>
     </div>
 
-    <!-- 4. Call Overlay -->
-    <div id="call-overlay">
-        <div class="video-container">
-            <video id="remote-video" autoplay playsinline></video>
-            <video id="local-video" autoplay playsinline muted></video>
-            <div style="position:absolute; top:40px; left:20px; text-shadow:0 1px 3px rgba(0,0,0,0.8); color:white;">
-                <div style="font-size:1.5rem; font-weight:bold;" id="call-status-text">Calling...</div>
-                <div id="call-timer">00:00</div>
-            </div>
-        </div>
-        <div class="call-controls">
-            <button class="btn-call-action btn-mute" id="btn-toggle-mic"><i class="fas fa-microphone"></i></button>
-            <button class="btn-call-action btn-mute" id="btn-toggle-cam"><i class="fas fa-video"></i></button>
-            <button class="btn-call-action btn-hangup" id="btn-hangup"><i class="fas fa-phone-slash"></i></button>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
+    <!-- Toast Notifications -->
     <div id="toast-container"></div>
-    
-    <!-- Hidden Elements -->
-    <input type="file" id="file-input">
 </div>
 
 <script>
-    /**
-     * ==================================================================
-     * 1. CORE UTILITIES & CONFIG
-     * ==================================================================
+    /*
+     * =========================================================================
+     * AETHER PRO - APPLICATION KERNEL
+     * 
+     * Architecture:
+     * 1. Globals & Configuration
+     * 2. Utils (Helpers, Formatters)
+     * 3. Diagnostics (Logging)
+     * 4. CryptoGuard (Encryption Layer)
+     * 5. Database (IndexedDB Wrapper)
+     * 6. EventBus (Pub/Sub)
+     * 7. Protocol (Data Packet Serialization)
+     * 8. NetworkManager (PeerJS Wrapper)
+     * 9. ChatSession (State Management)
+     * 10. UIController (DOM Manipulation)
+     * 11. CoreApp (Orchestrator)
+     * =========================================================================
      */
-    const CONFIG = {
-        chunkSize: 16384, // 16KB chunks for file transfer reliability
-        appName: 'AetherPro',
-        version: '2.0.0'
-    };
 
-    const DOM = {
-        app: document.getElementById('app'),
-        views: {
-            login: document.getElementById('view-login'),
-            home: document.getElementById('view-home'),
-            chat: document.getElementById('view-chat')
+    /**
+     * SECTION 1: GLOBALS & CONSTANTS
+     */
+    const CONSTANTS = {
+        APP_NAME: 'AetherPro',
+        VERSION: '2.5.0',
+        DB_NAME: 'AetherDB',
+        DB_VERSION: 2,
+        STORES: { MESSAGES: 'messages', CONFIG: 'config' },
+        EVENTS: {
+            LOGIN: 'app:login',
+            CONNECT: 'app:connect',
+            SEND_MSG: 'app:send_msg',
+            STATUS_CHANGE: 'net:status',
+            DATA_RECEIVED: 'net:data',
+            UI_TOAST: 'ui:toast',
+            DB_READY: 'db:ready'
         },
-        inputs: {
-            username: document.getElementById('input-username'),
-            remoteId: document.getElementById('input-remote-id'),
-            msg: document.getElementById('msg-input'),
-            file: document.getElementById('file-input')
+        PACKET_TYPES: {
+            HANDSHAKE: 0x01,
+            MESSAGE: 0x02,
+            IMAGE_CHUNK: 0x03,
+            RECEIPT: 0x04,
+            TYPING: 0x05,
+            PING: 0x06
         },
-        buttons: {
-            login: document.getElementById('btn-login'),
-            connect: document.getElementById('btn-connect'),
-            send: document.getElementById('btn-send-msg'),
-            attach: document.getElementById('btn-toggle-attach'),
-            settings: document.getElementById('btn-settings'),
-            theme: document.getElementById('btn-theme')
-        },
-        overlay: {
-            call: document.getElementById('call-overlay'),
-            settings: document.getElementById('settings-modal'),
-            sticker: document.getElementById('sticker-modal'),
-            recorder: document.getElementById('voice-recorder-ui')
-        },
-        media: {
-            localVideo: document.getElementById('local-video'),
-            remoteVideo: document.getElementById('remote-video'),
-            visualizer: document.getElementById('audio-visualizer')
-        }
-    };
-
-    // Global State Store
-    const store = {
-        user: { name: '', id: null },
-        theme: localStorage.getItem('theme') || 'light',
-        peer: null,
-        conn: null,
-        call: null,
-        localStream: null,
-        encryptionKey: null, // For E2EE
-        history: JSON.parse(localStorage.getItem('chat_history') || '[]'),
-        activeChatId: null, // The peer ID we are currently chatting with
-        fileBuffer: [], // For receiving files
-        fileMeta: null,
-        soundEnabled: true
-    };
-
-    // --- Helpers ---
-    const Utils = {
-        generateUUID: () => Math.random().toString(36).substring(2, 15),
-        
-        formatTime: (date) => new Date(date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        
-        formatDuration: (seconds) => {
-            const m = Math.floor(seconds / 60).toString().padStart(2,'0');
-            const s = (seconds % 60).toString().padStart(2,'0');
-            return `${m}:${s}`;
-        },
-
-        toast: (msg, icon='info-circle', duration=3000) => {
-            const el = document.createElement('div');
-            el.className = 'toast';
-            el.innerHTML = `<i class="fas fa-${icon}"></i> <span>${msg}</span>`;
-            document.getElementById('toast-container').appendChild(el);
-            if(store.soundEnabled) AudioEngine.play('pop');
-            setTimeout(() => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                setTimeout(() => el.remove(), 300);
-            }, duration);
-        },
-
-        setTheme: (theme) => {
-            document.documentElement.setAttribute('data-theme', theme);
-            store.theme = theme;
-            localStorage.setItem('theme', theme);
-            const icon = DOM.buttons.theme.querySelector('i');
-            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-        },
-
-        switchView: (viewName) => {
-            Object.values(DOM.views).forEach(v => v.classList.remove('active'));
-            DOM.views[viewName].classList.add('active');
-            
-            // Special handling
-            if(viewName === 'home') ChatEngine.renderHistory();
-        }
+        CHUNK_SIZE: 16 * 1024 // 16KB chunks for binary reliability
     };
 
     /**
-     * ==================================================================
-     * 2. AUDIO ENGINE (Synthesized Sounds)
-     * ==================================================================
+     * SECTION 2: UTILITIES
      */
-    const AudioEngine = {
-        ctx: new (window.AudioContext || window.webkitAudioContext)(),
-        
-        play: function(type) {
-            if(!store.soundEnabled) return;
-            if(this.ctx.state === 'suspended') this.ctx.resume();
-            
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            
-            const now = this.ctx.currentTime;
-            
-            if (type === 'send') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else if (type === 'receive') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                osc.frequency.exponentialRampToValueAtTime(400, now + 0.2);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
-            } else if (type === 'pop') {
-                osc.frequency.setValueAtTime(600, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.05);
-                osc.start(now);
-                osc.stop(now + 0.05);
-            } else if (type === 'ring') {
-                // Looping ringtone handled differently, this is just a blip
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(800, now);
-                osc.frequency.linearRampToValueAtTime(800, now + 0.5);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.5);
-                osc.start(now);
-                osc.stop(now + 0.5);
+    class Utils {
+        /**
+         * Generate a UUID v4
+         * @returns {string}
+         */
+        static generateUUID() {
+            if (crypto.randomUUID) return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        /**
+         * Wait for a specified time
+         * @param {number} ms 
+         */
+        static wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        /**
+         * Format timestamp
+         */
+        static formatTime(timestamp) {
+            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        /**
+         * Sanitize string for HTML
+         */
+        static sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        /**
+         * Detect URLs and linkify
+         */
+        static linkify(text) {
+            const urlRegex = /((https?:\/\/[^\s]+)|(www\.[^\s]+))/g;
+            return text.replace(urlRegex, (url) => {
+                const href = url.startsWith('http') ? url : `http://${url}`;
+                return `<a href="${href}" target="_blank" class="msg-link">${url}</a>`;
+            });
+        }
+
+        /**
+         * Debounce function execution
+         */
+        static debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+    }
+
+    /**
+     * SECTION 3: DIAGNOSTICS & LOGGING
+     */
+    class Diagnostics {
+        constructor() {
+            this.logs = [];
+        }
+
+        static log(module, message, data = null) {
+            const time = new Date().toISOString();
+            const logStr = `[${time}] [${module}] ${message}`;
+            console.log(logStr, data || '');
+        }
+
+        static error(module, message, error) {
+            const time = new Date().toISOString();
+            console.error(`[${time}] [${module}] ERROR: ${message}`, error);
+        }
+    }
+
+    /**
+     * SECTION 4: CRYPTOGUARD (E2EE)
+     * Handles AES-GCM Encryption/Decryption using Web Crypto API
+     */
+    class CryptoGuard {
+        constructor() {
+            this.key = null;
+            this.ivLength = 12; // 12 bytes for GCM
+        }
+
+        /**
+         * Generates a new random AES-GCM key for the session.
+         * In a real full production app, this would use ECDH for key exchange.
+         * Here we generate a key and assume a secure initial channel (PeerJS TLS) exchanges it.
+         */
+        async generateKey() {
+            try {
+                this.key = await window.crypto.subtle.generateKey(
+                    {
+                        name: "AES-GCM",
+                        length: 256
+                    },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+                Diagnostics.log('Crypto', 'New AES-256 Key Generated');
+                return this.key;
+            } catch (e) {
+                Diagnostics.error('Crypto', 'Key Gen Failed', e);
+                throw e;
             }
         }
-    };
 
-    /**
-     * ==================================================================
-     * 3. SECURITY ENGINE (E2EE)
-     * ==================================================================
-     * Uses Web Crypto API for AES-GCM encryption.
-     * In a real app, we would use ECDH for key exchange. 
-     * Here, for the "Single File" constraint and demo purposes, 
-     * we will simulate a secure handshake by generating a session key 
-     * and sending it (this is weak without RSA/ECDH, but satisfies the code complexity req).
-     */
-    const Security = {
-        key: null,
+        /**
+         * Export key to JSON Web Key format for sharing
+         */
+        async exportKey() {
+            if (!this.key) throw new Error("No key to export");
+            return await window.crypto.subtle.exportKey("jwk", this.key);
+        }
 
-        // Generate a random AES-GCM key
-        generateKey: async () => {
-            return await window.crypto.subtle.generateKey(
-                { name: "AES-GCM", length: 128 },
-                true,
-                ["encrypt", "decrypt"]
-            );
-        },
-
-        // Export key to JWK to send to peer (Simulation of Handshake)
-        exportKey: async (key) => {
-            return await window.crypto.subtle.exportKey("jwk", key);
-        },
-
-        // Import key received from peer
-        importKey: async (jwkData) => {
-            return await window.crypto.subtle.importKey(
+        /**
+         * Import a JWK key
+         */
+        async importKey(jwk) {
+            this.key = await window.crypto.subtle.importKey(
                 "jwk",
-                jwkData,
+                jwk,
                 { name: "AES-GCM" },
                 true,
                 ["encrypt", "decrypt"]
             );
-        },
+            Diagnostics.log('Crypto', 'Key Imported');
+        }
 
-        // Encrypt Text
-        encrypt: async (text) => {
-            if(!store.encryptionKey) return text; // Fallback
-            const enc = new TextEncoder();
-            const iv = window.crypto.getRandomValues(new Uint8Array(12));
-            const encoded = enc.encode(text);
+        /**
+         * Encrypts a text string or object
+         */
+        async encrypt(data) {
+            if (!this.key) throw new Error("Encryption key not set");
             
-            const ciphertext = await window.crypto.subtle.encrypt(
-                { name: "AES-GCM", iv: iv },
-                store.encryptionKey,
+            const enc = new TextEncoder();
+            const encoded = enc.encode(JSON.stringify(data));
+            const iv = window.crypto.getRandomValues(new Uint8Array(this.ivLength));
+
+            const cipherText = await window.crypto.subtle.encrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv
+                },
+                this.key,
                 encoded
             );
-            
-            // Pack IV + Ciphertext into JSON string
-            const buffer = new Uint8Array(ciphertext);
-            return JSON.stringify({
-                iv: Array.from(iv),
-                data: Array.from(buffer)
-            });
-        },
 
-        // Decrypt Text
-        decrypt: async (packedStr) => {
-            if(!store.encryptionKey) return packedStr;
-            try {
-                const packed = JSON.parse(packedStr);
-                const iv = new Uint8Array(packed.iv);
-                const data = new Uint8Array(packed.data);
-                
-                const decrypted = await window.crypto.subtle.decrypt(
-                    { name: "AES-GCM", iv: iv },
-                    store.encryptionKey,
-                    data
-                );
-                
-                return new TextDecoder().decode(decrypted);
-            } catch (e) {
-                console.error("Decryption failed", e);
-                return "[Encrypted Message]";
-            }
+            // Combine IV and Ciphertext
+            const buffer = new Uint8Array(iv.byteLength + cipherText.byteLength);
+            buffer.set(iv, 0);
+            buffer.set(new Uint8Array(cipherText), iv.byteLength);
+
+            // Return as base64 for easy transport over PeerJS JSON channel
+            return this.arrayBufferToBase64(buffer);
         }
-    };
+
+        /**
+         * Decrypts a base64 string
+         */
+        async decrypt(base64Data) {
+            if (!this.key) throw new Error("Encryption key not set");
+
+            const buffer = this.base64ToArrayBuffer(base64Data);
+            const iv = buffer.slice(0, this.ivLength);
+            const cipherText = buffer.slice(this.ivLength);
+
+            const decrypted = await window.crypto.subtle.decrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv
+                },
+                this.key,
+                cipherText
+            );
+
+            const dec = new TextDecoder();
+            return JSON.parse(dec.decode(decrypted));
+        }
+
+        arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+
+        base64ToArrayBuffer(base64) {
+            const binary_string = window.atob(base64);
+            const len = binary_string.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary_string.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+    }
 
     /**
-     * ==================================================================
-     * 4. PERSISTENCE ENGINE (Chat History)
-     * ==================================================================
+     * SECTION 5: DATABASE (INDEXEDDB)
+     * High-performance asynchronous storage for chat history.
      */
-    const Persistence = {
-        saveChat: (peerId, messageData) => {
-            // peerId: who we are talking to
-            // messageData: { sender: 'me'|'other', type: 'text'|'img', content, time }
-            
-            // 1. Update Global History List
-            let contact = store.history.find(c => c.id === peerId);
-            if (!contact) {
-                contact = { id: peerId, name: store.activeChatId === peerId ? document.getElementById('chat-partner-name').innerText : 'Unknown', msgs: [] };
-                store.history.unshift(contact);
-            } else {
-                // Move to top
-                store.history = store.history.filter(c => c.id !== peerId);
-                store.history.unshift(contact);
-            }
-            
-            contact.msgs.push(messageData);
-            
-            // Limit messages per chat to save space
-            if (contact.msgs.length > 50) contact.msgs.shift(); 
-            
-            localStorage.setItem('chat_history', JSON.stringify(store.history));
-            
-            // If in home view, refresh list
-            if(DOM.views.home.classList.contains('active')) ChatEngine.renderHistory();
-        },
-        
-        getChat: (peerId) => {
-            const contact = store.history.find(c => c.id === peerId);
-            return contact ? contact.msgs : [];
-        },
-
-        clear: () => {
-            localStorage.removeItem('chat_history');
-            store.history = [];
-            ChatEngine.renderHistory();
-            Utils.toast('History cleared', 'trash');
+    class Database {
+        constructor() {
+            this.db = null;
         }
-    };
+
+        open() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(CONSTANTS.DB_NAME, CONSTANTS.DB_VERSION);
+
+                request.onerror = (event) => {
+                    Diagnostics.error('Database', 'Open Error', event.target.error);
+                    reject(event.target.error);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    // Messages Store
+                    if (!db.objectStoreNames.contains(CONSTANTS.STORES.MESSAGES)) {
+                        const store = db.createObjectStore(CONSTANTS.STORES.MESSAGES, { keyPath: 'id' });
+                        store.createIndex('peerId', 'peerId', { unique: false });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                    Diagnostics.log('Database', 'Upgrade Completed');
+                };
+
+                request.onsuccess = (event) => {
+                    this.db = event.target.result;
+                    Diagnostics.log('Database', 'Opened Successfully');
+                    resolve(this.db);
+                };
+            });
+        }
+
+        addMessage(message) {
+            if (!this.db) return Promise.reject("DB not open");
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([CONSTANTS.STORES.MESSAGES], 'readwrite');
+                const store = transaction.objectStore(CONSTANTS.STORES.MESSAGES);
+                const req = store.add(message);
+                
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        getHistory(peerId) {
+            if (!this.db) return Promise.reject("DB not open");
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([CONSTANTS.STORES.MESSAGES], 'readonly');
+                const store = transaction.objectStore(CONSTANTS.STORES.MESSAGES);
+                const index = store.index('peerId');
+                const range = IDBKeyRange.only(peerId);
+                const req = index.getAll(range);
+
+                req.onsuccess = () => {
+                    // Sort by timestamp manually if needed, though usually insertion order implies time
+                    const results = req.result.sort((a, b) => a.timestamp - b.timestamp);
+                    resolve(results);
+                };
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        clearAll() {
+            if (!this.db) return;
+            const transaction = this.db.transaction([CONSTANTS.STORES.MESSAGES], 'readwrite');
+            transaction.objectStore(CONSTANTS.STORES.MESSAGES).clear();
+            Diagnostics.log('Database', 'Cleared All Data');
+        }
+    }
 
     /**
-     * ==================================================================
-     * 5. NETWORK ENGINE (PeerJS + P2P Logic)
-     * ==================================================================
+     * SECTION 6: EVENT BUS
+     * Decouples modules.
      */
-    const Network = {
-        init: (username) => {
-            store.user.name = username;
+    class EventBus {
+        constructor() {
+            this.listeners = {};
+        }
+
+        on(event, callback) {
+            if (!this.listeners[event]) this.listeners[event] = [];
+            this.listeners[event].push(callback);
+        }
+
+        emit(event, data) {
+            if (this.listeners[event]) {
+                this.listeners[event].forEach(cb => {
+                    try { cb(data); } catch (e) { console.error(e); }
+                });
+            }
+        }
+    }
+
+    /**
+     * SECTION 7: PROTOCOL & AVATAR GEN
+     */
+    class AvatarGenerator {
+        static generate(seed) {
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) {
+                hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            const color = '#' + '00000'.substring(0, 6 - c.length) + c;
             
-            store.peer = new Peer(null, { debug: 1 });
+            const svg = `
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" fill="${color}" />
+                    <text x="50" y="55" font-size="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold">
+                        ${seed.substring(0, 1).toUpperCase()}
+                    </text>
+                </svg>
+            `;
+            return `data:image/svg+xml;base64,${btoa(svg)}`;
+        }
+    }
+
+    class ChunkManager {
+        constructor() {
+            this.buffers = {}; // Store incoming chunks
+        }
+
+        handleChunk(peerId, chunkData) {
+            const { fileId, index, total, data } = chunkData;
+            if (!this.buffers[fileId]) {
+                this.buffers[fileId] = { parts: new Array(total), count: 0, total: total };
+            }
             
-            store.peer.on('open', (id) => {
-                store.user.id = id;
-                document.getElementById('my-peer-id').innerText = id;
-                document.getElementById('connection-status').classList.add('online');
-                Utils.toast('Connected to Signaling Server', 'wifi');
-                Utils.switchView('home');
+            this.buffers[fileId].parts[index] = data;
+            this.buffers[fileId].count++;
+
+            if (this.buffers[fileId].count === total) {
+                // Reassemble
+                const fullData = this.buffers[fileId].parts.join('');
+                delete this.buffers[fileId];
+                return fullData; // Base64 string
+            }
+            return null; // Not ready
+        }
+    }
+
+    /**
+     * SECTION 8: NETWORK MANAGER
+     * Handles PeerJS, Packet Serialization, and Reliability
+     */
+    class NetworkManager {
+        constructor(eventBus, cryptoGuard) {
+            this.bus = eventBus;
+            this.crypto = cryptoGuard;
+            this.peer = null;
+            this.conn = null;
+            this.myId = null;
+            this.chunkManager = new ChunkManager();
+            this.heartbeatInterval = null;
+        }
+
+        init(username) {
+            this.peer = new Peer(null, { debug: 0 }); // 0 = no logs from lib
+
+            this.peer.on('open', (id) => {
+                this.myId = id;
+                Diagnostics.log('Network', 'Peer Opened', id);
+                this.bus.emit(CONSTANTS.EVENTS.STATUS_CHANGE, { status: 'online', id: id });
             });
 
-            // Incoming Data Connection
-            store.peer.on('connection', (conn) => {
-                Network.handleConnection(conn);
-                Utils.toast('Incoming Connection!', 'user-plus');
+            this.peer.on('connection', (conn) => {
+                Diagnostics.log('Network', 'Incoming Connection');
+                this.setupConnection(conn);
             });
 
-            // Incoming Call
-            store.peer.on('call', (call) => {
-                CallEngine.handleIncomingCall(call);
+            this.peer.on('error', (err) => {
+                Diagnostics.error('Network', 'Peer Error', err);
+                this.bus.emit(CONSTANTS.EVENTS.UI_TOAST, { msg: `Net Error: ${err.type}`, icon: 'wifi' });
             });
 
-            store.peer.on('error', (err) => {
-                console.error(err);
-                Utils.toast('Network Error: ' + err.type, 'exclamation-triangle');
+            this.peer.on('disconnected', () => {
+                Diagnostics.log('Network', 'Disconnected from Signal Server');
+                this.peer.reconnect();
             });
-        },
+        }
 
-        connect: (remoteId) => {
-            if(!remoteId) return;
-            const conn = store.peer.connect(remoteId);
-            Network.handleConnection(conn);
-        },
+        connect(remoteId, username) {
+            if (this.conn) this.conn.close();
+            const conn = this.peer.connect(remoteId, {
+                metadata: { username: username }
+            });
+            this.setupConnection(conn);
+        }
 
-        handleConnection: (conn) => {
-            if(store.conn) store.conn.close(); // Only one active chat for this demo
-            store.conn = conn;
-            store.activeChatId = conn.peer;
+        setupConnection(conn) {
+            this.conn = conn;
 
             conn.on('open', async () => {
-                // 1. Generate E2EE Key
-                const key = await Security.generateKey();
-                store.encryptionKey = key;
-                const exportedKey = await Security.exportKey(key);
+                this.startHeartbeat();
                 
-                // 2. Send Handshake with Key (Simulated Key Exchange)
+                // 1. Generate & Export Key
+                await this.crypto.generateKey();
+                const jwk = await this.crypto.exportKey();
+
+                // 2. Send Handshake with Key
                 conn.send({
-                    type: 'handshake',
-                    username: store.user.name,
-                    key: exportedKey 
+                    type: CONSTANTS.PACKET_TYPES.HANDSHAKE,
+                    payload: { username: localStorage.getItem('aether_username'), key: jwk }
                 });
-                
-                Utils.switchView('chat');
-                ChatEngine.updateHeader('Connecting...', false);
-                ChatEngine.loadHistory(conn.peer);
+
+                this.bus.emit(CONSTANTS.EVENTS.STATUS_CHANGE, { status: 'connected', peer: conn.peer });
             });
 
-            conn.on('data', async (data) => {
-                // --- Handshake ---
-                if (data.type === 'handshake') {
-                    ChatEngine.updateHeader(data.username, true);
-                    store.encryptionKey = await Security.importKey(data.key);
-                    Utils.toast('Secure Channel Established', 'lock');
-                    document.getElementById('chat-encryption-status').style.color = '#2ed573';
-                } 
-                // --- Text Message ---
-                else if (data.type === 'text') {
-                    const decrypted = await Security.decrypt(data.content);
-                    ChatEngine.receiveMessage('text', decrypted);
-                    Persistence.saveChat(conn.peer, { sender: 'other', type: 'text', content: decrypted, time: Date.now() });
-                }
-                // --- File Metadata ---
-                else if (data.type === 'file-start') {
-                    store.fileBuffer = [];
-                    store.fileMeta = data.meta;
-                }
-                // --- File Chunk ---
-                else if (data.type === 'file-chunk') {
-                    store.fileBuffer.push(new Uint8Array(data.chunk));
-                    if (store.fileBuffer.length * CONFIG.chunkSize >= store.fileMeta.size || data.last) {
-                        // Reassemble
-                        const blob = new Blob(store.fileBuffer, { type: store.fileMeta.type });
-                        const url = URL.createObjectURL(blob);
-                        
-                        if(store.fileMeta.type.startsWith('image/')) {
-                            ChatEngine.receiveMessage('image', url);
-                            // NOTE: Persisting blobs is hard without IndexedDB, for this demo we skip deep blob persistence
-                        } else if(store.fileMeta.type.startsWith('audio/')) {
-                            ChatEngine.receiveMessage('audio', url);
-                        } else {
-                            ChatEngine.receiveMessage('file', { url, name: store.fileMeta.name, size: store.fileMeta.size });
-                        }
+            conn.on('data', async (raw) => {
+                try {
+                    // Handle Handshake (Unencrypted)
+                    if (raw.type === CONSTANTS.PACKET_TYPES.HANDSHAKE) {
+                        await this.crypto.importKey(raw.payload.key);
+                        Diagnostics.log('Network', 'Handshake Completed. Channel Encrypted.');
+                        this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { 
+                            type: 'handshake', 
+                            username: raw.payload.username 
+                        });
+                        return;
                     }
-                }
-                // --- Typing ---
-                else if (data.type === 'typing') {
-                    ChatEngine.showTyping();
+
+                    // Handle Encrypted Packets
+                    if (raw.ciphertext) {
+                        const decrypted = await this.crypto.decrypt(raw.ciphertext);
+                        this.handleDecryptedPacket(decrypted);
+                    } else if (raw.type === CONSTANTS.PACKET_TYPES.PING) {
+                        // Plaintext ping (safe)
+                    }
+                } catch (e) {
+                    Diagnostics.error('Network', 'Packet Parse Error', e);
                 }
             });
-            
+
             conn.on('close', () => {
-                Utils.toast('Peer disconnected', 'user-slash');
-                document.getElementById('chat-encryption-status').style.color = 'var(--text-muted)';
+                this.stopHeartbeat();
+                this.bus.emit(CONSTANTS.EVENTS.STATUS_CHANGE, { status: 'closed' });
             });
-        },
-        
-        sendData: async (payload) => {
-            if(!store.conn) return;
-            store.conn.send(payload);
+
+            conn.on('error', (err) => {
+                Diagnostics.error('Network', 'Connection Error', err);
+            });
         }
-    };
+
+        handleDecryptedPacket(data) {
+            switch(data.type) {
+                case CONSTANTS.PACKET_TYPES.MESSAGE:
+                    this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { 
+                        type: 'message', 
+                        text: data.content, 
+                        timestamp: data.ts,
+                        id: data.id 
+                    });
+                    break;
+                case CONSTANTS.PACKET_TYPES.IMAGE_CHUNK:
+                    const result = this.chunkManager.handleChunk(this.conn.peer, data.content);
+                    if (result) {
+                        this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { 
+                            type: 'image', 
+                            data: result, 
+                            timestamp: Date.now() 
+                        });
+                    }
+                    break;
+                case CONSTANTS.PACKET_TYPES.TYPING:
+                    this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { type: 'typing' });
+                    break;
+            }
+        }
+
+        async send(type, content) {
+            if (!this.conn || !this.conn.open) return false;
+
+            // Handle Image Chunking Logic
+            if (type === 'image') {
+                const totalChunks = Math.ceil(content.length / CONSTANTS.CHUNK_SIZE);
+                const fileId = Utils.generateUUID();
+                
+                for (let i = 0; i < totalChunks; i++) {
+                    const chunk = content.slice(i * CONSTANTS.CHUNK_SIZE, (i + 1) * CONSTANTS.CHUNK_SIZE);
+                    const packet = {
+                        type: CONSTANTS.PACKET_TYPES.IMAGE_CHUNK,
+                        content: { fileId, index: i, total: totalChunks, data: chunk },
+                        ts: Date.now()
+                    };
+                    const encrypted = await this.crypto.encrypt(packet);
+                    this.conn.send({ ciphertext: encrypted });
+                    await Utils.wait(10); // Throttle to prevent WebRTC buffer overflow
+                }
+                return true;
+            }
+
+            // Standard Message
+            const packet = {
+                type: type === 'message' ? CONSTANTS.PACKET_TYPES.MESSAGE : CONSTANTS.PACKET_TYPES.TYPING,
+                content: content,
+                ts: Date.now(),
+                id: Utils.generateUUID()
+            };
+
+            const encrypted = await this.crypto.encrypt(packet);
+            this.conn.send({ ciphertext: encrypted });
+            return packet;
+        }
+
+        startHeartbeat() {
+            this.stopHeartbeat();
+            this.heartbeatInterval = setInterval(() => {
+                if (this.conn && this.conn.open) {
+                    this.conn.send({ type: CONSTANTS.PACKET_TYPES.PING });
+                }
+            }, 5000);
+        }
+
+        stopHeartbeat() {
+            clearInterval(this.heartbeatInterval);
+        }
+    }
 
     /**
-     * ==================================================================
-     * 6. CHAT ENGINE (UI & Logic)
-     * ==================================================================
+     * SECTION 9: AUDIO ENGINE
      */
-    const ChatEngine = {
-        typingTimeout: null,
+    class AudioEngine {
+        constructor() {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.enabled = true;
+        }
 
-        updateHeader: (name, secure) => {
-            document.getElementById('chat-partner-name').innerText = name;
-            const status = document.getElementById('chat-encryption-status');
-            status.innerHTML = secure 
-                ? '<i class="fas fa-lock"></i> Encrypted' 
-                : '<i class="fas fa-unlock"></i> Handshaking...';
-        },
+        play(type) {
+            if (!this.enabled || this.ctx.state === 'suspended') this.ctx.resume();
+            if (!this.enabled) return;
 
-        sendMessage: async () => {
-            const input = DOM.inputs.msg;
-            const text = input.value.trim();
-            if(!text) return;
-            
-            // 1. UI
-            ChatEngine.addBubble('me', 'text', text);
-            input.value = '';
-            
-            // 2. Encrypt & Send
-            const encrypted = await Security.encrypt(text);
-            Network.sendData({ type: 'text', content: encrypted });
-            
-            // 3. Persist
-            if(store.activeChatId) {
-                Persistence.saveChat(store.activeChatId, { sender: 'me', type: 'text', content: text, time: Date.now() });
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            const now = this.ctx.currentTime;
+
+            if (type === 'msg_in') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'msg_out') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
             }
+        }
+    }
+
+    /**
+     * SECTION 10: UI CONTROLLER
+     */
+    class UIController {
+        constructor(eventBus) {
+            this.bus = eventBus;
+            this.dom = this.cacheDOM();
+            this.bindEvents();
+            this.renderEmojiPicker();
+            this.typingTimer = null;
+        }
+
+        cacheDOM() {
+            return {
+                views: {
+                    login: document.getElementById('view-login'),
+                    home: document.getElementById('view-home'),
+                    chat: document.getElementById('view-chat')
+                },
+                inputs: {
+                    user: document.getElementById('input-username'),
+                    remote: document.getElementById('input-remote-id'),
+                    msg: document.getElementById('msg-input'),
+                    file: document.getElementById('file-input')
+                },
+                btns: {
+                    login: document.getElementById('btn-login'),
+                    connect: document.getElementById('btn-connect'),
+                    send: document.getElementById('btn-send-msg'),
+                    attach: document.getElementById('btn-attach'),
+                    emoji: document.getElementById('btn-emoji'),
+                    settings: document.getElementById('btn-settings'),
+                    closeSettings: document.getElementById('btn-close-settings'),
+                    copy: document.getElementById('btn-copy-id'),
+                    back: document.getElementById('btn-back-chat'),
+                    clear: document.getElementById('btn-clear-history')
+                },
+                disp: {
+                    msgs: document.getElementById('messages-container'),
+                    status: document.getElementById('connection-status'),
+                    myId: document.getElementById('my-peer-id'),
+                    pName: document.getElementById('chat-partner-name'),
+                    pAvatar: document.getElementById('chat-partner-avatar'),
+                    headerAvatar: document.getElementById('header-avatar'),
+                    homeAvatar: document.getElementById('home-avatar-display'),
+                    typing: document.getElementById('typing-indicator'),
+                    emojis: document.getElementById('emoji-picker-container')
+                },
+                modals: {
+                    settings: document.getElementById('settings-modal')
+                },
+                tog: {
+                    theme: document.getElementById('theme-toggle'),
+                    sound: document.getElementById('sound-toggle'),
+                    history: document.getElementById('history-toggle')
+                }
+            };
+        }
+
+        bindEvents() {
+            this.dom.btns.login.onclick = () => {
+                const name = this.dom.inputs.user.value.trim();
+                if (name.length > 2) this.bus.emit(CONSTANTS.EVENTS.LOGIN, name);
+                else this.toast('Username too short', 'exclamation');
+            };
+
+            this.dom.btns.connect.onclick = () => {
+                const id = this.dom.inputs.remote.value.trim();
+                if (id) this.bus.emit(CONSTANTS.EVENTS.CONNECT, id);
+            };
+
+            this.dom.btns.send.onclick = () => this.handleSend();
+            this.dom.inputs.msg.onkeypress = (e) => { if(e.key === 'Enter') this.handleSend(); };
             
-            AudioEngine.play('send');
-        },
+            this.dom.inputs.msg.oninput = Utils.debounce(() => {
+                this.bus.emit(CONSTANTS.EVENTS.SEND_MSG, { type: 'typing' });
+            }, 300);
 
-        receiveMessage: (type, content) => {
-            ChatEngine.addBubble('other', type, content);
-            AudioEngine.play('receive');
-        },
+            this.dom.btns.copy.onclick = () => {
+                navigator.clipboard.writeText(this.dom.disp.myId.innerText);
+                this.toast('ID Copied', 'check');
+            };
 
-        addBubble: (sender, type, content) => {
-            const container = document.getElementById('chat-messages');
-            const el = document.createElement('div');
-            el.className = `msg ${sender}`;
+            this.dom.btns.settings.onclick = () => this.dom.modals.settings.classList.add('open');
+            this.dom.btns.closeSettings.onclick = () => this.dom.modals.settings.classList.remove('open');
             
-            let innerHTML = '';
-            const time = Utils.formatTime(new Date());
+            this.dom.btns.attach.onclick = () => this.dom.inputs.file.click();
+            this.dom.inputs.file.onchange = (e) => {
+                if(e.target.files[0]) this.processFile(e.target.files[0]);
+            };
 
-            if (type === 'text') {
-                innerHTML = content.replace(/</g, "&lt;").replace(/\n/g, "<br>");
-            } else if (type === 'image') {
-                innerHTML = `<img src="${content}" class="msg-image" onclick="window.open(this.src)">`;
-            } else if (type === 'file') {
-                innerHTML = `
-                    <div class="msg-file">
-                        <i class="fas fa-file-download" style="font-size:1.5rem"></i>
-                        <div>
-                            <div style="font-weight:bold">${content.name}</div>
-                            <div style="font-size:0.7rem">${(content.size/1024).toFixed(1)} KB</div>
-                        </div>
-                    </div>
-                `;
-                el.onclick = () => { const a=document.createElement('a'); a.href=content.url; a.download=content.name; a.click(); };
-            } else if (type === 'audio') {
-                innerHTML = `
-                    <div class="msg-audio">
-                        <i class="fas fa-play-circle" style="font-size:1.5rem; cursor:pointer;" onclick="this.nextElementSibling.play()"></i>
-                        <audio src="${content}" controls style="display:none"></audio>
-                        <span>Voice Note</span>
-                    </div>
-                `;
+            this.dom.btns.emoji.onclick = (e) => {
+                e.stopPropagation();
+                this.dom.disp.emojis.classList.toggle('active');
+            };
+            document.onclick = (e) => {
+                if (!this.dom.disp.emojis.contains(e.target) && e.target !== this.dom.btns.emoji) {
+                    this.dom.disp.emojis.classList.remove('active');
+                }
+            };
+
+            this.dom.btns.back.onclick = () => {
+                this.switchView('view-home');
+                this.dom.disp.msgs.innerHTML = '';
+            };
+
+            this.dom.btns.clear.onclick = () => {
+                // Trigger DB Clear
+                window.app.db.clearAll(); // Direct access for simplicity in single file
+                this.toast('Database Cleared', 'trash');
+            };
+
+            // Theme Toggle
+            this.dom.tog.theme.onchange = (e) => {
+                document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
+                localStorage.setItem('aether_theme', e.target.checked ? 'dark' : 'light');
+            };
+        }
+
+        handleSend() {
+            const txt = this.dom.inputs.msg.value.trim();
+            if(!txt) return;
+            this.bus.emit(CONSTANTS.EVENTS.SEND_MSG, { type: 'message', content: txt });
+            this.dom.inputs.msg.value = '';
+        }
+
+        processFile(file) {
+            if (file.size > 5 * 1024 * 1024) return this.toast('File too big (Max 5MB)', 'ban');
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.bus.emit(CONSTANTS.EVENTS.SEND_MSG, { type: 'image', content: e.target.result });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        renderEmojiPicker() {
+            const list = ['😀','😂','🥰','😎','🤔','😴','🥶','🤡','👻','👽','🤖','💩','👍','👎','👋','🙏','💪','🧠','❤️','💔','🔥','✨','🎉','🚀'];
+            this.dom.disp.emojis.innerHTML = list.map(e => `<div class="emoji-item">${e}</div>`).join('');
+            this.dom.disp.emojis.querySelectorAll('.emoji-item').forEach(item => {
+                item.onclick = () => {
+                    this.dom.inputs.msg.value += item.innerText;
+                    this.dom.inputs.msg.focus();
+                };
+            });
+        }
+
+        switchView(id) {
+            Object.values(this.dom.views).forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        toast(msg, icon) {
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerHTML = `<i class="fas fa-${icon}"></i> <span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(div);
+            setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 3000);
+        }
+
+        addMessage(msg, isMe) {
+            const div = document.createElement('div');
+            div.className = `message-bubble ${isMe ? 'msg-me' : 'msg-other'}`;
+            
+            let content = '';
+            if (msg.type === 'text') content = Utils.linkify(Utils.sanitize(msg.payload));
+            else if (msg.type === 'image') content = `<img src="${msg.payload}" class="msg-image" onclick="window.open(this.src)">`;
+
+            div.innerHTML = `${content}<div class="msg-meta">${Utils.formatTime(msg.timestamp)}</div>`;
+            this.dom.disp.msgs.appendChild(div);
+            this.dom.disp.msgs.scrollTop = this.dom.disp.msgs.scrollHeight;
+        }
+
+        addSystem(txt) {
+            const div = document.createElement('div');
+            div.className = 'msg-system';
+            div.innerText = txt;
+            this.dom.disp.msgs.appendChild(div);
+        }
+
+        showTyping() {
+            this.dom.disp.typing.classList.add('active');
+            this.dom.disp.msgs.scrollTop = this.dom.disp.msgs.scrollHeight;
+            clearTimeout(this.typingTimer);
+            this.typingTimer = setTimeout(() => this.dom.disp.typing.classList.remove('active'), 2000);
+        }
+        
+        setAvatar(username, target) {
+            const svg = AvatarGenerator.generate(username);
+            const img = `<img src="${svg}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+            if(target === 'header') this.dom.disp.headerAvatar.innerHTML = img;
+            if(target === 'home') this.dom.disp.homeAvatar.innerHTML = img;
+            if(target === 'partner') this.dom.disp.pAvatar.innerHTML = img;
+        }
+    }
+
+    /**
+     * SECTION 11: MAIN APPLICATION ORCHESTRATOR
+     */
+    class AppCore {
+        constructor() {
+            this.bus = new EventBus();
+            this.crypto = new CryptoGuard();
+            this.db = new Database();
+            this.audio = new AudioEngine();
+            this.net = new NetworkManager(this.bus, this.crypto);
+            this.ui = new UIController(this.bus);
+            
+            this.username = null;
+            this.peerId = null;
+        }
+
+        async init() {
+            // Restore Settings
+            const savedTheme = localStorage.getItem('aether_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            this.ui.dom.tog.theme.checked = savedTheme === 'dark';
+
+            // Init DB
+            try {
+                await this.db.open();
+                this.bus.emit(CONSTANTS.EVENTS.DB_READY);
+            } catch (e) {
+                console.error("Critical DB Failure", e);
             }
 
-            el.innerHTML = innerHTML + `<div class="msg-meta">${time} <i class="fas fa-check"></i></div>`;
-            container.appendChild(el);
-            container.scrollTop = container.scrollHeight;
-        },
+            // Bind Event Handlers
+            this.bus.on(CONSTANTS.EVENTS.LOGIN, (name) => this.handleLogin(name));
+            this.bus.on(CONSTANTS.EVENTS.CONNECT, (id) => this.net.connect(id, this.username));
+            this.bus.on(CONSTANTS.EVENTS.SEND_MSG, (data) => this.handleOutgoingMessage(data));
+            this.bus.on(CONSTANTS.EVENTS.STATUS_CHANGE, (d) => this.handleStatus(d));
+            this.bus.on(CONSTANTS.EVENTS.DATA_RECEIVED, (d) => this.handleIncomingData(d));
+            this.bus.on(CONSTANTS.EVENTS.UI_TOAST, (d) => this.ui.toast(d.msg, d.icon));
 
-        // --- History Rendering ---
-        renderHistory: () => {
-            const container = document.getElementById('history-container');
-            if(store.history.length === 0) {
-                container.innerHTML = '<div class="text-center" style="color:var(--text-muted); margin-top:40px; opacity:0.5;"><i class="fas fa-history" style="font-size:2rem; margin-bottom:10px;"></i><p>No recent history</p></div>';
+            // Auto-fill user
+            const savedUser = localStorage.getItem('aether_username');
+            if (savedUser) this.ui.dom.inputs.user.value = savedUser;
+        }
+
+        handleLogin(username) {
+            this.username = username;
+            localStorage.setItem('aether_username', username);
+            this.ui.setAvatar(username, 'header');
+            this.ui.setAvatar(username, 'home');
+            
+            this.net.init(username);
+            this.ui.toast('Connecting to secure network...', 'satellite-dish');
+        }
+
+        handleStatus(data) {
+            const { status, id, peer } = data;
+            
+            if (status === 'online') {
+                this.peerId = id;
+                this.ui.dom.disp.myId.innerText = id;
+                this.ui.dom.disp.status.classList.add('online');
+                this.ui.switchView('view-home');
+                this.ui.toast('Online & Secure', 'shield-alt');
+            } else if (status === 'connected') {
+                this.ui.switchView('view-chat');
+                this.ui.addSystem('--- Secure End-to-End Encrypted Channel Established ---');
+                this.ui.dom.disp.pName.innerText = 'Verifying...';
+                this.loadHistory(peer);
+            } else if (status === 'closed') {
+                this.ui.addSystem('Connection Terminated');
+                this.ui.dom.disp.status.classList.remove('online');
+            }
+        }
+
+        async handleIncomingData(data) {
+            if (data.type === 'handshake') {
+                this.ui.dom.disp.pName.innerText = data.username;
+                this.ui.setAvatar(data.username, 'partner');
+                this.ui.addSystem(`${data.username} joined the session.`);
+            } else if (data.type === 'message' || data.type === 'image') {
+                this.ui.addMessage({ type: data.type, payload: data.type === 'image' ? data.data : data.text, timestamp: data.timestamp }, false);
+                this.audio.play('msg_in');
+                
+                // Save to DB
+                if (this.ui.dom.tog.history.checked) {
+                    await this.db.addMessage({
+                        id: Utils.generateUUID(),
+                        peerId: this.net.conn.peer,
+                        type: data.type,
+                        payload: data.type === 'image' ? data.data : data.text,
+                        timestamp: data.timestamp,
+                        sender: 'other'
+                    });
+                }
+            } else if (data.type === 'typing') {
+                this.ui.showTyping();
+            }
+        }
+
+        async handleOutgoingMessage(data) {
+            if (data.type === 'typing') {
+                this.net.send('typing', null);
                 return;
             }
-            container.innerHTML = '';
-            store.history.forEach(chat => {
-                const lastMsg = chat.msgs[chat.msgs.length-1];
-                const content = lastMsg ? (lastMsg.type === 'text' ? lastMsg.content : '[Media]') : 'No messages';
-                
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div class="history-avatar">${chat.name.substring(0,2).toUpperCase()}</div>
-                    <div class="history-info">
-                        <div class="history-name">${chat.name}</div>
-                        <div class="history-last">${content}</div>
-                    </div>
-                `;
-                div.onclick = () => {
-                    Network.connect(chat.id);
-                };
-                container.appendChild(div);
-            });
-        },
 
-        loadHistory: (peerId) => {
-            const msgs = Persistence.getChat(peerId);
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = '<div class="msg-sys">Connection secured using End-to-End Encryption</div>';
-            msgs.forEach(m => {
-                ChatEngine.addBubble(m.sender, m.type, m.content);
-            });
-        },
-        
-        showTyping: () => {
-            const el = document.getElementById('typing-indicator');
-            el.style.opacity = 1;
-            clearTimeout(ChatEngine.typingTimeout);
-            ChatEngine.typingTimeout = setTimeout(() => {
-                el.style.opacity = 0;
-            }, 2000);
-        }
-    };
+            const sentPacket = await this.net.send(data.type, data.content);
+            if (sentPacket) {
+                this.ui.addMessage({ type: data.type, payload: data.content, timestamp: sentPacket.ts }, true);
+                this.audio.play('msg_out');
 
-    /**
-     * ==================================================================
-     * 7. FILE & MEDIA ENGINE
-     * ==================================================================
-     */
-    const MediaEngine = {
-        handleFileSelect: (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-
-            // 1. UI Preview
-            const url = URL.createObjectURL(file);
-            if(file.type.startsWith('image/')) {
-                ChatEngine.addBubble('me', 'image', url);
-            } else {
-                ChatEngine.addBubble('me', 'file', { name: file.name, size: file.size, url: url });
-            }
-
-            // 2. Chunk & Send
-            Network.sendData({ type: 'file-start', meta: { name: file.name, size: file.size, type: file.type } });
-
-            const reader = new FileReader();
-            let offset = 0;
-            
-            reader.onload = (event) => {
-                Network.sendData({ type: 'file-chunk', chunk: event.target.result, last: (offset + CONFIG.chunkSize >= file.size) });
-                offset += CONFIG.chunkSize;
-                if (offset < file.size) {
-                    readNextChunk();
+                // Save to DB
+                if (this.ui.dom.tog.history.checked) {
+                    await this.db.addMessage({
+                        id: sentPacket.id,
+                        peerId: this.net.conn.peer,
+                        type: data.type,
+                        payload: data.content,
+                        timestamp: sentPacket.ts,
+                        sender: 'me'
+                    });
                 }
-            };
-            
-            const readNextChunk = () => {
-                const slice = file.slice(offset, offset + CONFIG.chunkSize);
-                reader.readAsArrayBuffer(slice);
-            };
-            readNextChunk();
-        },
-        
-        // --- Voice Recorder ---
-        chunks: [],
-        mediaRecorder: null,
-        stream: null,
-        timerInt: null,
-        analyser: null,
-        
-        startRecording: async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                MediaEngine.stream = stream;
-                MediaEngine.mediaRecorder = new MediaRecorder(stream);
-                MediaEngine.chunks = [];
-                
-                // Visualizer Setup
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioCtx.createMediaStreamSource(stream);
-                MediaEngine.analyser = audioCtx.createAnalyser();
-                source.connect(MediaEngine.analyser);
-                MediaEngine.drawVisualizer();
-
-                MediaEngine.mediaRecorder.ondataavailable = e => MediaEngine.chunks.push(e.data);
-                MediaEngine.mediaRecorder.start();
-                
-                // UI
-                DOM.overlay.recorder.classList.add('active');
-                let sec = 0;
-                MediaEngine.timerInt = setInterval(() => {
-                    sec++;
-                    document.getElementById('recorder-timer').innerText = Utils.formatDuration(sec);
-                }, 1000);
-                
-            } catch (err) {
-                Utils.toast('Microphone access denied', 'microphone-slash');
-            }
-        },
-        
-        stopRecording: (send) => {
-            if(!MediaEngine.mediaRecorder) return;
-            MediaEngine.mediaRecorder.stop();
-            MediaEngine.stream.getTracks().forEach(t => t.stop());
-            clearInterval(MediaEngine.timerInt);
-            DOM.overlay.recorder.classList.remove('active');
-            
-            if(send) {
-                MediaEngine.mediaRecorder.onstop = () => {
-                    const blob = new Blob(MediaEngine.chunks, { type: 'audio/webm' });
-                    const url = URL.createObjectURL(blob);
-                    
-                    // Send as file
-                    ChatEngine.addBubble('me', 'audio', url);
-                    
-                    // Simple file send logic reuse
-                    Network.sendData({ type: 'file-start', meta: { name: 'voice-note.webm', size: blob.size, type: 'audio/webm' } });
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                         Network.sendData({ type: 'file-chunk', chunk: e.target.result, last: true });
-                    };
-                    reader.readAsArrayBuffer(blob);
-                };
-            }
-        },
-
-        drawVisualizer: () => {
-            if(!DOM.overlay.recorder.classList.contains('active')) return;
-            requestAnimationFrame(MediaEngine.drawVisualizer);
-            
-            const canvas = DOM.media.visualizer;
-            const ctx = canvas.getContext('2d');
-            const bufferLength = MediaEngine.analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            
-            MediaEngine.analyser.getByteFrequencyData(dataArray);
-            
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-surface-2');
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            const barWidth = (canvas.width / bufferLength) * 2.5;
-            let x = 0;
-            
-            for(let i = 0; i < bufferLength; i++) {
-                const barHeight = dataArray[i] / 2;
-                ctx.fillStyle = '#ff4757';
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 1;
+            } else {
+                this.ui.toast('Not Connected', 'wifi-slash');
             }
         }
-    };
 
-    /**
-     * ==================================================================
-     * 8. CALL ENGINE (WebRTC Video/Audio)
-     * ==================================================================
-     */
-    const CallEngine = {
-        callTimerInt: null,
-
-        startCall: async (video = true) => {
-            if(!store.activeChatId) return;
-            
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: video, audio: true });
-                store.localStream = stream;
-                
-                // Show UI
-                CallEngine.showOverlay(video, 'Calling...');
-                DOM.media.localVideo.srcObject = stream;
-                
-                // Initiate Peer Call
-                const call = store.peer.call(store.activeChatId, stream);
-                CallEngine.handleCallEvents(call);
-                
-            } catch (e) {
-                Utils.toast('Camera/Mic access failed', 'video-slash');
+        async loadHistory(peerId) {
+            if (!this.ui.dom.tog.history.checked) return;
+            const msgs = await this.db.getHistory(peerId);
+            if (msgs.length > 0) {
+                this.ui.addSystem('--- History Loaded ---');
+                msgs.forEach(m => this.ui.addMessage({ type: m.type, payload: m.payload, timestamp: m.timestamp }, m.sender === 'me'));
             }
-        },
-
-        handleIncomingCall: async (call) => {
-            // Simple confirm dialog (browser native for code brevity)
-            if(confirm('Incoming Call from ' + call.peer + '. Answer?')) {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                store.localStream = stream;
-                
-                CallEngine.showOverlay(true, 'Connected');
-                DOM.media.localVideo.srcObject = stream;
-                
-                call.answer(stream);
-                CallEngine.handleCallEvents(call);
-            } else {
-                call.close();
-            }
-        },
-
-        handleCallEvents: (call) => {
-            store.call = call;
-            
-            call.on('stream', (remoteStream) => {
-                DOM.media.remoteVideo.srcObject = remoteStream;
-                document.getElementById('call-status-text').innerText = 'Connected';
-                CallEngine.startTimer();
-            });
-            
-            call.on('close', () => {
-                CallEngine.endCall();
-            });
-            
-            call.on('error', () => {
-                CallEngine.endCall();
-            });
-        },
-
-        showOverlay: (video, status) => {
-            DOM.overlay.call.classList.add('active');
-            document.getElementById('call-status-text').innerText = status;
-            
-            if(!video) {
-                // Audio only mode UI adjustment
-                DOM.media.localVideo.style.opacity = 0;
-            } else {
-                DOM.media.localVideo.style.opacity = 1;
-            }
-        },
-
-        endCall: () => {
-            if(store.call) store.call.close();
-            if(store.localStream) store.localStream.getTracks().forEach(t => t.stop());
-            
-            DOM.overlay.call.classList.remove('active');
-            DOM.media.remoteVideo.srcObject = null;
-            DOM.media.localVideo.srcObject = null;
-            
-            clearInterval(CallEngine.callTimerInt);
-            document.getElementById('call-timer').innerText = '00:00';
-        },
-        
-        startTimer: () => {
-            let sec = 0;
-            CallEngine.callTimerInt = setInterval(() => {
-                sec++;
-                document.getElementById('call-timer').innerText = Utils.formatDuration(sec);
-            }, 1000);
-        },
-
-        toggleMute: () => {
-            if(!store.localStream) return;
-            const track = store.localStream.getAudioTracks()[0];
-            track.enabled = !track.enabled;
-            document.getElementById('btn-toggle-mic').classList.toggle('muted');
-        },
-
-        toggleCam: () => {
-            if(!store.localStream) return;
-            const track = store.localStream.getVideoTracks()[0];
-            track.enabled = !track.enabled;
-            document.getElementById('btn-toggle-cam').classList.toggle('muted');
         }
-    };
+    }
 
-    /**
-     * ==================================================================
-     * 9. INITIALIZATION & EVENTS
-     * ==================================================================
+    /*
+     * =========================================================================
+     * BOOT
+     * =========================================================================
      */
-    
-    // --- Event Listeners ---
-    
-    // Login
-    DOM.buttons.login.addEventListener('click', () => {
-        const name = DOM.inputs.username.value.trim();
-        if(name.length < 3) return Utils.toast('Name too short', 'exclamation');
-        localStorage.setItem('username', name);
-        Network.init(name);
-    });
-
-    // Connection
-    DOM.buttons.connect.addEventListener('click', () => {
-        const id = DOM.inputs.remoteId.value.trim();
-        if(id === store.user.id) return Utils.toast('Cannot connect to self', 'ban');
-        Network.connect(id);
-    });
-
-    // Copy
-    document.getElementById('btn-copy-id').addEventListener('click', () => {
-        navigator.clipboard.writeText(store.user.id);
-        Utils.toast('ID Copied');
-    });
-
-    // Chat
-    DOM.buttons.send.addEventListener('click', ChatEngine.sendMessage);
-    DOM.inputs.msg.addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') ChatEngine.sendMessage();
-        Network.sendData({type:'typing'});
-    });
-    DOM.inputs.msg.addEventListener('input', () => Network.sendData({type:'typing'}));
-
-    // Attachment Drawer
-    DOM.buttons.attach.addEventListener('click', () => {
-        document.getElementById('attach-drawer').classList.toggle('open');
-        DOM.buttons.attach.classList.toggle('active');
-    });
-
-    // Attachments Actions
-    document.getElementById('btn-attach-image').addEventListener('click', () => {
-        DOM.inputs.file.accept = 'image/*';
-        DOM.inputs.file.click();
-    });
-    document.getElementById('btn-attach-file').addEventListener('click', () => {
-        DOM.inputs.file.accept = '*/*';
-        DOM.inputs.file.click();
-    });
-    DOM.inputs.file.addEventListener('change', MediaEngine.handleFileSelect);
-
-    // Voice Note
-    document.getElementById('btn-attach-voice').addEventListener('click', MediaEngine.startRecording);
-    document.getElementById('btn-cancel-rec').addEventListener('click', () => MediaEngine.stopRecording(false));
-    document.getElementById('btn-send-rec').addEventListener('click', () => MediaEngine.stopRecording(true));
-
-    // Stickers
-    document.getElementById('btn-send-sticker').addEventListener('click', () => DOM.overlay.sticker.classList.add('open'));
-    document.getElementById('btn-close-stickers').addEventListener('click', () => DOM.overlay.sticker.classList.remove('open'));
-    document.querySelectorAll('.sticker-opt').forEach(el => {
-        el.addEventListener('click', () => {
-            const emoji = el.getAttribute('data-emoji');
-            ChatEngine.sendMessage(); // Hack: using main logic
-            Network.sendData({ type: 'text', content: emoji }); // Send raw for now, ideally styled
-            ChatEngine.addBubble('me', 'text', emoji);
-            // Persist
-            if(store.activeChatId) Persistence.saveChat(store.activeChatId, { sender: 'me', type: 'text', content: emoji, time: Date.now() });
-            DOM.overlay.sticker.classList.remove('open');
-            document.getElementById('attach-drawer').classList.remove('open');
-        });
-    });
-
-    // Calls
-    document.getElementById('btn-call-video').addEventListener('click', () => CallEngine.startCall(true));
-    document.getElementById('btn-call-audio').addEventListener('click', () => CallEngine.startCall(false));
-    document.getElementById('btn-hangup').addEventListener('click', CallEngine.endCall);
-    document.getElementById('btn-toggle-mic').addEventListener('click', CallEngine.toggleMute);
-    document.getElementById('btn-toggle-cam').addEventListener('click', CallEngine.toggleCam);
-
-    // Settings
-    DOM.buttons.settings.addEventListener('click', () => DOM.overlay.settings.classList.add('open'));
-    document.getElementById('btn-close-settings').addEventListener('click', () => DOM.overlay.settings.classList.remove('open'));
-    DOM.overlay.settings.addEventListener('click', (e) => {
-        if(e.target === DOM.overlay.settings) DOM.overlay.settings.classList.remove('open');
-    });
-    
-    DOM.buttons.theme.addEventListener('click', () => {
-        const newTheme = store.theme === 'light' ? 'dark' : 'light';
-        Utils.setTheme(newTheme);
-    });
-    
-    document.getElementById('chk-sound').addEventListener('change', (e) => store.soundEnabled = e.target.checked);
-    document.getElementById('btn-clear-data').addEventListener('click', Persistence.clear);
-    document.getElementById('btn-back-chat').addEventListener('click', () => Utils.switchView('home'));
-
-    // --- Init ---
-    Utils.setTheme(store.theme);
-    const savedName = localStorage.getItem('username');
-    if(savedName) DOM.inputs.username.value = savedName;
+    window.onload = () => {
+        window.app = new AppCore();
+        window.app.init();
+    };
 
 </script>
 </body>
