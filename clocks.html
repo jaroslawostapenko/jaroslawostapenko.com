@@ -1,0 +1,831 @@
+<!-- 
+    Filename: clocks.html
+    Description: World Clock Pro - Mobile First Edition
+    Author: Yaroslav Ostapenko
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>World Clock Pro</title>
+    <style>
+        /* 
+           ==========================================================================
+           CSS VARIABLES & THEME CONFIGURATION
+           ==========================================================================
+        */
+        :root {
+            /* Light Theme (Default) */
+            --bg-body: #f2f4f6;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-modal: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --accent-color: #007aff;
+            --danger-color: #ff3b30;
+            --clock-face: #e5e5ea;
+            --clock-hand: #1c1c1e;
+            --clock-second: #ff9500;
+            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --border-glass: 1px solid rgba(255, 255, 255, 0.5);
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg-body: #000000;
+            --bg-card: rgba(28, 28, 30, 0.6);
+            --bg-modal: #1c1c1e;
+            --text-primary: #ffffff;
+            --text-secondary: #98989d;
+            --accent-color: #0a84ff;
+            --danger-color: #ff453a;
+            --clock-face: #2c2c2e;
+            --clock-hand: #ffffff;
+            --clock-second: #ff9f0a;
+            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --border-glass: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 
+           ==========================================================================
+           RESET & BASE STYLES
+           ==========================================================================
+        */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll, use container */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 
+           ==========================================================================
+           LAYOUT & HEADER
+           ==========================================================================
+        */
+        .app-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for FAB */
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-top: 10px;
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header-left p {
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            background: rgba(128, 128, 128, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background 0.2s;
+        }
+
+        .btn-icon:active {
+            transform: scale(0.9);
+        }
+
+        .btn-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* 
+           ==========================================================================
+           CLOCK CARDS
+           ==========================================================================
+        */
+        .clock-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .clock-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: var(--border-glass);
+            padding: 20px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.4s var(--ease-spring) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        /* Analog Clock Styling */
+        .analog-wrapper {
+            width: 70px;
+            height: 70px;
+            margin-right: 20px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            background: var(--clock-face);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px;
+            z-index: 2;
+        }
+
+        .hour-hand {
+            width: 4px;
+            height: 25%;
+            background: var(--clock-hand);
+        }
+
+        .minute-hand {
+            width: 2px;
+            height: 35%;
+            background: var(--clock-hand);
+        }
+
+        .second-hand {
+            width: 1px;
+            height: 40%;
+            background: var(--clock-second);
+            z-index: 3;
+        }
+
+        .center-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--clock-hand);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+
+        /* Text Info Styling */
+        .city-info {
+            flex: 1;
+        }
+
+        .city-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .time-offset {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .digital-time {
+            text-align: right;
+        }
+
+        .time-display {
+            font-size: 28px;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .meridiem {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-left: 2px;
+        }
+
+        .day-indicator {
+            font-size: 12px;
+            color: var(--accent-color);
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        /* Delete Button (Edit Mode) */
+        .delete-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            width: 0;
+            height: 30px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            overflow: hidden;
+            transition: width 0.3s var(--ease-spring), margin 0.3s ease;
+            cursor: pointer;
+            margin-left: 0;
+        }
+
+        .clock-card.edit-mode .delete-btn {
+            width: 60px;
+            margin-left: 15px;
+        }
+
+        /* 
+           ==========================================================================
+           FLOATING ACTION BUTTON (FAB)
+           ==========================================================================
+        */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 10px 20px rgba(0, 122, 255, 0.3);
+            color: white;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s var(--ease-spring);
+        }
+
+        .fab:active {
+            transform: translateX(-50%) scale(0.9);
+        }
+
+        /* 
+           ==========================================================================
+           MODAL & SEARCH
+           ==========================================================================
+        */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 85vh;
+            background: var(--bg-modal);
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.4s var(--ease-spring);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(128,128,128, 0.1);
+        }
+
+        .search-container {
+            padding: 15px 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(128,128,128, 0.1);
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .city-results {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px 20px;
+        }
+
+        .result-item {
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(128,128,128, 0.1);
+            cursor: pointer;
+        }
+
+        .result-item h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .result-item p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: auto;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-left">
+                <h1>World Clock</h1>
+                <p id="local-date-display">Loading...</p>
+            </div>
+            <div class="header-controls">
+                <button class="btn-icon" id="theme-toggle" aria-label="Toggle Theme">
+                    <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                </button>
+                <button class="btn-icon" id="edit-toggle" aria-label="Edit List">
+                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div id="clock-list" class="clock-list">
+            <!-- Clocks will be rendered here -->
+        </div>
+
+        <footer>
+            Created by Yaroslav Ostapenko
+        </footer>
+    </div>
+
+    <button class="fab" id="fab-add">+</button>
+
+    <!-- Search Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2>Add City</h2>
+                <button class="btn-icon" id="modal-close">✕</button>
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-input" id="city-search" placeholder="Search (e.g. Tokyo, London)..." autocomplete="off">
+            </div>
+            <div class="city-results" id="city-results">
+                <!-- Search results here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* 
+           ==========================================================================
+           JAVASCRIPT LOGIC
+           ==========================================================================
+        */
+
+        // --- 1. DATA: EXTENSIVE CITY DATABASE ---
+        const allCities = [
+            { name: "Abidjan", zone: "Africa/Abidjan", country: "Ivory Coast" },
+            { name: "Accra", zone: "Africa/Accra", country: "Ghana" },
+            { name: "Adis Ababa", zone: "Africa/Addis_Ababa", country: "Ethiopia" },
+            { name: "Algiers", zone: "Africa/Algiers", country: "Algeria" },
+            { name: "Amsterdam", zone: "Europe/Amsterdam", country: "Netherlands" },
+            { name: "Anchorage", zone: "America/Anchorage", country: "USA" },
+            { name: "Athens", zone: "Europe/Athens", country: "Greece" },
+            { name: "Auckland", zone: "Pacific/Auckland", country: "New Zealand" },
+            { name: "Baghdad", zone: "Asia/Baghdad", country: "Iraq" },
+            { name: "Bangkok", zone: "Asia/Bangkok", country: "Thailand" },
+            { name: "Barcelona", zone: "Europe/Madrid", country: "Spain" },
+            { name: "Beijing", zone: "Asia/Shanghai", country: "China" },
+            { name: "Beirut", zone: "Asia/Beirut", country: "Lebanon" },
+            { name: "Berlin", zone: "Europe/Berlin", country: "Germany" },
+            { name: "Bogota", zone: "America/Bogota", country: "Colombia" },
+            { name: "Boston", zone: "America/New_York", country: "USA" },
+            { name: "Brasilia", zone: "America/Sao_Paulo", country: "Brazil" },
+            { name: "Brussels", zone: "Europe/Brussels", country: "Belgium" },
+            { name: "Bucharest", zone: "Europe/Bucharest", country: "Romania" },
+            { name: "Budapest", zone: "Europe/Budapest", country: "Hungary" },
+            { name: "Buenos Aires", zone: "America/Argentina/Buenos_Aires", country: "Argentina" },
+            { name: "Cairo", zone: "Africa/Cairo", country: "Egypt" },
+            { name: "Cape Town", zone: "Africa/Johannesburg", country: "South Africa" },
+            { name: "Caracas", zone: "America/Caracas", country: "Venezuela" },
+            { name: "Casablanca", zone: "Africa/Casablanca", country: "Morocco" },
+            { name: "Chicago", zone: "America/Chicago", country: "USA" },
+            { name: "Copenhagen", zone: "Europe/Copenhagen", country: "Denmark" },
+            { name: "Dallas", zone: "America/Chicago", country: "USA" },
+            { name: "Delhi", zone: "Asia/Kolkata", country: "India" },
+            { name: "Denver", zone: "America/Denver", country: "USA" },
+            { name: "Dhaka", zone: "Asia/Dhaka", country: "Bangladesh" },
+            { name: "Dubai", zone: "Asia/Dubai", country: "UAE" },
+            { name: "Dublin", zone: "Europe/Dublin", country: "Ireland" },
+            { name: "Frankfurt", zone: "Europe/Berlin", country: "Germany" },
+            { name: "Geneva", zone: "Europe/Zurich", country: "Switzerland" },
+            { name: "Hanoi", zone: "Asia/Bangkok", country: "Vietnam" },
+            { name: "Havana", zone: "America/Havana", country: "Cuba" },
+            { name: "Helsinki", zone: "Europe/Helsinki", country: "Finland" },
+            { name: "Hong Kong", zone: "Asia/Hong_Kong", country: "China" },
+            { name: "Honolulu", zone: "Pacific/Honolulu", country: "USA" },
+            { name: "Houston", zone: "America/Chicago", country: "USA" },
+            { name: "Istanbul", zone: "Europe/Istanbul", country: "Turkey" },
+            { name: "Jakarta", zone: "Asia/Jakarta", country: "Indonesia" },
+            { name: "Jerusalem", zone: "Asia/Jerusalem", country: "Israel" },
+            { name: "Johannesburg", zone: "Africa/Johannesburg", country: "South Africa" },
+            { name: "Karachi", zone: "Asia/Karachi", country: "Pakistan" },
+            { name: "Kathmandu", zone: "Asia/Kathmandu", country: "Nepal" },
+            { name: "Kiev", zone: "Europe/Kiev", country: "Ukraine" },
+            { name: "Kuala Lumpur", zone: "Asia/Kuala_Lumpur", country: "Malaysia" },
+            { name: "Kuwait City", zone: "Asia/Kuwait", country: "Kuwait" },
+            { name: "Lagos", zone: "Africa/Lagos", country: "Nigeria" },
+            { name: "Lima", zone: "America/Lima", country: "Peru" },
+            { name: "Lisbon", zone: "Europe/Lisbon", country: "Portugal" },
+            { name: "London", zone: "Europe/London", country: "UK" },
+            { name: "Los Angeles", zone: "America/Los_Angeles", country: "USA" },
+            { name: "Madrid", zone: "Europe/Madrid", country: "Spain" },
+            { name: "Manila", zone: "Asia/Manila", country: "Philippines" },
+            { name: "Melbourne", zone: "Australia/Melbourne", country: "Australia" },
+            { name: "Mexico City", zone: "America/Mexico_City", country: "Mexico" },
+            { name: "Miami", zone: "America/New_York", country: "USA" },
+            { name: "Milan", zone: "Europe/Rome", country: "Italy" },
+            { name: "Montreal", zone: "America/Toronto", country: "Canada" },
+            { name: "Moscow", zone: "Europe/Moscow", country: "Russia" },
+            { name: "Mumbai", zone: "Asia/Kolkata", country: "India" },
+            { name: "Nairobi", zone: "Africa/Nairobi", country: "Kenya" },
+            { name: "New York", zone: "America/New_York", country: "USA" },
+            { name: "Oslo", zone: "Europe/Oslo", country: "Norway" },
+            { name: "Paris", zone: "Europe/Paris", country: "France" },
+            { name: "Perth", zone: "Australia/Perth", country: "Australia" },
+            { name: "Phoenix", zone: "America/Phoenix", country: "USA" },
+            { name: "Prague", zone: "Europe/Prague", country: "Czech Republic" },
+            { name: "Reykjavik", zone: "Atlantic/Reykjavik", country: "Iceland" },
+            { name: "Rio de Janeiro", zone: "America/Sao_Paulo", country: "Brazil" },
+            { name: "Riyadh", zone: "Asia/Riyadh", country: "Saudi Arabia" },
+            { name: "Rome", zone: "Europe/Rome", country: "Italy" },
+            { name: "San Francisco", zone: "America/Los_Angeles", country: "USA" },
+            { name: "Santiago", zone: "America/Santiago", country: "Chile" },
+            { name: "Sao Paulo", zone: "America/Sao_Paulo", country: "Brazil" },
+            { name: "Seoul", zone: "Asia/Seoul", country: "South Korea" },
+            { name: "Shanghai", zone: "Asia/Shanghai", country: "China" },
+            { name: "Singapore", zone: "Asia/Singapore", country: "Singapore" },
+            { name: "Stockholm", zone: "Europe/Stockholm", country: "Sweden" },
+            { name: "Sydney", zone: "Australia/Sydney", country: "Australia" },
+            { name: "Taipei", zone: "Asia/Taipei", country: "Taiwan" },
+            { name: "Tehran", zone: "Asia/Tehran", country: "Iran" },
+            { name: "Tel Aviv", zone: "Asia/Tel_Aviv", country: "Israel" },
+            { name: "Tokyo", zone: "Asia/Tokyo", country: "Japan" },
+            { name: "Toronto", zone: "America/Toronto", country: "Canada" },
+            { name: "Vancouver", zone: "America/Vancouver", country: "Canada" },
+            { name: "Vienna", zone: "Europe/Vienna", country: "Austria" },
+            { name: "Warsaw", zone: "Europe/Warsaw", country: "Poland" },
+            { name: "Washington DC", zone: "America/New_York", country: "USA" },
+            { name: "Zurich", zone: "Europe/Zurich", country: "Switzerland" }
+        ].sort((a, b) => a.name.localeCompare(b.name));
+
+        // --- 2. STATE MANAGEMENT ---
+        let myCities = JSON.parse(localStorage.getItem('myCities')) || [
+            { name: "New York", zone: "America/New_York", country: "USA" },
+            { name: "London", zone: "Europe/London", country: "UK" },
+            { name: "Tokyo", zone: "Asia/Tokyo", country: "Japan" }
+        ];
+
+        let isEditMode = false;
+        let isDarkMode = localStorage.getItem('theme') === 'dark';
+
+        // --- 3. DOM ELEMENTS ---
+        const dom = {
+            clockList: document.getElementById('clock-list'),
+            fab: document.getElementById('fab-add'),
+            modal: document.getElementById('modal'),
+            modalClose: document.getElementById('modal-close'),
+            searchInput: document.getElementById('city-search'),
+            searchResults: document.getElementById('city-results'),
+            editToggle: document.getElementById('edit-toggle'),
+            themeToggle: document.getElementById('theme-toggle'),
+            localDate: document.getElementById('local-date-display')
+        };
+
+        // --- 4. CORE FUNCTIONS ---
+
+        function init() {
+            applyTheme();
+            renderClocks();
+            updateTimeLoop();
+            setupEventListeners();
+            populateSearchResults('');
+            
+            // Set header date
+            const now = new Date();
+            dom.localDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+        }
+
+        // Apply Theme based on state
+        function applyTheme() {
+            document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+            dom.themeToggle.innerHTML = isDarkMode 
+                ? '<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>' // Sun icon for dark mode
+                : '<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>'; // Moon icon for light mode
+        }
+
+        // Calculate time difference
+        function getTimeOffset(zone) {
+            const now = new Date();
+            const local = new Date(now.toLocaleString('en-US', { timeZone: undefined })); // System local
+            const target = new Date(now.toLocaleString('en-US', { timeZone: zone }));
+            
+            const diffMs = target - local;
+            const diffHrs = Math.round(diffMs / 3600000);
+            
+            if (diffHrs === 0) return 'Same Time';
+            return diffHrs > 0 ? `+${diffHrs}HRS` : `${diffHrs}HRS`;
+        }
+
+        // Render the main list of clocks
+        function renderClocks() {
+            dom.clockList.innerHTML = '';
+            
+            if (myCities.length === 0) {
+                dom.clockList.innerHTML = '<div class="empty-state">No cities added.<br>Tap + to add one.</div>';
+                return;
+            }
+
+            myCities.forEach((city, index) => {
+                const el = document.createElement('div');
+                el.className = `clock-card ${isEditMode ? 'edit-mode' : ''}`;
+                el.innerHTML = `
+                    <div class="card-content">
+                        <div class="analog-wrapper">
+                            <div class="clock-face">
+                                <div class="hand hour-hand" id="hour-${index}"></div>
+                                <div class="hand minute-hand" id="min-${index}"></div>
+                                <div class="hand second-hand" id="sec-${index}"></div>
+                                <div class="center-dot"></div>
+                            </div>
+                        </div>
+                        <div class="city-info">
+                            <div class="city-name">${city.name}</div>
+                            <div class="time-offset">${city.country} • ${getTimeOffset(city.zone)}</div>
+                        </div>
+                        <div class="digital-time">
+                            <div class="time-display" id="dig-${index}">00:00</div>
+                            <div class="day-indicator" id="day-${index}">Today</div>
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="removeCity(${index})">Delete</button>
+                `;
+                dom.clockList.appendChild(el);
+            });
+            updateTime(); // Immediate update
+        }
+
+        // Update loop logic
+        function updateTime() {
+            const now = new Date();
+            
+            myCities.forEach((city, index) => {
+                // 1. Get time in target timezone
+                const zoneTimeStr = now.toLocaleTimeString('en-US', { timeZone: city.zone, hour12: false });
+                const [h, m, s] = zoneTimeStr.split(':').map(Number);
+                
+                // 2. Analog Math
+                const sDeg = s * 6;
+                const mDeg = m * 6 + s * 0.1;
+                const hDeg = (h % 12) * 30 + m * 0.5;
+
+                // 3. Update Hands
+                const hHand = document.getElementById(`hour-${index}`);
+                const mHand = document.getElementById(`min-${index}`);
+                const sHand = document.getElementById(`sec-${index}`);
+
+                if(hHand) hHand.style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+                if(mHand) mHand.style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+                if(sHand) sHand.style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
+
+                // 4. Update Digital
+                const displayTime = now.toLocaleTimeString('en-US', { 
+                    timeZone: city.zone, 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+                
+                // Split 12:00 PM into 12:00 and PM for styling if needed, 
+                // but here we just stick to the string for simplicity.
+                const digEl = document.getElementById(`dig-${index}`);
+                if(digEl) digEl.innerHTML = displayTime.replace(' ', '<span class="meridiem">') + '</span>';
+
+                // 5. Day Indicator (Tomorrow/Yesterday)
+                const targetDate = new Date(now.toLocaleString('en-US', { timeZone: city.zone }));
+                const localDate = new Date();
+                
+                let dayTxt = "Today";
+                if (targetDate.getDate() !== localDate.getDate()) {
+                    dayTxt = targetDate > localDate ? "Tomorrow" : "Yesterday";
+                }
+                
+                const dayEl = document.getElementById(`day-${index}`);
+                if(dayEl) dayEl.innerText = dayTxt;
+            });
+        }
+
+        function updateTimeLoop() {
+            updateTime();
+            requestAnimationFrame(updateTimeLoop);
+        }
+
+        // --- 5. SEARCH & MODAL LOGIC ---
+
+        function populateSearchResults(query) {
+            dom.searchResults.innerHTML = '';
+            const lowerQuery = query.toLowerCase();
+            
+            const filtered = allCities.filter(c => 
+                c.name.toLowerCase().includes(lowerQuery) || 
+                c.country.toLowerCase().includes(lowerQuery)
+            );
+
+            filtered.forEach(city => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `<h3>${city.name}</h3><p>${city.country} • ${city.zone}</p>`;
+                item.onclick = () => addCity(city);
+                dom.searchResults.appendChild(item);
+            });
+
+            if(filtered.length === 0) {
+                dom.searchResults.innerHTML = '<div class="empty-state">No cities found</div>';
+            }
+        }
+
+        function addCity(city) {
+            // Check duplicates
+            if(myCities.some(c => c.name === city.name)) {
+                alert("City already added!");
+                return;
+            }
+            myCities.push(city);
+            saveData();
+            renderClocks();
+            toggleModal(false);
+            dom.searchInput.value = '';
+            populateSearchResults('');
+        }
+
+        window.removeCity = function(index) {
+            myCities.splice(index, 1);
+            saveData();
+            renderClocks();
+        };
+
+        function toggleModal(show) {
+            if (show) {
+                dom.modal.classList.add('active');
+                setTimeout(() => dom.searchInput.focus(), 100);
+            } else {
+                dom.modal.classList.remove('active');
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('myCities', JSON.stringify(myCities));
+        }
+
+        // --- 6. EVENT LISTENERS ---
+
+        function setupEventListeners() {
+            // FAB
+            dom.fab.addEventListener('click', () => toggleModal(true));
+            
+            // Modal
+            dom.modalClose.addEventListener('click', () => toggleModal(false));
+            dom.modal.addEventListener('click', (e) => {
+                if(e.target === dom.modal) toggleModal(false);
+            });
+
+            // Search
+            dom.searchInput.addEventListener('input', (e) => populateSearchResults(e.target.value));
+
+            // Theme Toggle
+            dom.themeToggle.addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+                applyTheme();
+            });
+
+            // Edit Toggle
+            dom.editToggle.addEventListener('click', () => {
+                isEditMode = !isEditMode;
+                // Re-render to show/hide delete buttons or toggle class on container
+                renderClocks();
+            });
+        }
+
+        // Init App
+        init();
+
+    </script>
+</body>
+</html>
