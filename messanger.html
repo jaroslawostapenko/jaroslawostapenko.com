@@ -5,838 +5,235 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AETHER | P2P Encrypted Mesh Messenger</title>
     
-    <!-- PeerJS CDN for WebRTC handling -->
+    <!-- PeerJS CDN -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     
     <style>
         /* 
         ========================================
-        1. CORE VARIABLES & THEME CONFIGURATION
+        CORE VARIABLES
         ========================================
         */
         :root {
-            /* Color Palette - Cyber Glass Theme */
             --bg-deep: #050505;
             --bg-surface: #0a0b10;
-            --bg-glass: rgba(20, 22, 30, 0.65);
-            --bg-glass-strong: rgba(20, 22, 30, 0.95);
-            
+            --bg-glass: rgba(20, 22, 30, 0.75);
+            --bg-glass-strong: rgba(10, 12, 16, 0.95);
             --primary: #00f2ea;
             --primary-dim: #008f8a;
-            --primary-glow: rgba(0, 242, 234, 0.3);
-            
-            --secondary: #ff0055;
-            --secondary-dim: #8f0030;
-            --secondary-glow: rgba(255, 0, 85, 0.3);
-
-            --accent: #7000ff;
-            
             --text-main: #ffffff;
             --text-muted: #8b9bb4;
-            --text-dark: #000000;
-
             --border-light: rgba(255, 255, 255, 0.1);
-            --border-active: rgba(0, 242, 234, 0.5);
-
-            /* Spacing System */
-            --space-xs: 4px;
-            --space-sm: 8px;
-            --space-md: 16px;
-            --space-lg: 24px;
-            --space-xl: 32px;
-            --space-xxl: 64px;
-
-            /* Effects */
-            --blur-strength: 20px;
-            --shadow-card: 0 10px 40px -10px rgba(0,0,0,0.5);
-            --shadow-neon: 0 0 15px var(--primary-glow);
-            --shadow-neon-red: 0 0 15px var(--secondary-glow);
-            
-            /* Typography */
             --font-stack: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-
-            /* Safe Area for Mobile (iPhone Notch) */
-            --sat: env(safe-area-inset-top);
-            --sab: env(safe-area-inset-bottom);
         }
 
         /* 
         ========================================
-        2. RESET & BASE STYLES
+        RESET & BASE
         ========================================
         */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg-deep);
-            /* Complex Gradient Background */
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 234, 0.05) 0%, transparent 20%);
             color: var(--text-main);
             font-family: var(--font-stack);
             height: 100vh;
-            /* Use dynamic viewport height for mobile browsers */
-            height: 100dvh; 
+            height: 100dvh; /* Fix for mobile address bar */
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.1);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-light);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dim);
         }
 
         /* 
         ========================================
-        3. ANIMATIONS
+        LAYOUT STRUCTURE
         ========================================
         */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        #app-root { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 var(--primary-glow); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 242, 234, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 242, 234, 0); }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideInUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0px); }
-        }
-
-        /* 
-        ========================================
-        4. LAYOUT & CONTAINERS
-        ========================================
-        */
-        #app-root {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        /* Background Grid Mesh */
-        .bg-mesh {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-size: 50px 50px;
-            background-image: 
-                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Main App Container */
         .main-container {
-            width: 90vw;
-            height: 85vh;
-            max-width: 1400px;
+            width: 90vw; height: 85vh; max-width: 1400px;
             background: var(--bg-glass);
-            backdrop-filter: blur(var(--blur-strength));
-            -webkit-backdrop-filter: blur(var(--blur-strength));
             border: 1px solid var(--border-light);
             border-radius: 24px;
-            box-shadow: var(--shadow-card);
             display: flex;
             overflow: hidden;
             position: relative;
-            animation: fadeIn 0.8s var(--ease-out);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         /* 
         ========================================
-        5. LOGIN SCREEN
+        LOGIN SCREEN
         ========================================
         */
         #login-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-deep);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-deep); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-
         .login-card {
-            width: 100%;
-            max-width: 400px;
-            padding: var(--space-xl);
-            background: var(--bg-surface);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            position: relative;
-            overflow: hidden;
-            animation: slideInUp 0.5s ease-out;
+            width: 90%; max-width: 400px; padding: 30px;
+            background: var(--bg-surface); border: 1px solid var(--border-light);
+            border-radius: 16px; text-align: center;
         }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-
-        .brand-title {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: var(--space-sm);
-            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .brand-subtitle {
-            color: var(--text-muted);
-            margin-bottom: var(--space-xl);
-            font-size: 0.9rem;
-        }
-
-        .input-group {
-            text-align: left;
-            margin-bottom: var(--space-lg);
-        }
-
-        .input-label {
-            display: block;
-            color: var(--text-muted);
-            margin-bottom: var(--space-xs);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        .brand-title { font-size: 2rem; font-weight: 800; margin-bottom: 5px; color: var(--primary); }
         .text-input {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-light);
-            padding: 14px 16px; /* Larger tap target */
-            color: white;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-family: var(--font-stack);
-            font-size: 16px; /* Prevents zoom on iOS */
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light);
+            padding: 14px; color: white; border-radius: 8px; margin-bottom: 15px;
+            font-size: 16px;
         }
-
-        .text-input:focus {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-neon);
-            background: rgba(0,0,0,0.2);
-        }
-
         .btn-primary {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dim) 100%);
-            color: var(--bg-deep);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-neon);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .login-footer-credit {
-            margin-top: 30px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-            opacity: 0.5;
+            width: 100%; padding: 14px; background: var(--primary); border: none;
+            border-radius: 8px; color: black; font-weight: bold; cursor: pointer;
+            font-size: 1rem; text-transform: uppercase;
         }
 
         /* 
         ========================================
-        6. SIDEBAR
+        SIDEBAR
         ========================================
         */
         .sidebar {
-            width: 320px;
-            background: var(--bg-glass-strong);
+            width: 320px; background: var(--bg-glass-strong);
             border-right: 1px solid var(--border-light);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            z-index: 10;
+            display: flex; flex-direction: column; flex-shrink: 0;
         }
-
-        .sidebar-header {
-            padding: var(--space-lg);
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 80px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            max-width: 100%;
-            overflow: hidden;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .username-display {
-            font-weight: 600;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .id-display {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .sidebar-actions {
-            padding: var(--space-md);
-        }
-
-        .btn-icon {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-light);
-            color: var(--text-muted);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .contact-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 0 var(--space-md);
-            -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
-        }
-
-        .list-header {
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: var(--space-md) 0 var(--space-sm) var(--space-xs);
-        }
-
+        .sidebar-header { height: 70px; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-light); }
+        .contact-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
         .contact-item {
-            display: flex;
-            align-items: center;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 6px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: background 0.2s;
+            display: flex; align-items: center; padding: 12px;
+            border-radius: 8px; margin-bottom: 4px; cursor: pointer;
         }
-
-        .contact-item:active, .contact-item:hover {
-            background: rgba(255,255,255,0.08);
+        .contact-item:hover, .contact-item.active { background: rgba(255,255,255,0.05); }
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--primary);
+            color: black; display: flex; align-items: center; justify-content: center; font-weight: bold;
+            flex-shrink: 0; margin-right: 12px;
         }
-
-        .contact-item.active {
-            background: rgba(0, 242, 234, 0.1);
-            border-color: rgba(0, 242, 234, 0.2);
-        }
-
-        .contact-info {
-            margin-left: 12px;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .contact-name {
-            display: block;
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 2px;
-        }
-
-        .contact-last-msg {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         .add-contact-btn {
-            width: 100%;
-            background: rgba(255,255,255,0.03);
-            border: 1px dashed var(--border-light);
-            color: var(--text-muted);
-            padding: 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .sidebar-footer {
-            padding: 16px;
-            text-align: center;
-            border-top: 1px solid var(--border-light);
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: rgba(0,0,0,0.2);
+            margin: 10px; padding: 10px; background: transparent;
+            border: 1px dashed var(--border-light); color: var(--text-muted);
+            border-radius: 8px; cursor: pointer; text-align: center; display: block;
         }
 
         /* 
         ========================================
-        7. CHAT AREA
+        CHAT AREA
         ========================================
         */
         .chat-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .empty-state {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-            width: 100%;
-        }
-
-        .empty-icon {
-            width: 80px; height: 80px; opacity: 0.2; margin-bottom: var(--space-md);
-        }
-
-        .chat-header {
-            height: 80px;
-            padding: 0 var(--space-md);
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(20, 22, 30, 0.4);
-            flex-shrink: 0;
-        }
-
-        .chat-title-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            overflow: hidden;
-        }
-
-        /* Back Button - Mobile Only by default */
-        .mobile-back-btn {
-            display: none; 
-            padding: 8px;
-            margin-right: -4px;
-            color: var(--text-main);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .chat-title h3 {
-            font-size: 1.1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-status {
-            font-size: 0.8rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            flex-grow: 1; display: flex; flex-direction: column;
+            background: rgba(0,0,0,0.4); position: relative;
         }
         
-        .status-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            box-shadow: var(--shadow-neon);
-            animation: pulseGlow 2s infinite;
+        .chat-header {
+            height: 70px; padding: 0 15px; border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(20, 22, 30, 0.6); flex-shrink: 0;
         }
-
+        
+        /* Mobile Back Button */
+        .mobile-back-btn {
+            display: none; background: none; border: none; color: white;
+            margin-right: 10px; cursor: pointer; padding: 5px;
+        }
+        
         .messages-container {
-            flex-grow: 1;
-            padding: var(--space-md);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-            -webkit-overflow-scrolling: touch;
+            flex-grow: 1; padding: 20px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
         }
-
-        .message {
-            max-width: 85%;
-            display: flex;
-            flex-direction: column;
-            animation: slideInRight 0.3s var(--ease-out);
-        }
-
-        .message.sent {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-
-        .message.received {
-            align-self: flex-start;
-            align-items: flex-start;
-        }
-
-        .bubble {
-            padding: 12px 16px;
-            border-radius: 16px;
-            position: relative;
-            line-height: 1.4;
-            word-wrap: break-word;
-            font-size: 1rem;
-        }
-
-        .message.sent .bubble {
-            background: linear-gradient(135deg, var(--primary-dim), #006064);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.received .bubble {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid var(--border-light);
-            color: var(--text-main);
-            border-bottom-left-radius: 4px;
-        }
-
-        .message-meta {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            opacity: 0.7;
-            padding: 0 4px;
-        }
-
+        
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 12px; word-wrap: break-word; }
+        .message.sent { align-self: flex-end; background: var(--primary-dim); color: white; border-bottom-right-radius: 2px; }
+        .message.received { align-self: flex-start; background: rgba(255,255,255,0.1); border-bottom-left-radius: 2px; }
+        
         .input-area {
-            padding: 12px;
-            background: rgba(20, 22, 30, 0.8);
-            border-top: 1px solid var(--border-light);
-            flex-shrink: 0;
-            padding-bottom: max(12px, var(--sab)); /* Safe area bottom */
+            padding: 10px; background: var(--bg-surface);
+            border-top: 1px solid var(--border-light); flex-shrink: 0;
         }
-
-        .chat-form {
-            display: flex;
-            gap: 10px;
-            background: rgba(0,0,0,0.3);
-            padding: 6px 6px 6px 12px;
-            border-radius: 24px;
-            border: 1px solid var(--border-light);
-            align-items: center;
-        }
-
+        .chat-form { display: flex; gap: 10px; }
         .chat-input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            font-family: var(--font-stack);
-            font-size: 16px; /* Prevents iOS zoom */
-            height: 40px;
-            line-height: 24px;
-        }
-
-        .send-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            border: none;
-            color: var(--bg-deep);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
+            flex-grow: 1; background: rgba(255,255,255,0.05); border: none;
+            color: white; padding: 12px; border-radius: 20px; font-size: 16px;
         }
 
         /* 
         ========================================
-        8. MODALS & TOASTS
+        UTILITY
         ========================================
         */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .modal {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            padding: var(--space-lg);
-            box-shadow: var(--shadow-card);
-            position: relative;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-lg);
-        }
-
-        .close-modal {
-            background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px;
-        }
-
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 300;
-            width: 90%;
-            max-width: 400px;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: rgba(20, 22, 30, 0.95);
-            border-left: 4px solid var(--primary);
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            color: white;
-            margin-top: 10px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         .hidden { display: none !important; }
         .flex { display: flex; }
-
-        /* SVG Icons */
-        .icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-sm { width: 16px; height: 16px; }
+        .flex-col { flex-direction: column; }
+        .icon { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
 
         /* 
         ========================================
-        9. MOBILE RESPONSIVE MEDIA QUERIES
+        MOBILE RESPONSIVE FIXES
         ========================================
         */
         @media (max-width: 768px) {
-            body {
-                /* Remove body padding for immersive feel */
-                padding: 0;
-            }
-
             .main-container {
-                width: 100%;
-                height: 100%; /* Fill screen */
-                max-width: none;
-                border-radius: 0;
-                border: none;
-                flex-direction: row; /* Still row, but we toggle visibility */
+                width: 100%; height: 100%; border: none; border-radius: 0;
             }
 
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                flex-shrink: 0;
-                transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                /* If chat is active, slide sidebar out to left */
-                transform: translateX(0);
-            }
-
-            .chat-area {
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 50;
-                background: var(--bg-deep); /* Ensure opaque background */
-                transform: translateX(100%); /* Initially hidden to the right */
-                transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            }
-
-            /* State: Chat is Open */
-            .main-container.mobile-chat-active .sidebar {
-                transform: translateX(-30%); /* Parallax effect */
-            }
-
-            .main-container.mobile-chat-active .chat-area {
-                transform: translateX(0);
-            }
-
-            .mobile-back-btn {
-                display: flex;
-            }
-
-            /* Adjust Fonts for mobile */
-            .brand-title { font-size: 1.8rem; }
-            .login-card { border: none; background: transparent; box-shadow: none; }
+            /* 
+               CRITICAL FIX: 
+               Instead of sliding, we simply toggle display on mobile.
+               This prevents layout overlaps.
+            */
             
-            /* Better Modal positioning */
-            .modal {
-                position: fixed;
-                bottom: 0;
-                width: 100%;
-                max-width: 100%;
-                border-radius: 20px 20px 0 0;
-                border-bottom: none;
-                padding-bottom: 40px; /* Space for home bar */
-                animation: slideInUp 0.3s ease;
+            /* Default: Sidebar Visible, Chat Hidden */
+            .sidebar { width: 100%; display: flex; }
+            .chat-area { display: none; width: 100%; height: 100%; }
+
+            /* Active Chat Mode: Sidebar Hidden, Chat Visible */
+            .main-container.mobile-chat-active .sidebar { display: none; }
+            .main-container.mobile-chat-active .chat-area { display: flex; }
+
+            .mobile-back-btn { display: block; }
+            
+            .chat-title h3 {
+                max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             }
-            
-            .modal-overlay { align-items: flex-end; padding: 0; }
-            
-            /* Message bubbles full width usage */
-            .message { max-width: 88%; }
-            
-            /* Hide non-essential elements on very small screens */
-            .sidebar-footer { padding-bottom: max(16px, var(--sab)); }
+        }
+        
+        /* Modal Style */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); z-index: 200;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-surface); width: 90%; max-width: 350px;
+            padding: 20px; border-radius: 12px; border: 1px solid var(--border-light);
+        }
+        
+        /* Credit */
+        .sidebar-footer {
+            padding: 15px; text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.3);
+            border-top: 1px solid var(--border-light);
         }
     </style>
 </head>
 <body>
 
-    <!-- Background Elements -->
-    <div class="bg-mesh"></div>
-
     <!-- Application Root -->
     <div id="app-root">
         
-        <!-- Login / Connect Screen -->
+        <!-- Login Screen -->
         <div id="login-screen">
             <div class="login-card">
                 <div class="brand-title">AETHER</div>
-                <div class="brand-subtitle">P2P Decentralized Messaging</div>
-                
-                <div class="input-group">
-                    <label class="input-label">Choose a Username</label>
-                    <input type="text" id="username-input" class="text-input" placeholder="e.g. Neo" autocomplete="off">
-                </div>
-
-                <div class="input-group" style="display:none;" id="id-display-container">
-                    <label class="input-label">Your ID</label>
-                    <input type="text" id="my-peer-id-display" class="text-input" readonly>
-                </div>
-
-                <button id="connect-network-btn" class="btn-primary">Initialize Uplink</button>
-                <div id="loader" class="hidden" style="margin-top:20px; color:var(--primary); font-size: 0.9rem;">
-                    <svg class="icon icon-spin" style="animation:spin 1s linear infinite" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
-                    <span style="margin-left:8px">Establishing secure handshake...</span>
-                </div>
-
-                <!-- CREATOR CREDIT -->
-                <div class="login-footer-credit">Created by Yaroslav Ostapenko</div>
+                <div style="color:var(--text-muted); margin-bottom:20px">Secure P2P Messaging</div>
+                <input type="text" id="username-input" class="text-input" placeholder="Enter Username" autocomplete="off">
+                <button id="connect-network-btn" class="btn-primary">Connect</button>
+                <div id="loader" class="hidden" style="margin-top:15px; color:var(--primary);">Connecting...</div>
+                <div style="margin-top:30px; font-size:0.8rem; color:var(--text-muted); opacity:0.5;">Created by Yaroslav Ostapenko</div>
             </div>
         </div>
 
@@ -846,458 +243,212 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <div class="user-profile">
-                        <div class="avatar" id="current-user-avatar">?</div>
-                        <div class="user-info">
-                            <div class="username-display" id="current-username">Guest</div>
-                            <div class="id-display" id="copy-id-btn" title="Tap to copy ID">
-                                <span id="display-short-id">ID: ...</span>
-                                <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            </div>
-                        </div>
+                    <div class="avatar" id="current-user-avatar">?</div>
+                    <div style="overflow:hidden;">
+                        <div id="current-username" style="font-weight:bold;">Guest</div>
+                        <div id="copy-id-btn" style="font-size:0.8rem; color:var(--text-muted); cursor:pointer;">Copy ID</div>
                     </div>
                 </div>
 
-                <div class="sidebar-actions">
-                    <button class="add-contact-btn" id="open-add-contact-modal">
-                        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        New Connection
-                    </button>
-                </div>
-
-                <div class="list-header">Active Peers</div>
                 <div class="contact-list" id="contact-list">
-                    <!-- Contacts injected via JS -->
+                    <!-- Contacts will appear here -->
                 </div>
                 
-                <!-- CREATOR CREDIT -->
-                <div class="sidebar-footer">
-                    Created by Yaroslav Ostapenko
-                </div>
+                <button class="add-contact-btn" id="open-add-contact-modal">+ Add Connection</button>
+                
+                <div class="sidebar-footer">Created by Yaroslav Ostapenko</div>
             </div>
 
             <!-- Chat Area -->
             <div class="chat-area">
                 
-                <!-- Empty State (Desktop only usually) -->
-                <div id="no-chat-state" class="empty-state">
-                    <svg class="icon empty-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <h2>Aether Network</h2>
-                    <p style="margin-top:10px; font-size:0.9rem; opacity:0.7">Select a peer to start encrypted transmission.</p>
+                <!-- Empty State -->
+                <div id="no-chat-state" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:var(--text-muted);">
+                    <h3>No Chat Selected</h3>
                 </div>
 
-                <!-- Active Chat Interface -->
-                <div id="active-chat-interface" class="hidden flex-col h-full w-full">
+                <!-- Active Chat -->
+                <div id="active-chat-interface" class="hidden flex-col h-full" style="height:100%; width:100%;">
+                    
                     <div class="chat-header">
-                        <div class="chat-title-group">
+                        <div style="display:flex; align-items:center;">
                             <button class="mobile-back-btn" id="back-to-sidebar">
-                                <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                             </button>
-                            <div class="chat-title">
-                                <h3 id="chat-peer-name">Unknown User</h3>
-                                <div class="chat-status"><span class="status-dot"></span> Secure</div>
-                            </div>
+                            <h3 id="chat-peer-name">User</h3>
                         </div>
-                        <button class="btn-icon" id="clear-chat-btn" title="Clear History">
-                            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <button id="clear-chat-btn" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
                     </div>
 
-                    <div class="messages-container" id="messages-container">
-                        <!-- Messages injected via JS -->
-                    </div>
+                    <div class="messages-container" id="messages-container"></div>
 
                     <div class="input-area">
                         <form class="chat-form" id="message-form">
                             <input type="text" class="chat-input" id="message-input" placeholder="Message..." autocomplete="off">
-                            <button type="submit" class="send-btn">
-                                <svg class="icon icon-sm" style="margin-left:2px" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                            </button>
+                            <button type="submit" class="btn-primary" style="width:50px; border-radius:50%; padding:0;">&rarr;</button>
                         </form>
                     </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- Add Contact Modal -->
+        <!-- Add Modal -->
         <div class="modal-overlay" id="add-contact-modal">
             <div class="modal">
-                <div class="modal-header">
-                    <h3>Add Peer</h3>
-                    <button class="close-modal" id="close-contact-modal">&times;</button>
+                <h3 style="margin-bottom:15px;">Add Peer</h3>
+                <input type="text" id="peer-id-input" class="text-input" placeholder="Paste Peer ID">
+                <input type="text" id="peer-alias-input" class="text-input" placeholder="Alias (Optional)">
+                <div style="display:flex; gap:10px;">
+                    <button id="close-contact-modal" class="btn-primary" style="background:#333; color:white;">Cancel</button>
+                    <button id="add-peer-btn" class="btn-primary">Add</button>
                 </div>
-                <div class="input-group">
-                    <label class="input-label">Peer ID</label>
-                    <input type="text" id="peer-id-input" class="text-input" placeholder="Paste ID here">
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Alias (Optional)</label>
-                    <input type="text" id="peer-alias-input" class="text-input" placeholder="Contact Name">
-                </div>
-                <button id="add-peer-btn" class="btn-primary">Connect</button>
             </div>
         </div>
-
-        <!-- Toast Container -->
-        <div class="toast-container" id="toast-container"></div>
 
     </div>
 
-    <!-- 
-    ========================================
-    JAVASCRIPT LOGIC
-    ========================================
-    -->
+    <!-- Logic -->
     <script>
-        /**
-         * AETHER APP LOGIC - Created by Yaroslav Ostapenko
-         */
-
-        // --- STATE MANAGEMENT ---
-        const AppState = {
-            me: { id: null, username: null },
-            peerInstance: null,
-            connections: {},
-            contacts: [], 
-            activeChatId: null,
-            chats: {} 
-        };
-
-        // --- DOM REFERENCES ---
+        const AppState = { me: {}, peerInstance: null, connections: {}, contacts: [], chats: {}, activeChatId: null };
         const DOM = {
             loginScreen: document.getElementById('login-screen'),
             mainInterface: document.getElementById('main-interface'),
             usernameInput: document.getElementById('username-input'),
             connectBtn: document.getElementById('connect-network-btn'),
             loader: document.getElementById('loader'),
-            
-            // Sidebar
-            currentUserAvatar: document.getElementById('current-user-avatar'),
-            currentUsername: document.getElementById('current-username'),
-            displayShortId: document.getElementById('display-short-id'),
-            copyIdBtn: document.getElementById('copy-id-btn'),
             contactList: document.getElementById('contact-list'),
-            addContactModalBtn: document.getElementById('open-add-contact-modal'),
-            
-            // Chat
-            noChatState: document.getElementById('no-chat-state'),
-            activeChatInterface: document.getElementById('active-chat-interface'),
-            chatPeerName: document.getElementById('chat-peer-name'),
             messagesContainer: document.getElementById('messages-container'),
+            chatPeerName: document.getElementById('chat-peer-name'),
             messageForm: document.getElementById('message-form'),
             messageInput: document.getElementById('message-input'),
-            clearChatBtn: document.getElementById('clear-chat-btn'),
-            backToSidebarBtn: document.getElementById('back-to-sidebar'),
-            
-            // Modals
-            modalOverlay: document.getElementById('add-contact-modal'),
-            closeModalBtn: document.getElementById('close-contact-modal'),
-            addPeerBtn: document.getElementById('add-peer-btn'),
-            peerIdInput: document.getElementById('peer-id-input'),
-            peerAliasInput: document.getElementById('peer-alias-input'),
-            
-            // Toast
-            toastContainer: document.getElementById('toast-container')
+            activeChatInterface: document.getElementById('active-chat-interface'),
+            noChatState: document.getElementById('no-chat-state'),
+            addModal: document.getElementById('add-contact-modal')
         };
 
-        // --- HELPER FUNCTIONS ---
-        const Utils = {
-            truncateId: (id) => id ? id.substring(0, 8) + '...' : '',
-            getInitials: (name) => name ? name.charAt(0).toUpperCase() : '?',
-            formatTime: (date) => new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            // Mobile detection helper (optional, handled mostly by CSS)
-            isMobile: () => window.innerWidth <= 768
+        // Initialize
+        document.getElementById('connect-network-btn').onclick = handleLogin;
+        document.getElementById('copy-id-btn').onclick = () => { navigator.clipboard.writeText(AppState.me.id); alert('ID Copied'); };
+        document.getElementById('open-add-contact-modal').onclick = () => DOM.addModal.classList.add('active');
+        document.getElementById('close-contact-modal').onclick = () => DOM.addModal.classList.remove('active');
+        document.getElementById('add-peer-btn').onclick = handleAddPeer;
+        document.getElementById('back-to-sidebar').onclick = () => {
+            DOM.mainInterface.classList.remove('mobile-chat-active');
+        };
+        DOM.messageForm.onsubmit = handleSendMessage;
+        document.getElementById('clear-chat-btn').onclick = () => {
+            if(AppState.activeChatId) { AppState.chats[AppState.activeChatId] = []; renderMessages(AppState.activeChatId); }
         };
 
-        const Notify = {
-            show: (message) => {
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                toast.textContent = message;
-                DOM.toastContainer.appendChild(toast);
-                requestAnimationFrame(() => toast.classList.add('show'));
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }
-        };
-
-        // --- APP INITIALIZATION ---
-        function initApp() {
-            // Login & Connection
-            DOM.connectBtn.addEventListener('click', handleLogin);
-            DOM.usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
-
-            // ID Copy
-            DOM.copyIdBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(AppState.me.id);
-                Notify.show('ID copied to clipboard');
-            });
-
-            // Modals
-            DOM.addContactModalBtn.addEventListener('click', () => {
-                DOM.modalOverlay.classList.add('active');
-                setTimeout(() => DOM.peerIdInput.focus(), 100);
-            });
-            DOM.closeModalBtn.addEventListener('click', () => DOM.modalOverlay.classList.remove('active'));
-            // Close modal when clicking outside
-            DOM.modalOverlay.addEventListener('click', (e) => {
-                if (e.target === DOM.modalOverlay) DOM.modalOverlay.classList.remove('active');
-            });
-            
-            DOM.addPeerBtn.addEventListener('click', handleAddPeer);
-
-            // Chat Actions
-            DOM.messageForm.addEventListener('submit', handleSendMessage);
-            DOM.clearChatBtn.addEventListener('click', () => {
-                if(AppState.activeChatId) {
-                    AppState.chats[AppState.activeChatId] = [];
-                    renderMessages(AppState.activeChatId);
-                }
-            });
-
-            // Mobile Navigation
-            DOM.backToSidebarBtn.addEventListener('click', () => {
-                DOM.mainInterface.classList.remove('mobile-chat-active');
-                // We keep activeChatId set so if they go back it's still there, 
-                // but visually we are on the sidebar.
-                // Deselecting contact visual
-                const activeItems = document.querySelectorAll('.contact-item.active');
-                activeItems.forEach(el => el.classList.remove('active'));
-            });
-        }
-
-        // --- CORE LOGIC ---
         function handleLogin() {
             const username = DOM.usernameInput.value.trim();
-            if(!username) { Notify.show('Please enter a username'); return; }
-
+            if(!username) return alert('Username required');
+            
             DOM.connectBtn.disabled = true;
             DOM.loader.classList.remove('hidden');
-            DOM.usernameInput.blur(); // Close mobile keyboard
-
             AppState.me.username = username;
-            
-            if(typeof Peer === 'undefined') {
-                Notify.show('Error: PeerJS not loaded.');
+
+            if(typeof Peer === 'undefined') return alert('PeerJS not loaded');
+
+            AppState.peerInstance = new Peer(null, { debug: 1 });
+            AppState.peerInstance.on('open', id => {
+                AppState.me.id = id;
+                document.getElementById('current-username').innerText = username;
+                document.getElementById('current-user-avatar').innerText = username[0].toUpperCase();
+                DOM.loginScreen.classList.add('hidden');
+                DOM.mainInterface.classList.remove('hidden');
+            });
+            AppState.peerInstance.on('connection', conn => {
+                setupConnection(conn);
+                alert('New connection!');
+            });
+            AppState.peerInstance.on('error', err => {
+                console.error(err);
+                alert('Connection Error');
                 DOM.connectBtn.disabled = false;
-                DOM.loader.classList.add('hidden');
-                return;
-            }
-
-            try {
-                AppState.peerInstance = new Peer(null, { debug: 1 });
-                
-                AppState.peerInstance.on('open', (id) => {
-                    AppState.me.id = id;
-                    transitionToMainInterface();
-                });
-
-                AppState.peerInstance.on('connection', (conn) => {
-                    setupConnection(conn);
-                    Notify.show('New P2P Connection Established');
-                });
-
-                AppState.peerInstance.on('error', (err) => {
-                    console.error(err);
-                    Notify.show('Network Error: ' + (err.type || 'Unknown'));
-                    DOM.connectBtn.disabled = false;
-                    DOM.loader.classList.add('hidden');
-                });
-            } catch (e) {
-                Notify.show("PeerJS initialization failed");
-                DOM.connectBtn.disabled = false;
-            }
-        }
-
-        function transitionToMainInterface() {
-            DOM.loginScreen.classList.add('hidden');
-            DOM.mainInterface.classList.remove('hidden');
-            DOM.mainInterface.style.display = 'flex'; // Ensure flex override
-            
-            DOM.currentUsername.textContent = AppState.me.username;
-            DOM.currentUserAvatar.textContent = Utils.getInitials(AppState.me.username);
-            DOM.displayShortId.textContent = 'ID: ' + Utils.truncateId(AppState.me.id);
+            });
         }
 
         function handleAddPeer() {
-            const peerId = DOM.peerIdInput.value.trim();
-            const alias = DOM.peerAliasInput.value.trim() || 'User ' + Utils.truncateId(peerId);
-
-            if(!peerId) return;
-            if(peerId === AppState.me.id) { Notify.show("Cannot connect to self."); return; }
-
-            const conn = AppState.peerInstance.connect(peerId, {
-                metadata: { username: AppState.me.username }
-            });
-
+            const id = document.getElementById('peer-id-input').value.trim();
+            const alias = document.getElementById('peer-alias-input').value.trim() || 'User ' + id.substr(0,5);
+            if(!id) return;
+            const conn = AppState.peerInstance.connect(id, { metadata: { username: AppState.me.username } });
             conn.on('open', () => {
                 setupConnection(conn, alias);
-                DOM.modalOverlay.classList.remove('active');
-                DOM.peerIdInput.value = '';
-                DOM.peerAliasInput.value = '';
-                Notify.show(`Connected to ${alias}`);
-                // Automatically switch to chat on mobile might be jarring, so we just list them
-            });
-            
-            conn.on('error', () => Notify.show("Connection Failed"));
-        }
-
-        function setupConnection(conn, assignedName = null) {
-            const peerId = conn.peer;
-            let peerName = assignedName;
-            
-            if(!peerName && conn.metadata && conn.metadata.username) {
-                peerName = conn.metadata.username;
-            }
-            if(!peerName) peerName = "User " + Utils.truncateId(peerId);
-
-            AppState.connections[peerId] = conn;
-
-            // Add contact if new
-            if(!AppState.contacts.find(c => c.id === peerId)) {
-                AppState.contacts.push({
-                    id: peerId, name: peerName, lastMessage: 'Connected', timestamp: new Date()
-                });
-            }
-            renderContactList();
-
-            if(!AppState.chats[peerId]) AppState.chats[peerId] = [];
-
-            conn.on('data', (data) => handleIncomingData(peerId, data));
-            conn.on('close', () => {
-                Notify.show(`${peerName} disconnected`);
-                delete AppState.connections[peerId];
-                // Optional: Remove from contact list or mark offline
+                DOM.addModal.classList.remove('active');
             });
         }
 
-        function handleIncomingData(peerId, data) {
-            if(data.type === 'text') {
-                const messageObj = { sender: 'them', content: data.content, timestamp: data.timestamp };
-                
-                if(!AppState.chats[peerId]) AppState.chats[peerId] = [];
-                AppState.chats[peerId].push(messageObj);
-
-                const contact = AppState.contacts.find(c => c.id === peerId);
-                if(contact) {
-                    contact.lastMessage = data.content;
-                    contact.timestamp = new Date();
-                }
-                renderContactList();
-
-                if(AppState.activeChatId === peerId) {
-                    appendMessageToDOM(messageObj);
-                    scrollToBottom();
-                } else {
-                    Notify.show(`Message from ${contact ? contact.name : 'Peer'}`);
-                }
+        function setupConnection(conn, name = null) {
+            const id = conn.peer;
+            const peerName = name || (conn.metadata && conn.metadata.username) || "User " + id.substr(0,5);
+            
+            AppState.connections[id] = conn;
+            if(!AppState.contacts.find(c => c.id === id)) {
+                AppState.contacts.push({ id, name: peerName });
+                renderContacts();
             }
+            if(!AppState.chats[id]) AppState.chats[id] = [];
+            
+            conn.on('data', data => {
+                AppState.chats[id].push({ sender: 'them', content: data.content });
+                if(AppState.activeChatId === id) renderMessages(id);
+                else renderContacts(); // Refresh list to show activity if needed
+            });
+        }
+
+        function renderContacts() {
+            DOM.contactList.innerHTML = '';
+            AppState.contacts.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'contact-item';
+                div.innerHTML = `<div class="avatar">${c.name[0].toUpperCase()}</div><div>${c.name}</div>`;
+                div.onclick = () => openChat(c.id);
+                DOM.contactList.appendChild(div);
+            });
+        }
+
+        function openChat(id) {
+            AppState.activeChatId = id;
+            const c = AppState.contacts.find(x => x.id === id);
+            DOM.chatPeerName.innerText = c ? c.name : 'Unknown';
+            DOM.noChatState.classList.add('hidden');
+            DOM.activeChatInterface.classList.remove('hidden');
+            DOM.activeChatInterface.classList.add('flex');
+            DOM.mainInterface.classList.add('mobile-chat-active');
+            renderMessages(id);
         }
 
         function handleSendMessage(e) {
             e.preventDefault();
-            if(!AppState.activeChatId || !DOM.messageInput.value.trim()) return;
-
-            const content = DOM.messageInput.value.trim();
-            const peerId = AppState.activeChatId;
-            const conn = AppState.connections[peerId];
-
+            const txt = DOM.messageInput.value.trim();
+            if(!txt || !AppState.activeChatId) return;
+            
+            const conn = AppState.connections[AppState.activeChatId];
             if(conn && conn.open) {
-                conn.send({ type: 'text', content: content, timestamp: new Date() });
-                
-                const messageObj = { sender: 'me', content: content, timestamp: new Date() };
-                AppState.chats[peerId].push(messageObj);
-
-                appendMessageToDOM(messageObj);
-                scrollToBottom();
+                conn.send({ type: 'text', content: txt });
+                AppState.chats[AppState.activeChatId].push({ sender: 'me', content: txt });
+                renderMessages(AppState.activeChatId);
                 DOM.messageInput.value = '';
-                DOM.messageInput.focus();
-
-                const contact = AppState.contacts.find(c => c.id === peerId);
-                if(contact) {
-                    contact.lastMessage = "You: " + content;
-                    contact.timestamp = new Date();
-                    renderContactList();
-                }
             } else {
-                Notify.show('Connection lost.');
+                alert('Connection closed');
             }
         }
 
-        // --- RENDERING ---
-        function renderContactList() {
-            DOM.contactList.innerHTML = '';
-            AppState.contacts.sort((a, b) => b.timestamp - a.timestamp);
-
-            AppState.contacts.forEach(contact => {
-                const item = document.createElement('div');
-                item.className = `contact-item ${AppState.activeChatId === contact.id ? 'active' : ''}`;
-                item.onclick = () => switchChat(contact.id);
-                
-                item.innerHTML = `
-                    <div class="avatar">${Utils.getInitials(contact.name)}</div>
-                    <div class="contact-info">
-                        <span class="contact-name">${escapeHtml(contact.name)}</span>
-                        <span class="contact-last-msg">${escapeHtml(contact.lastMessage)}</span>
-                    </div>
-                `;
-                DOM.contactList.appendChild(item);
-            });
-        }
-
-        function switchChat(peerId) {
-            AppState.activeChatId = peerId;
-            renderContactList();
-
-            // Mobile transition
-            DOM.mainInterface.classList.add('mobile-chat-active');
-            DOM.noChatState.classList.add('hidden');
-            DOM.activeChatInterface.classList.remove('hidden');
-            DOM.activeChatInterface.classList.add('flex');
-
-            const contact = AppState.contacts.find(c => c.id === peerId);
-            DOM.chatPeerName.textContent = contact ? contact.name : 'Unknown';
-
-            renderMessages(peerId);
-        }
-
-        function renderMessages(peerId) {
+        function renderMessages(id) {
             DOM.messagesContainer.innerHTML = '';
-            const messages = AppState.chats[peerId] || [];
-            messages.forEach(msg => appendMessageToDOM(msg));
-            scrollToBottom();
-        }
-
-        function appendMessageToDOM(msg) {
-            const div = document.createElement('div');
-            div.className = `message ${msg.sender === 'me' ? 'sent' : 'received'}`;
-            div.innerHTML = `
-                <div class="bubble">${escapeHtml(msg.content)}</div>
-                <div class="message-meta">${Utils.formatTime(msg.timestamp)}</div>
-            `;
-            DOM.messagesContainer.appendChild(div);
-        }
-
-        function scrollToBottom() {
+            (AppState.chats[id] || []).forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.sender === 'me' ? 'sent' : 'received'}`;
+                div.innerText = msg.content;
+                DOM.messagesContainer.appendChild(div);
+            });
             DOM.messagesContainer.scrollTop = DOM.messagesContainer.scrollHeight;
         }
-
-        function escapeHtml(text) {
-            if(!text) return '';
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-        
-        // Spin animation for loader
-        const styleSheet = document.createElement("style");
-        styleSheet.innerText = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
-        document.head.appendChild(styleSheet);
-
-        // Init
-        window.addEventListener('DOMContentLoaded', initApp);
-
     </script>
 </body>
 </html>
