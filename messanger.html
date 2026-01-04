@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Yaroslav Ostapenko">
-    <title>Orbit Connect | Created by Yaroslav Ostapenko</title>
+    <title>Orbit Connect v2 | Fixed & Robust</title>
     <style>
         /* =========================================
            1. CSS VARIABLES & RESET
@@ -33,7 +33,6 @@
             scrollbar-color: var(--primary) var(--bg-dark);
         }
 
-        /* Scrollbar Styling */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
@@ -49,19 +48,14 @@
             align-items: center;
         }
 
-        /* Background Particle Canvas */
         #bg-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.3;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; opacity: 0.3;
         }
 
         /* =========================================
-           2. LAYOUT & CONTAINERS
+           2. LAYOUT
            ========================================= */
         .app-container {
             position: relative;
@@ -69,7 +63,7 @@
             width: 95vw;
             height: 90vh;
             max-width: 1400px;
-            background: rgba(10, 15, 20, 0.85);
+            background: rgba(10, 15, 20, 0.9);
             backdrop-filter: blur(10px);
             border: 1px solid var(--primary-dim);
             border-radius: var(--border-radius);
@@ -77,75 +71,48 @@
             display: grid;
             grid-template-columns: 280px 1fr 300px;
             overflow: hidden;
-            transition: all 0.3s ease;
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 900px) {
-            .app-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr;
-            }
-            .sidebar-left, .sidebar-right {
-                display: none; 
-            }
+            .app-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+            .sidebar-left, .sidebar-right { display: none; }
         }
 
-        /* =========================================
-           3. SIDEBARS
-           ========================================= */
         .sidebar {
             padding: 20px;
             border-right: 1px solid var(--primary-dim);
             display: flex;
             flex-direction: column;
             background: rgba(0, 0, 0, 0.2);
-            height: 100%;
         }
-
-        .sidebar-right {
-            border-left: 1px solid var(--primary-dim);
-            border-right: none;
-        }
+        .sidebar-right { border-left: 1px solid var(--primary-dim); border-right: none; }
 
         .brand {
             font-family: var(--font-mono);
             font-size: 1.2rem;
             color: var(--primary);
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             text-shadow: 0 0 10px var(--primary-dim);
         }
-
-        .brand span {
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
+        .brand span { font-weight: bold; letter-spacing: 2px; }
 
         .status-badge {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+            width: 10px; height: 10px; border-radius: 50%;
             background-color: var(--alert);
             box-shadow: 0 0 8px var(--alert);
-            margin-right: 8px;
+            transition: 0.3s;
         }
-
         .status-badge.connected {
             background-color: var(--primary);
             box-shadow: 0 0 8px var(--primary);
         }
-
-        /* Connection Panel in Left Sidebar */
-        .connection-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
+        .status-badge.pending {
+            background-color: orange;
+            box-shadow: 0 0 8px orange;
         }
+
+        .connection-panel { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
 
         .btn {
             background: var(--primary-dim);
@@ -159,33 +126,15 @@
             transition: all 0.2s;
             text-transform: uppercase;
         }
+        .btn:hover:not(:disabled) { background: var(--primary); color: #000; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: #555; color: #555; }
 
-        .btn:hover {
-            background: var(--primary);
-            color: #000;
-        }
-
-        .btn-secondary {
-            border-color: var(--secondary);
-            color: var(--secondary);
-            background: rgba(0, 204, 255, 0.1);
-        }
+        .btn-secondary { border-color: var(--secondary); color: var(--secondary); background: rgba(0, 204, 255, 0.1); }
+        .btn-secondary:hover { background: var(--secondary); }
         
-        .btn-secondary:hover {
-            background: var(--secondary);
-        }
+        .btn-danger { border-color: var(--alert); color: var(--alert); background: rgba(255, 0, 85, 0.1); }
+        .btn-danger:hover { background: var(--alert); }
 
-        .btn-danger {
-            border-color: var(--alert);
-            color: var(--alert);
-            background: rgba(255, 0, 85, 0.1);
-        }
-
-        .btn-danger:hover {
-            background: var(--alert);
-        }
-
-        /* Logs Area */
         .logs-container {
             flex: 1;
             background: #000;
@@ -198,14 +147,12 @@
             color: var(--text-dim);
             margin-bottom: 15px;
         }
-
         .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 2px; }
         .log-time { color: var(--secondary); margin-right: 5px; }
         .log-info { color: var(--primary); }
         .log-err { color: var(--alert); }
-        .log-sys { color: #fff; font-style: italic; }
+        .log-warn { color: orange; }
 
-        /* Credits Footer */
         .credits-footer {
             margin-top: auto;
             border-top: 1px solid #333;
@@ -215,235 +162,90 @@
             color: var(--text-dim);
             font-family: var(--font-mono);
         }
-        
         .credits-footer .author {
-            color: var(--secondary);
-            font-weight: bold;
-            display: block;
-            margin-top: 5px;
+            color: var(--secondary); font-weight: bold; display: block; margin-top: 5px;
             text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
         }
 
-        /* =========================================
-           4. CHAT AREA
-           ========================================= */
-        .chat-area {
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-panel);
-            position: relative;
-        }
-
-        .chat-header {
-            padding: 20px;
-            border-bottom: 1px solid #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* Message Bubbles */
+        /* Chat Area */
+        .chat-area { display: flex; flex-direction: column; background: var(--bg-panel); position: relative; }
+        .chat-header { padding: 20px; border-bottom: 1px solid #333; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
         .message {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            position: relative;
-            animation: fadeIn 0.3s ease;
+            max-width: 70%; padding: 12px 18px; border-radius: 12px;
+            font-size: 0.95rem; line-height: 1.4; position: relative;
         }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .message.mine {
             align-self: flex-end;
             background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 204, 255, 0.2));
-            border: 1px solid var(--primary-dim);
-            color: var(--text-main);
+            border: 1px solid var(--primary-dim); color: var(--text-main);
             border-bottom-right-radius: 2px;
         }
-
         .message.theirs {
-            align-self: flex-start;
-            background: #1a2029;
-            border: 1px solid #333;
-            border-bottom-left-radius: 2px;
+            align-self: flex-start; background: #1a2029;
+            border: 1px solid #333; border-bottom-left-radius: 2px;
         }
-
         .message .meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            margin-bottom: 5px;
-            font-family: var(--font-mono);
+            display: flex; justify-content: space-between;
+            font-size: 0.7rem; color: var(--text-dim); margin-bottom: 5px; font-family: var(--font-mono);
         }
+        .message.system { align-self: center; background: transparent; border: none; color: var(--text-dim); font-size: 0.8rem; font-style: italic; }
 
-        .message.system {
-            align-self: center;
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            font-style: italic;
-        }
-
-        /* File Attachment Styling */
-        .file-attachment {
-            margin-top: 10px;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            border: 1px dashed var(--secondary);
-        }
-        
-        .file-attachment:hover { background: rgba(0,0,0,0.5); }
-
-        /* Input Area */
         .chat-input-area {
-            padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-top: 1px solid #333;
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid #333; display: flex; gap: 10px; align-items: center;
         }
-
         .chat-input {
-            flex: 1;
-            background: var(--bg-input);
-            border: 1px solid #333;
-            color: white;
-            padding: 12px;
-            border-radius: 20px;
-            outline: none;
-            transition: border-color 0.2s;
+            flex: 1; background: var(--bg-input); border: 1px solid #333; color: white;
+            padding: 12px; border-radius: 20px; outline: none; transition: border-color 0.2s;
         }
-
         .chat-input:focus { border-color: var(--primary); }
         .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .icon-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 8px;
-            transition: color 0.2s;
-        }
-        .icon-btn:hover { color: var(--primary); }
-        .icon-btn.clip:hover { color: var(--secondary); }
-
-        /* =========================================
-           5. MODALS & OVERLAYS
-           ========================================= */
+        /* Modals */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
         }
-
         .modal {
-            background: var(--bg-panel);
-            width: 500px;
-            max-width: 90%;
-            padding: 30px;
-            border: 1px solid var(--primary);
-            border-radius: var(--border-radius);
+            background: var(--bg-panel); width: 600px; max-width: 90%; padding: 30px;
+            border: 1px solid var(--primary); border-radius: var(--border-radius);
             box-shadow: 0 0 30px rgba(0, 255, 157, 0.2);
-            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        @keyframes slideUp { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-
-        .modal h2 { color: var(--primary); font-family: var(--font-mono); margin-bottom: 15px; }
-        .modal p { color: var(--text-dim); margin-bottom: 20px; font-size: 0.9rem; }
-        
         .sdp-box {
-            width: 100%;
-            height: 100px;
-            background: #000;
-            border: 1px solid #333;
-            color: var(--secondary);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            padding: 10px;
-            resize: none;
-            margin-bottom: 15px;
+            width: 100%; height: 120px; background: #000; border: 1px solid #333;
+            color: var(--secondary); font-family: var(--font-mono); font-size: 0.75rem;
+            padding: 10px; resize: none; margin-bottom: 15px; outline: none;
         }
-
         .step-container { display: none; }
         .step-container.active { display: block; }
-        
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+        .loading-text { color: var(--alert); font-size: 0.8rem; margin-right: auto; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
-        /* Drag and Drop Overlay */
-        .drag-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 255, 157, 0.1);
-            border: 2px dashed var(--primary);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            pointer-events: none;
-        }
-        .drag-overlay h1 { color: var(--primary); text-shadow: 0 0 10px black; }
-
-        /* Notification Toast */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        /* Toast */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
         .toast {
-            background: var(--bg-panel);
-            border-left: 4px solid var(--primary);
-            padding: 15px 20px;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            animation: slideInRight 0.3s ease;
+            background: var(--bg-panel); border-left: 4px solid var(--primary);
+            padding: 15px 20px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             min-width: 250px;
         }
 
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
+        /* File Attachment */
+        .file-attachment {
+            margin-top: 10px; padding: 10px; border: 1px dashed var(--secondary);
+            border-radius: 6px; cursor: pointer; display: flex; gap: 10px; align-items: center;
+        }
+        .file-attachment:hover { background: rgba(0,204,255,0.1); }
     </style>
 </head>
 <body>
 
-    <!-- Background Animation -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Main Application Wrapper -->
     <div class="app-container" id="app">
         
-        <!-- Left Sidebar: Controls -->
         <aside class="sidebar sidebar-left">
             <div class="brand">
                 <div class="status-badge" id="connection-badge"></div>
@@ -452,7 +254,7 @@
 
             <div class="connection-panel">
                 <div>
-                    <label style="color:var(--text-dim); font-size:0.8rem;">YOUR USERNAME</label>
+                    <label style="color:var(--text-dim); font-size:0.8rem;">USERNAME</label>
                     <input type="text" id="username-input" class="chat-input" style="width:100%; margin-top:5px; border-radius:4px;" value="Navigator">
                 </div>
 
@@ -461,24 +263,16 @@
                 <button class="btn btn-danger" id="btn-disconnect" disabled>Disconnect</button>
             </div>
 
-            <label style="color:var(--text-dim); font-size:0.7rem; font-family:var(--font-mono); margin-bottom:5px;">SYSTEM LOGS</label>
-            <div class="logs-container" id="system-logs">
-                <div class="log-entry"><span class="log-time">[SYS]</span> <span class="log-info">System initialized...</span></div>
-            </div>
+            <label style="color:var(--text-dim); font-size:0.7rem;">SYSTEM LOGS</label>
+            <div class="logs-container" id="system-logs"></div>
 
-            <!-- CREDITS FOOTER -->
             <div class="credits-footer">
                 <div>P2P Secure Messenger</div>
                 <span class="author">Created by Yaroslav Ostapenko</span>
             </div>
         </aside>
 
-        <!-- Center: Chat Interface -->
-        <main class="chat-area" id="chat-dropzone">
-            <div class="drag-overlay" id="drag-overlay">
-                <h1>DROP FILE TO SEND</h1>
-            </div>
-
+        <main class="chat-area">
             <header class="chat-header">
                 <div>
                     <h3 id="chat-title">Not Connected</h3>
@@ -487,19 +281,17 @@
             </header>
 
             <div class="chat-messages" id="messages-list">
-                <!-- Messages will be injected here via JS -->
-                <div class="message system">Welcome to Orbit Connect. Establish a P2P connection to start.</div>
+                <div class="message system">Welcome. Follow the steps on the left to connect.</div>
             </div>
 
             <div class="chat-input-area">
-                <button class="icon-btn clip" id="btn-attach" title="Send File">📎</button>
+                <button class="icon-btn" id="btn-attach">📎</button>
                 <input type="file" id="file-input" hidden>
                 <input type="text" class="chat-input" id="message-input" placeholder="Type a message..." disabled>
-                <button class="icon-btn" id="btn-send" title="Send Message">➤</button>
+                <button class="icon-btn" id="btn-send" disabled>➤</button>
             </div>
         </main>
 
-        <!-- Right Sidebar: Info & History -->
         <aside class="sidebar sidebar-right">
             <h4 style="color:var(--primary); font-family:var(--font-mono); margin-bottom:15px;">STATS</h4>
             <div style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">
@@ -507,17 +299,9 @@
                 <p>Data Recv: <span id="stat-recv" style="color:white;">0 B</span></p>
                 <p>State: <span id="stat-state">New</span></p>
             </div>
-
             <hr style="border:0; border-top:1px solid #333; margin: 20px 0;">
-
             <h4 style="color:var(--secondary); font-family:var(--font-mono); margin-bottom:15px;">FILES</h4>
-            <div id="file-list" style="flex:1; overflow-y:auto; font-size:0.8rem; color:var(--text-dim);">
-                <p style="font-style:italic;">No files transferred yet.</p>
-            </div>
-            
-            <div style="margin-top:auto; text-align:right; font-size:0.6rem; color:#333;">
-                v1.0.4 - Release
-            </div>
+            <div id="file-list" style="flex:1; overflow-y:auto; font-size:0.8rem; color:var(--text-dim);"></div>
         </aside>
 
     </div>
@@ -525,22 +309,24 @@
     <!-- Modals -->
     <div class="modal-overlay" id="connection-modal">
         <div class="modal">
+            
             <!-- Step 1: Create Offer -->
             <div id="step-create" class="step-container">
-                <h2>Create Connection</h2>
-                <p>Copy this code and send it to your peer.</p>
-                <textarea class="sdp-box" id="offer-output" readonly></textarea>
+                <h2>1. Create Offer</h2>
+                <p>Wait for the code to generate, then copy it and send it to your friend.</p>
+                <textarea class="sdp-box" id="offer-output" readonly placeholder="Generating... please wait..."></textarea>
                 <div class="modal-actions">
-                    <button class="btn" id="btn-copy-offer">Copy</button>
-                    <button class="btn btn-secondary" id="btn-goto-step3">I received the Answer</button>
+                    <span id="loader-offer" class="loading-text">Gathering Candidates...</span>
+                    <button class="btn" id="btn-copy-offer" disabled>Copy Offer</button>
+                    <button class="btn btn-secondary" id="btn-goto-step3">I received Answer</button>
                 </div>
             </div>
 
-            <!-- Step 2: Join (Input Offer) -->
+            <!-- Step 2: Join -->
             <div id="step-join" class="step-container">
-                <h2>Join Room</h2>
-                <p>Paste the code received from your peer below.</p>
-                <textarea class="sdp-box" id="offer-input" placeholder="Paste Offer Here..."></textarea>
+                <h2>2. Join Room</h2>
+                <p>Paste the Offer code you received here.</p>
+                <textarea class="sdp-box" id="offer-input" placeholder="Paste Offer Code Here..."></textarea>
                 <div class="modal-actions">
                     <button class="btn" id="btn-process-offer">Generate Answer</button>
                 </div>
@@ -548,20 +334,21 @@
 
             <!-- Step 2b: Show Answer -->
             <div id="step-answer" class="step-container">
-                <h2>Send Answer</h2>
-                <p>Copy this code and send it back to the host.</p>
-                <textarea class="sdp-box" id="answer-output" readonly></textarea>
+                <h2>3. Send Answer</h2>
+                <p>Wait for generation, then copy this code back to the host.</p>
+                <textarea class="sdp-box" id="answer-output" readonly placeholder="Generating... please wait..."></textarea>
                 <div class="modal-actions">
-                    <button class="btn" id="btn-copy-answer">Copy</button>
+                    <span id="loader-answer" class="loading-text">Gathering Candidates...</span>
+                    <button class="btn" id="btn-copy-answer" disabled>Copy Answer</button>
                     <button class="btn btn-secondary" onclick="closeModal()">Done</button>
                 </div>
             </div>
 
-            <!-- Step 3: Finalize (Input Answer) -->
+            <!-- Step 3: Finalize -->
             <div id="step-finalize" class="step-container">
-                <h2>Finalize Connection</h2>
-                <p>Paste the answer code received from your peer.</p>
-                <textarea class="sdp-box" id="answer-input" placeholder="Paste Answer Here..."></textarea>
+                <h2>4. Connect</h2>
+                <p>Paste the Answer code you received back from your friend.</p>
+                <textarea class="sdp-box" id="answer-input" placeholder="Paste Answer Code Here..."></textarea>
                 <div class="modal-actions">
                     <button class="btn" id="btn-finalize">Connect</button>
                 </div>
@@ -574,42 +361,19 @@
     <div class="toast-container" id="toast-area"></div>
 
     <script>
-        /* =========================================
-           1. UTILITIES & CONFIG
-           ========================================= */
+        // --- Utilities ---
         const $ = (id) => document.getElementById(id);
-        
-        // STUN servers are needed to punch through NATs.
-        const RTC_CONFIG = {
-            iceServers: [
-                { urls: "stun:stun.l.google.com:19302" },
-                { urls: "stun:stun1.l.google.com:19302" }
-            ]
-        };
+        const RTC_CONFIG = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+        const state = { username: "Navigator", connected: false, bytesSent: 0, bytesRecv: 0, fileTransfers: {} };
+        let peerConnection = null;
+        let dataChannel = null;
 
-        const DATA_CHANNEL_OPTIONS = { ordered: true };
-        const CHUNK_SIZE = 16384; 
-
-        /* =========================================
-           2. STATE MANAGEMENT
-           ========================================= */
-        const state = {
-            username: "Navigator",
-            peerName: "Unknown",
-            connected: false,
-            bytesSent: 0,
-            bytesRecv: 0,
-            fileTransfers: {}, // Key: ID, Value: { chunks, meta, progress }
-        };
-
-        /* =========================================
-           3. LOGGING & UI HELPERS
-           ========================================= */
+        // --- Logging ---
         function log(msg, type = 'info') {
             const container = $('system-logs');
             const entry = document.createElement('div');
             entry.className = 'log-entry';
-            const time = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit'});
+            const time = new Date().toLocaleTimeString('en-US', {hour12:false});
             entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${msg}</span>`;
             container.appendChild(entry);
             container.scrollTop = container.scrollHeight;
@@ -625,561 +389,268 @@
             setTimeout(() => el.remove(), 4000);
         }
 
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
         function updateStats() {
             $('stat-sent').innerText = formatBytes(state.bytesSent);
             $('stat-recv').innerText = formatBytes(state.bytesRecv);
             $('stat-state').innerText = peerConnection ? peerConnection.connectionState : 'Closed';
         }
+        function formatBytes(a,b=2){if(!+a)return"0 B";const c=0>b?0:b,d=Math.floor(Math.log(a)/Math.log(1024));return`${parseFloat((a/Math.pow(1024,d)).toFixed(c))} ${["B","KB","MB","GB","TB"][d]}`}
 
-        /* =========================================
-           4. WEBRTC CORE
-           ========================================= */
-        let peerConnection = null;
-        let dataChannel = null;
-
-        function initPeerConnection() {
-            log('Initializing WebRTC stack...');
+        // --- WebRTC Logic (The Fixed Part) ---
+        
+        function initPeer() {
+            if(peerConnection) peerConnection.close();
             peerConnection = new RTCPeerConnection(RTC_CONFIG);
-
-            // Event: ICE Candidate generated (must be swapped manually)
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    log('ICE Candidate generated.', 'info');
-                    updateOfferOrAnswerOutput();
-                }
-            };
-
+            
             peerConnection.onconnectionstatechange = () => {
-                log(`Connection State: ${peerConnection.connectionState}`);
                 updateStats();
-                if(peerConnection.connectionState === 'connected') {
-                    setConnectedUI(true);
-                } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
-                    setConnectedUI(false);
-                    toast('Peer disconnected', 'error');
+                if (peerConnection.connectionState === 'connected') {
+                    setUIConnected(true);
+                    log('P2P Connection Established!', 'info');
+                } else if (peerConnection.connectionState === 'disconnected') {
+                    setUIConnected(false);
+                    log('Peer Disconnected', 'err');
                 }
             };
 
-            peerConnection.ondatachannel = (event) => {
-                log('Received Data Channel from remote.');
-                setupDataChannel(event.channel);
+            peerConnection.ondatachannel = (e) => setupDataChannel(e.channel);
+            
+            // IMPORTANT: Wait for ICE Gathering to complete before letting user copy
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate === null) {
+                    // This means gathering is finished
+                    const sdp = JSON.stringify(peerConnection.localDescription);
+                    
+                    if($('step-create').classList.contains('active')) {
+                        $('offer-output').value = sdp;
+                        $('btn-copy-offer').disabled = false;
+                        $('loader-offer').style.display = 'none';
+                        log('Offer ready to copy.', 'info');
+                    } else if ($('step-answer').classList.contains('active')) {
+                        $('answer-output').value = sdp;
+                        $('btn-copy-answer').disabled = false;
+                        $('loader-answer').style.display = 'none';
+                        log('Answer ready to copy.', 'info');
+                    }
+                }
             };
         }
 
         function setupDataChannel(channel) {
             dataChannel = channel;
             dataChannel.onopen = () => {
-                log('Data Channel OPEN', 'info');
-                setConnectedUI(true);
-                // Send handshake to sync names
-                sendData({ type: 'handshake', username: state.username });
+                log('Channel Open. Sending Handshake...', 'info');
+                sendData({ type: 'handshake', username: $('username-input').value });
             };
-            
-            dataChannel.onmessage = handleIncomingMessage;
-            
-            dataChannel.onclose = () => {
-                log('Data Channel CLOSED', 'err');
-                setConnectedUI(false);
-            };
+            dataChannel.onmessage = handleData;
         }
 
-        function createDataChannel() {
-            const channel = peerConnection.createDataChannel("chat", DATA_CHANNEL_OPTIONS);
-            setupDataChannel(channel);
-        }
-
-        // Generate Offer
         async function createOffer() {
-            initPeerConnection();
-            createDataChannel();
-            
+            initPeer();
+            // Reset UI
+            $('offer-output').value = '';
+            $('btn-copy-offer').disabled = true;
+            $('loader-offer').style.display = 'block';
+
+            const dc = peerConnection.createDataChannel("chat", { ordered: true });
+            setupDataChannel(dc);
+
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-            
-            log('Generating Offer SDP...');
-            updateOfferOrAnswerOutput();
+            log('Gathering ICE candidates... please wait.', 'warn');
         }
 
-        // Generate Answer
-        async function createAnswer(offerSDP) {
-            initPeerConnection();
-            
-            const remoteDesc = new RTCSessionDescription(JSON.parse(offerSDP));
-            await peerConnection.setRemoteDescription(remoteDesc);
-            
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            
-            log('Generating Answer SDP...');
-            updateOfferOrAnswerOutput();
-        }
+        async function createAnswer(offerStr) {
+            try {
+                initPeer();
+                // Reset UI
+                $('answer-output').value = '';
+                $('btn-copy-answer').disabled = true;
+                $('loader-answer').style.display = 'block';
 
-        // Finalize Connection (Host side)
-        async function finalizeConnection(answerSDP) {
-            const remoteDesc = new RTCSessionDescription(JSON.parse(answerSDP));
-            await peerConnection.setRemoteDescription(remoteDesc);
-            log('Remote description set. Finalizing...');
-        }
+                const offerDesc = new RTCSessionDescription(JSON.parse(offerStr));
+                await peerConnection.setRemoteDescription(offerDesc);
 
-        function updateOfferOrAnswerOutput() {
-            // We use the localDescription which contains the SDP and gathered ICE candidates
-            if(peerConnection.localDescription) {
-                const sdp = JSON.stringify(peerConnection.localDescription);
-                if($('step-create').classList.contains('active')) {
-                    $('offer-output').value = sdp;
-                } else if ($('step-answer').classList.contains('active')) {
-                    $('answer-output').value = sdp;
-                }
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                log('Gathering ICE candidates... please wait.', 'warn');
+            } catch (e) {
+                toast('Invalid Offer Code', 'error');
+                log('Error parsing offer: ' + e, 'err');
             }
         }
 
-        /* =========================================
-           5. DATA HANDLING & PROTOCOL
-           ========================================= */
-        function sendData(payload) {
-            if (dataChannel && dataChannel.readyState === 'open') {
-                const json = JSON.stringify(payload);
+        async function finalizeConnection(answerStr) {
+            try {
+                const answerDesc = new RTCSessionDescription(JSON.parse(answerStr));
+                await peerConnection.setRemoteDescription(answerDesc);
+                log('Remote description set. Connection pending...', 'info');
+            } catch (e) {
+                toast('Invalid Answer Code', 'error');
+                log('Error parsing answer: ' + e, 'err');
+            }
+        }
+
+        // --- Data Handling ---
+        function sendData(data) {
+            if(dataChannel && dataChannel.readyState === 'open') {
+                const json = JSON.stringify(data);
                 dataChannel.send(json);
                 state.bytesSent += json.length;
                 updateStats();
-            } else {
-                log('Cannot send: Channel not open', 'err');
             }
         }
 
-        function handleIncomingMessage(event) {
-            state.bytesRecv += event.data.length;
+        function handleData(e) {
+            state.bytesRecv += e.data.length;
             updateStats();
+            const data = JSON.parse(e.data);
 
-            try {
-                const data = JSON.parse(event.data);
-                
-                switch(data.type) {
-                    case 'handshake':
-                        state.peerName = data.username;
-                        $('chat-title').innerText = `Connected with ${state.peerName}`;
-                        $('chat-subtitle').innerText = 'Secure Encrypted Tunnel (WebRTC)';
-                        toast(`${state.peerName} connected!`);
-                        break;
-                    
-                    case 'text':
-                        addMessageToUI(data.message, 'theirs', state.peerName);
-                        break;
-                    
-                    case 'file-start':
-                        handleFileStart(data);
-                        break;
-
-                    case 'file-chunk':
-                        handleFileChunk(data);
-                        break;
+            if(data.type === 'handshake') {
+                $('chat-title').innerText = `Connected to ${data.username}`;
+                $('chat-subtitle').innerText = 'Encrypted P2P Link Active';
+                $('connection-badge').className = 'status-badge connected';
+                toast(`${data.username} joined!`);
+            } else if (data.type === 'msg') {
+                addMessage(data.text, 'theirs');
+            } else if (data.type === 'file-start') {
+                state.fileTransfers[data.id] = { chunks: [], meta: data };
+                log(`Receiving file: ${data.name}`);
+            } else if (data.type === 'file-chunk') {
+                const tr = state.fileTransfers[data.id];
+                if(tr) {
+                    tr.chunks.push(data.data); // data is base64 string
+                    if(data.last) {
+                        saveFile(tr);
+                        delete state.fileTransfers[data.id];
+                    }
                 }
-            } catch (e) {
-                log('Error parsing incoming data: ' + e, 'err');
             }
         }
 
-        /* =========================================
-           6. FILE TRANSFER LOGIC
-           ========================================= */
-        async function sendFile(file) {
-            const fileId = Date.now().toString();
+        function addMessage(text, type) {
+            const list = $('messages-list');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerHTML = `<div class="meta"><span>${type==='mine'?'Me':'Peer'}</span><span>${new Date().toLocaleTimeString()}</span></div><div>${text}</div>`;
+            list.appendChild(div);
+            list.scrollTop = list.scrollHeight;
+        }
+
+        // --- File Logic ---
+        function saveFile(tr) {
+            // Reassemble Base64 parts
+            const byteCharacters = atob(tr.chunks.join(''));
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], {type: tr.meta.mime});
+            const url = URL.createObjectURL(blob);
             
-            // 1. Send Metadata
-            sendData({
-                type: 'file-start',
-                id: fileId,
-                name: file.name,
-                size: file.size,
-                mime: file.type
-            });
+            // UI
+            const link = document.createElement('div');
+            link.className = 'message theirs';
+            link.innerHTML = `<div>File Received: <strong>${tr.meta.name}</strong></div><div class="file-attachment" onclick="window.open('${url}')"><span>💾 Download</span></div>`;
+            $('messages-list').appendChild(link);
+            
+            const sideLink = document.createElement('div');
+            sideLink.innerHTML = `<a href="${url}" download="${tr.meta.name}" style="color:var(--primary)">${tr.meta.name}</a>`;
+            $('file-list').appendChild(sideLink);
+        }
 
-            // UI Log
-            addMessageToUI(`Sending file: ${file.name} (${formatBytes(file.size)})`, 'mine', 'You', true);
-            log(`Starting file upload: ${file.name}`);
-
-            // 2. Read and Chunk
+        async function uploadFile(file) {
+            const id = Date.now().toString();
+            sendData({ type: 'file-start', id: id, name: file.name, mime: file.type, size: file.size });
+            
             const reader = new FileReader();
-            let offset = 0;
-
-            reader.onload = (e) => {
-                const buffer = e.target.result;
-                // Convert ArrayBuffer to Base64 to send via JSON
+            reader.readAsDataURL(file); // Simplest way to get Base64
+            reader.onload = () => {
+                const b64 = reader.result.split(',')[1]; // remove prefix
+                const chunkLen = 16000; // safe chunk size
+                const total = b64.length;
+                let offset = 0;
                 
-                sendData({
-                    type: 'file-chunk',
-                    id: fileId,
-                    data: arrayBufferToBase64(buffer), // Custom helper
-                    offset: offset,
-                    last: (offset + buffer.byteLength) >= file.size
-                });
-
-                offset += buffer.byteLength;
-
-                if(offset < file.size) {
-                    readNextChunk();
-                } else {
-                    log(`File sent: ${file.name}`);
+                while(offset < total) {
+                    const chunk = b64.slice(offset, offset + chunkLen);
+                    offset += chunkLen;
+                    sendData({ type: 'file-chunk', id: id, data: chunk, last: offset >= total });
                 }
+                addMessage(`Sent file: ${file.name}`, 'mine');
             };
-
-            const readNextChunk = () => {
-                const slice = file.slice(offset, offset + CHUNK_SIZE);
-                reader.readAsArrayBuffer(slice);
-            };
-
-            readNextChunk();
         }
 
-        function handleFileStart(data) {
-            state.fileTransfers[data.id] = {
-                meta: data,
-                chunks: [],
-                receivedSize: 0,
-                startTime: Date.now()
-            };
-            addMessageToUI(`Incoming file: ${data.name} (${formatBytes(data.size)})...`, 'theirs', state.peerName, true);
-        }
-
-        function handleFileChunk(data) {
-            const transfer = state.fileTransfers[data.id];
-            if(!transfer) return;
-
-            // Convert Base64 back to ArrayBuffer
-            const chunk = base64ToArrayBuffer(data.data);
-            transfer.chunks.push(chunk);
-            transfer.receivedSize += chunk.byteLength;
-
-            if(data.last) {
-                // Reassemble
-                const blob = new Blob(transfer.chunks, { type: transfer.meta.mime });
-                const url = URL.createObjectURL(blob);
-                
-                // Update UI
-                const container = $('messages-list');
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'message theirs';
-                msgDiv.innerHTML = `
-                    <div class="meta"><span>${state.peerName}</span><span>${new Date().toLocaleTimeString()}</span></div>
-                    <div>File Received: <strong>${transfer.meta.name}</strong></div>
-                    <div class="file-attachment" onclick="downloadFile('${url}', '${transfer.meta.name}')">
-                        <span>💾</span>
-                        <span>Download (${formatBytes(transfer.meta.size)})</span>
-                    </div>
-                `;
-                container.appendChild(msgDiv);
-                container.scrollTop = container.scrollHeight;
-                
-                // Add to sidebar
-                const fileList = $('file-list');
-                const fileEntry = document.createElement('div');
-                fileEntry.style.marginBottom = '10px';
-                fileEntry.innerHTML = `<a href="${url}" download="${transfer.meta.name}" style="color:var(--primary); text-decoration:none;">⬇ ${transfer.meta.name}</a>`;
-                fileList.appendChild(fileEntry);
-
-                log(`File transfer complete: ${transfer.meta.name}`);
-                delete state.fileTransfers[data.id];
-            }
-        }
-
-        // Binary Helpers
-        function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return window.btoa(binary);
-        }
-
-        function base64ToArrayBuffer(base64) {
-            const binary_string = window.atob(base64);
-            const len = binary_string.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary_string.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function downloadFile(url, filename) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        /* =========================================
-           7. UI INTERACTIONS
-           ========================================= */
+        // --- UI Events ---
+        $('btn-create-offer').onclick = () => { createOffer(); showModal('step-create'); };
+        $('btn-join-room').onclick = () => { showModal('step-join'); };
+        $('btn-goto-step3').onclick = () => { showModal('step-finalize'); };
         
-        // Modals
-        function showModal(stepId) {
-            $('connection-modal').style.display = 'flex';
-            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
-            $(stepId).classList.add('active');
-        }
-
-        function closeModal() {
-            $('connection-modal').style.display = 'none';
-        }
-
-        // Connection Flow
-        $('btn-create-offer').onclick = () => {
-            state.username = $('username-input').value || "Navigator";
-            createOffer();
-            showModal('step-create');
-        };
-
-        $('btn-join-room').onclick = () => {
-            state.username = $('username-input').value || "Navigator";
-            showModal('step-join');
-        };
-
-        $('btn-goto-step3').onclick = () => {
-            showModal('step-finalize');
-        };
-
         $('btn-process-offer').onclick = () => {
-            const offerText = $('offer-input').value;
-            if(!offerText) return toast('Please paste the offer code', 'error');
-            createAnswer(offerText);
+            const val = $('offer-input').value.trim();
+            if(!val) return toast('Paste offer first!', 'error');
+            createAnswer(val);
             showModal('step-answer');
         };
 
         $('btn-finalize').onclick = () => {
-            const answerText = $('answer-input').value;
-            if(!answerText) return toast('Please paste the answer code', 'error');
-            finalizeConnection(answerText);
+            const val = $('answer-input').value.trim();
+            if(!val) return toast('Paste answer first!', 'error');
+            finalizeConnection(val);
             closeModal();
         };
 
-        $('btn-copy-offer').onclick = () => {
-            navigator.clipboard.writeText($('offer-output').value);
-            toast('Offer copied to clipboard');
-        };
-
-        $('btn-copy-answer').onclick = () => {
-            navigator.clipboard.writeText($('answer-output').value);
-            toast('Answer copied to clipboard');
-        };
-
-        $('btn-disconnect').onclick = () => {
-            if(peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-                setConnectedUI(false);
-                log('Disconnected manually.');
-            }
-        };
-
-        // Chat
-        $('btn-send').onclick = sendMessage;
-        $('message-input').onkeypress = (e) => {
-            if(e.key === 'Enter') sendMessage();
-        };
-
-        function sendMessage() {
-            const input = $('message-input');
-            const text = input.value.trim();
-            if(!text) return;
-
-            addMessageToUI(text, 'mine', state.username);
-            sendData({ type: 'text', message: text });
-            
-            input.value = '';
-        }
-
-        function addMessageToUI(text, type, sender, isSystem=false) {
-            const container = $('messages-list');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${type} ${isSystem ? 'system' : ''}`;
-            
-            if(!isSystem) {
-                const time = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-                msgDiv.innerHTML = `
-                    <div class="meta">
-                        <span>${sender}</span>
-                        <span>${time}</span>
-                    </div>
-                    <div>${text.replace(/\n/g, '<br>')}</div>
-                `;
-            } else {
-                msgDiv.innerText = text;
-            }
-
-            container.appendChild(msgDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function setConnectedUI(isConnected) {
-            state.connected = isConnected;
-            const badge = $('connection-badge');
-            const input = $('message-input');
-            const btnSend = $('btn-send');
-            const btnAttach = $('btn-attach');
-            const btnDis = $('btn-disconnect');
-            const title = $('chat-title');
-
-            if(isConnected) {
-                badge.classList.add('connected');
-                input.disabled = false;
-                btnSend.disabled = false;
-                btnDis.disabled = false;
-                // handshake handles the title
-            } else {
-                badge.classList.remove('connected');
-                input.disabled = true;
-                btnSend.disabled = true;
-                btnAttach.disabled = true;
-                btnDis.disabled = true;
-                title.innerText = 'Not Connected';
-                $('chat-subtitle').innerText = 'Waiting for peer connection...';
-                $('messages-list').innerHTML = '<div class="message system">Connection closed.</div>';
-            }
-        }
-
-        /* =========================================
-           8. FILE ATTACHMENTS & DRAG DROP
-           ========================================= */
-        const fileInput = $('file-input');
-        $('btn-attach').onclick = () => fileInput.click();
+        $('btn-copy-offer').onclick = () => { navigator.clipboard.writeText($('offer-output').value); toast('Copied!'); };
+        $('btn-copy-answer').onclick = () => { navigator.clipboard.writeText($('answer-output').value); toast('Copied!'); };
         
-        fileInput.onchange = (e) => {
-            if(e.target.files.length > 0) {
-                sendFile(e.target.files[0]);
-            }
+        $('btn-send').onclick = () => {
+            const el = $('message-input');
+            if(!el.value.trim()) return;
+            sendData({ type: 'msg', text: el.value });
+            addMessage(el.value, 'mine');
+            el.value = '';
         };
 
-        const dropzone = $('chat-dropzone');
-        const overlay = $('drag-overlay');
+        $('btn-attach').onclick = () => $('file-input').click();
+        $('file-input').onchange = (e) => { if(e.target.files[0]) uploadFile(e.target.files[0]); };
 
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        function setUIConnected(connected) {
+            state.connected = connected;
+            $('message-input').disabled = !connected;
+            $('btn-send').disabled = !connected;
+            $('btn-disconnect').disabled = !connected;
+            if(!connected) {
+                $('chat-title').innerText = "Not Connected";
+                $('connection-badge').className = "status-badge";
+            }
         }
 
-        dropzone.addEventListener('dragenter', () => {
-            if(state.connected) overlay.style.display = 'flex';
-        });
+        function showModal(id) {
+            $('connection-modal').style.display = 'flex';
+            document.querySelectorAll('.step-container').forEach(e => e.classList.remove('active'));
+            $(id).classList.add('active');
+        }
+        function closeModal() { $('connection-modal').style.display = 'none'; }
 
-        overlay.addEventListener('dragleave', () => {
-            overlay.style.display = 'none';
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            overlay.style.display = 'none';
-            if(!state.connected) return toast('Connect to a peer first', 'error');
-            
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if(files.length > 0) {
-                sendFile(files[0]);
-            }
-        });
-
-        /* =========================================
-           9. PARTICLE BACKGROUND SYSTEM
-           ========================================= */
-        const canvas = $('bg-canvas');
-        const ctx = canvas.getContext('2d');
+        // --- Particles ---
+        const canvas = $('bg-canvas'), ctx = canvas.getContext('2d');
         let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 2 + 1;
-                this.color = Math.random() > 0.5 ? 'rgba(0, 255, 157, 0.2)' : 'rgba(0, 204, 255, 0.2)';
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            for (let i = 0; i < 50; i++) {
-                particles.push(new Particle());
-            }
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+        window.onresize();
+        for(let i=0;i<40;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5),vy:(Math.random()-.5)});
+        
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
             particles.forEach(p => {
-                p.update();
-                p.draw();
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1;
+                ctx.beginPath(); ctx.arc(p.x,p.y,2,0,Math.PI*2); ctx.fillStyle='rgba(0,255,157,0.3)'; ctx.fill();
             });
-
-            // Draw connections
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < 100) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 255, 157, ${0.1 - dist/1000})`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animateParticles);
+            requestAnimationFrame(animate);
         }
+        animate();
 
-        initParticles();
-        animateParticles();
-
-        /* =========================================
-           10. INIT
-           ========================================= */
-        window.onload = () => {
-            log('Created by Yaroslav Ostapenko', 'sys');
-            log('Ready. Set username and create or join a room.');
-            // Generate random username if needed
-            const randomId = Math.floor(Math.random() * 9999);
-            $('username-input').value = `User-${randomId}`;
-        };
-
+        window.onload = () => log('System Ready. Created by Yaroslav Ostapenko');
     </script>
 </body>
 </html>
