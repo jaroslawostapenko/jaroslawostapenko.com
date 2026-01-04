@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aether P2P Messenger</title>
+    <!-- PeerJS for P2P Networking -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 
+         * ------------------------------------------------------------------
+         * CORE VARIABLES & THEME CONFIGURATION
+         * ------------------------------------------------------------------
+         */
+        :root {
+            /* Light Theme (Default) */
+            --primary-hue: 250; /* Purple/Blue */
+            --primary: hsl(var(--primary-hue), 80%, 60%);
+            --primary-dark: hsl(var(--primary-hue), 80%, 50%);
+            --primary-light: hsl(var(--primary-hue), 80%, 75%);
+            --primary-fade: hsla(var(--primary-hue), 80%, 60%, 0.1);
+            
+            --bg-body: #f0f2f5;
+            --bg-surface: #ffffff;
+            --bg-surface-2: #f7f9fc;
+            
+            --text-main: #1a1b1e;
+            --text-muted: #888888;
+            --text-light: #ffffff;
+            
+            --border: #e1e4e8;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
+            --shadow-neumorphic: 
+                6px 6px 12px #d1d9e6, 
+                -6px -6px 12px #ffffff;
+                
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+            
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+
+            --anim-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --anim-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121212;
+            --bg-surface: #1e1e1e;
+            --bg-surface-2: #2c2c2c;
+            
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            
+            --border: #333333;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-neumorphic: 
+                5px 5px 10px #0d0d0d, 
+                -5px -5px 10px #232323;
+        }
+
+        /* 
+         * ------------------------------------------------------------------
+         * RESET & BASE STYLES
+         * ------------------------------------------------------------------
+         */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* App-like feel */
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: var(--radius-full);
+            opacity: 0.2;
+        }
+
+        /* 
+         * ------------------------------------------------------------------
+         * UTILITY CLASSES
+         * ------------------------------------------------------------------
+         */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .text-center { text-align: center; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .p-4 { padding: 1rem; }
+
+        /* 
+         * ------------------------------------------------------------------
+         * COMPONENT: BUTTONS & INPUTS
+         * ------------------------------------------------------------------
+         */
+        .btn {
+            border: none;
+            outline: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-fade);
+        }
+
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-icon.active {
+            color: var(--primary);
+            background: var(--primary-fade);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 2px solid transparent;
+            background: var(--bg-surface);
+            color: var(--text-main);
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-fade);
+        }
+
+        .input-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: 0.2s ease all;
+            background: transparent;
+        }
+
+        .input-field:focus ~ .input-label,
+        .input-field:not(:placeholder-shown) ~ .input-label {
+            top: -10px;
+            left: 12px;
+            font-size: 0.75rem;
+            background: var(--bg-body);
+            padding: 0 6px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* 
+         * ------------------------------------------------------------------
+         * LAYOUT STRUCTURE (APP SHELL)
+         * ------------------------------------------------------------------
+         */
+        #app {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Tablet constraint */
+            margin: 0 auto;
+            height: 100%;
+            background: var(--bg-surface-2);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .app-header {
+            height: 70px;
+            background: rgba(255, 255, 255, 0.85); /* Glass effect */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            padding-top: var(--safe-area-top);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        [data-theme="dark"] .app-header {
+            background: rgba(30, 30, 30, 0.85);
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        
+        .header-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ff4757; /* Red initially */
+            box-shadow: 0 0 8px rgba(255, 71, 87, 0.5);
+            transition: background-color 0.3s;
+        }
+        
+        .header-status.online {
+            background-color: #2ed573;
+            box-shadow: 0 0 8px rgba(46, 213, 115, 0.5);
+        }
+
+        /* Views (Pages) */
+        .view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding-top: 70px; /* Header space */
+            padding-bottom: 20px;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-body);
+            z-index: 10;
+        }
+
+        .view.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+            z-index: 20;
+        }
+
+        /* 
+         * ------------------------------------------------------------------
+         * VIEW: ONBOARDING / LOGIN
+         * ------------------------------------------------------------------
+         */
+        #view-login {
+            z-index: 50; /* Above everything */
+            padding: 40px;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-body);
+        }
+
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 10px 30px var(--primary-fade);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 
+         * ------------------------------------------------------------------
+         * VIEW: HOME (Chat List & Connection)
+         * ------------------------------------------------------------------
+         */
+        .id-card {
+            background: var(--bg-surface);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .id-display {
+            font-family: monospace;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 10px 0;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+
+        .copy-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .connect-section {
+            padding: 20px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            margin-top: auto; /* Push to bottom */
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+
+        /* 
+         * ------------------------------------------------------------------
+         * VIEW: CHAT INTERFACE
+         * ------------------------------------------------------------------
+         */
+        #view-chat {
+            padding-bottom: 0; /* Override */
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-surface-2);
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            animation: popIn 0.3s var(--anim-bounce);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .msg-system {
+            align-self: center;
+            background: rgba(0,0,0,0.05);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-radius: 20px;
+            padding: 6px 15px;
+            max-width: 90%;
+            text-align: center;
+        }
+        [data-theme="dark"] .msg-system { background: rgba(255,255,255,0.1); }
+
+        .msg-me {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 4px 10px var(--primary-fade);
+        }
+
+        .msg-other {
+            align-self: flex-start;
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .msg-meta {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+            display: block;
+        }
+
+        .chat-input-area {
+            background: var(--bg-surface);
+            padding: 15px;
+            padding-bottom: max(15px, var(--safe-area-bottom));
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 24px;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .chat-input:focus { border-color: var(--primary); }
+
+        .btn-send {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--primary-fade);
+            transition: transform 0.2s;
+        }
+        .btn-send:hover { transform: scale(1.05); }
+
+        /* 
+         * ------------------------------------------------------------------
+         * SETTINGS DRAWER / MODAL
+         * ------------------------------------------------------------------
+         */
+        .settings-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 101;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-card {
+            width: 85%;
+            max-width: 400px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transform: translateY(50px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* 
+         * ------------------------------------------------------------------
+         * TOAST NOTIFICATIONS
+         * ------------------------------------------------------------------
+         */
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 350px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(30,30,30,0.9);
+            color: white;
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease forwards;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-indicator {
+            padding: 10px;
+            display: none;
+        }
+        .typing-indicator.active { display: block; }
+        .dots { display: flex; gap: 4px; }
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Header (Shared) -->
+    <header class="app-header">
+        <div class="header-status" id="connection-status"></div>
+        <div class="header-title">Aether</div>
+        <button class="btn-icon" id="btn-settings">
+            <i class="fas fa-cog"></i>
+        </button>
+    </header>
+
+    <!-- View 1: Login / Username -->
+    <section id="view-login" class="view active">
+        <div class="logo-container">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <h2 class="text-center mb-4">Welcome</h2>
+        <p class="text-center mb-4" style="color:var(--text-muted)">Secure P2P Messaging</p>
+        
+        <div class="input-group">
+            <input type="text" id="input-username" class="input-field" placeholder=" " autocomplete="off">
+            <label class="input-label">Choose a Username</label>
+        </div>
+        
+        <button id="btn-login" class="btn btn-primary w-full">Start Messaging</button>
+    </section>
+
+    <!-- View 2: Home / Connect -->
+    <section id="view-home" class="view">
+        <div class="p-4 flex-col h-full">
+            <h3 class="mb-2">My Connection ID</h3>
+            <div class="id-card">
+                <div class="id-display" id="my-peer-id">Generating...</div>
+                <button class="btn btn-secondary btn-sm" id="btn-copy-id">
+                    <i class="fas fa-copy"></i> Copy ID
+                </button>
+                <p class="copy-hint">Share this with your friend</p>
+            </div>
+
+            <div class="flex-col justify-center" style="flex:1; align-items:center; opacity:0.5;">
+                <i class="fas fa-satellite-dish" style="font-size:3rem; margin-bottom:1rem;"></i>
+                <p>Waiting for connection...</p>
+            </div>
+
+            <div class="connect-section">
+                <h3 class="mb-4">Connect to Friend</h3>
+                <div class="input-group">
+                    <input type="text" id="input-remote-id" class="input-field" placeholder=" ">
+                    <label class="input-label">Paste Friend's ID</label>
+                </div>
+                <button id="btn-connect" class="btn btn-primary w-full">
+                    Connect <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- View 3: Chat -->
+    <section id="view-chat" class="view">
+        <div class="p-4" style="background:var(--bg-surface); border-bottom:1px solid var(--border);">
+            <div class="flex items-center gap-3">
+                <div class="btn-icon" id="btn-back-chat"><i class="fas fa-arrow-left"></i></div>
+                <div>
+                    <h4 id="chat-partner-name">Unknown User</h4>
+                    <span style="font-size:0.75rem; color:var(--text-muted)">Encrypted Connection</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="messages-container" class="chat-area">
+            <div class="msg-system">Secure P2P connection established.</div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </div>
+
+        <div class="chat-input-area">
+            <button class="btn-icon"><i class="fas fa-plus"></i></button>
+            <input type="text" id="msg-input" class="chat-input" placeholder="Type a message...">
+            <button id="btn-send-msg" class="btn-send">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card">
+            <div class="flex justify-between items-center mb-4">
+                <div class="modal-title" style="margin:0">Settings</div>
+                <button class="btn-icon" id="btn-close-settings"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="setting-row">
+                <span>Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-row">
+                <span>Sound Effects</span>
+                <label class="switch">
+                    <input type="checkbox" checked id="sound-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="p-4" style="margin-top:20px; background:var(--bg-body); border-radius:var(--radius-sm);">
+                <small style="color:var(--text-muted)">Aether Messenger v1.0<br>P2P Protocol: WebRTC</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+</div>
+
+<script>
+    /*
+     * ------------------------------------------------------------------
+     * STATE MANAGEMENT & CONFIG
+     * ------------------------------------------------------------------
+     */
+    const state = {
+        username: localStorage.getItem('aether_username') || '',
+        theme: localStorage.getItem('aether_theme') || 'light',
+        soundEnabled: true,
+        peer: null,
+        conn: null,
+        myId: null,
+        currentView: 'view-login'
+    };
+
+    // DOM Elements
+    const dom = {
+        views: {
+            login: document.getElementById('view-login'),
+            home: document.getElementById('view-home'),
+            chat: document.getElementById('view-chat')
+        },
+        inputs: {
+            username: document.getElementById('input-username'),
+            remoteId: document.getElementById('input-remote-id'),
+            message: document.getElementById('msg-input')
+        },
+        buttons: {
+            login: document.getElementById('btn-login'),
+            connect: document.getElementById('btn-connect'),
+            copy: document.getElementById('btn-copy-id'),
+            send: document.getElementById('btn-send-msg'),
+            settings: document.getElementById('btn-settings'),
+            closeSettings: document.getElementById('btn-close-settings'),
+            backChat: document.getElementById('btn-back-chat')
+        },
+        display: {
+            myId: document.getElementById('my-peer-id'),
+            status: document.getElementById('connection-status'),
+            messages: document.getElementById('messages-container'),
+            partnerName: document.getElementById('chat-partner-name'),
+            typing: document.getElementById('typing-indicator')
+        },
+        modals: {
+            settings: document.getElementById('settings-modal')
+        },
+        toggles: {
+            theme: document.getElementById('theme-toggle'),
+            sound: document.getElementById('sound-toggle')
+        }
+    };
+
+    /*
+     * ------------------------------------------------------------------
+     * CORE FUNCTIONS: UI & NAVIGATION
+     * ------------------------------------------------------------------
+     */
+    
+    // Initialize Theme
+    function initTheme() {
+        document.documentElement.setAttribute('data-theme', state.theme);
+        dom.toggles.theme.checked = state.theme === 'dark';
+    }
+
+    // Switch View with Animation
+    function switchView(viewId) {
+        Object.values(dom.views).forEach(el => {
+            el.classList.remove('active');
+        });
+        dom.views[viewId.replace('view-', '')].classList.add('active');
+        state.currentView = viewId;
+    }
+
+    // Toast Notification System
+    function showToast(message, icon = 'info-circle') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-${icon}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        
+        // Sound effect for toast
+        if(state.soundEnabled) playSound('pop');
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Sound Generator (Synthesized beep to avoid external files)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (!state.soundEnabled) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'send') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'receive') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        } else {
+            // Pop sound
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * P2P LOGIC (PEERJS)
+     * ------------------------------------------------------------------
+     */
+
+    function initPeer() {
+        // Create Peer instance (connects to PeerJS free cloud server)
+        state.peer = new Peer(null, {
+            debug: 2
+        });
+
+        state.peer.on('open', (id) => {
+            state.myId = id;
+            dom.display.myId.innerText = id;
+            dom.display.status.classList.add('online');
+            showToast('Connected to P2P Network', 'network-wired');
+        });
+
+        // Handle incoming connection
+        state.peer.on('connection', (conn) => {
+            handleConnection(conn);
+            showToast('Incoming connection!', 'user-plus');
+        });
+
+        state.peer.on('error', (err) => {
+            console.error(err);
+            showToast('Connection Error: ' + err.type, 'exclamation-triangle');
+        });
+    }
+
+    function connectToPeer(remoteId) {
+        if (!state.peer) return;
+        const conn = state.peer.connect(remoteId, {
+            metadata: { username: state.username }
+        });
+        handleConnection(conn);
+    }
+
+    function handleConnection(conn) {
+        // If already connected, close old one? For now, simple replacement
+        if (state.conn) {
+            state.conn.close();
+        }
+        state.conn = conn;
+
+        state.conn.on('open', () => {
+            // Send my username
+            state.conn.send({ type: 'handshake', username: state.username });
+            
+            // Switch to chat
+            switchView('view-chat');
+            addSystemMessage('Connected.');
+        });
+
+        state.conn.on('data', (data) => {
+            if (data.type === 'message') {
+                addMessage(data.text, 'other');
+                playSound('receive');
+            } else if (data.type === 'handshake') {
+                dom.display.partnerName.innerText = data.username;
+                addSystemMessage(`${data.username} joined the chat.`);
+            } else if (data.type === 'typing') {
+                showTyping();
+            }
+        });
+
+        state.conn.on('close', () => {
+            addSystemMessage('Peer disconnected.');
+            dom.display.partnerName.innerText = 'Offline';
+            state.conn = null;
+        });
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * CHAT LOGIC
+     * ------------------------------------------------------------------
+     */
+
+    function sendMessage() {
+        const text = dom.inputs.message.value.trim();
+        if (!text) return;
+        if (!state.conn) {
+            showToast('Not connected to anyone!', 'user-slash');
+            return;
+        }
+
+        // Send via P2P
+        state.conn.send({ type: 'message', text: text });
+
+        // Add to local UI
+        addMessage(text, 'me');
+        dom.inputs.message.value = '';
+        playSound('send');
+    }
+
+    function addMessage(text, type) {
+        const div = document.createElement('div');
+        div.className = `message-bubble msg-${type}`;
+        
+        // Escape HTML to prevent injection
+        const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        div.innerHTML = `
+            ${safeText}
+            <span class="msg-meta">${time}</span>
+        `;
+        
+        dom.display.messages.appendChild(div);
+        scrollToBottom();
+    }
+
+    function addSystemMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'msg-system';
+        div.innerText = text;
+        dom.display.messages.appendChild(div);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        dom.display.messages.scrollTop = dom.display.messages.scrollHeight;
+    }
+
+    let typingTimeout;
+    function showTyping() {
+        dom.display.typing.classList.add('active');
+        scrollToBottom();
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            dom.display.typing.classList.remove('active');
+        }, 2000);
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * EVENT LISTENERS
+     * ------------------------------------------------------------------
+     */
+
+    // Login
+    dom.buttons.login.addEventListener('click', () => {
+        const user = dom.inputs.username.value.trim();
+        if (user.length < 3) {
+            showToast('Username too short', 'exclamation-circle');
+            return;
+        }
+        state.username = user;
+        localStorage.setItem('aether_username', user);
+        
+        // Initialize P2P
+        initPeer();
+        switchView('view-home');
+    });
+
+    // Copy ID
+    dom.buttons.copy.addEventListener('click', () => {
+        if (!state.myId) return;
+        navigator.clipboard.writeText(state.myId).then(() => {
+            showToast('ID Copied to Clipboard', 'check');
+        });
+    });
+
+    // Connect
+    dom.buttons.connect.addEventListener('click', () => {
+        const id = dom.inputs.remoteId.value.trim();
+        if (!id) return;
+        if (id === state.myId) {
+            showToast("Can't connect to yourself", 'ban');
+            return;
+        }
+        connectToPeer(id);
+    });
+
+    // Send Message
+    dom.buttons.send.addEventListener('click', sendMessage);
+    dom.inputs.message.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // Typing Indicator Logic
+    dom.inputs.message.addEventListener('input', () => {
+        if (state.conn) {
+            state.conn.send({ type: 'typing' });
+        }
+    });
+
+    // Settings Modal
+    dom.buttons.settings.addEventListener('click', () => {
+        dom.modals.settings.classList.add('open');
+    });
+    dom.buttons.closeSettings.addEventListener('click', () => {
+        dom.modals.settings.classList.remove('open');
+    });
+    dom.modals.settings.addEventListener('click', (e) => {
+        if (e.target === dom.modals.settings) {
+            dom.modals.settings.classList.remove('open');
+        }
+    });
+
+    // Back Button
+    dom.buttons.backChat.addEventListener('click', () => {
+        switchView('view-home');
+    });
+
+    // Theme Toggle
+    dom.toggles.theme.addEventListener('change', (e) => {
+        state.theme = e.target.checked ? 'dark' : 'light';
+        localStorage.setItem('aether_theme', state.theme);
+        initTheme();
+    });
+
+    // Sound Toggle
+    dom.toggles.sound.addEventListener('change', (e) => {
+        state.soundEnabled = e.target.checked;
+    });
+
+    /*
+     * ------------------------------------------------------------------
+     * INITIALIZATION
+     * ------------------------------------------------------------------
+     */
+    initTheme();
+    if (state.username) {
+        dom.inputs.username.value = state.username;
+    }
+
+    // Handle "Install App" prompt logic (Simulated)
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        // Store event for later if we wanted to implement PWA install button
+    });
+
+</script>
+</body>
+</html>
