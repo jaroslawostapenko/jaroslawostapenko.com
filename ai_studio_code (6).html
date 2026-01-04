@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCVV-OS | Centralized Mining Network</title>
+    
+    <!-- EXTERNAL LIBRARIES -->
+    <!-- Crypto for Hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- MQTT for Network Layer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <!-- Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <!-- ================================================================================== -->
+    <!-- SECTION 1: CSS (THEME ENGINE) -->
+    <!-- ================================================================================== -->
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #0a0a0a;
+            --sidebar-bg: #000000;
+            --primary: #00ff41;
+            --primary-dim: #008f11;
+            --accent: #003b00;
+            --text-main: #e0e0e0;
+            --text-muted: #555;
+            --danger: #ff3333;
+            --warning: #ffcc00;
+            --border: 1px solid #1a1a1a;
+            --border-active: 1px solid #00ff41;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- SCROLLBARS --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .text-green { color: var(--primary); }
+        .text-red { color: var(--danger); }
+        .flex { display: flex; }
+        .flex-col { display: flex; flex-direction: column; }
+        .j-between { justify-content: space-between; }
+        .a-center { align-items: center; }
+        .full-h { height: 100%; }
+        .m-1 { margin: 10px; }
+        .p-1 { padding: 10px; }
+        .btn {
+            background: var(--accent);
+            color: var(--primary);
+            border: 1px solid var(--primary-dim);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 10px var(--primary); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+        /* --- LOGIN SCREEN --- */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .auth-box {
+            background: var(--panel-bg); border: var(--border-active);
+            padding: 40px; width: 400px; text-align: center;
+            box-shadow: 0 0 30px rgba(0,255,65,0.2);
+        }
+        .auth-input {
+            width: 100%; background: #000; border: 1px solid #333;
+            color: var(--primary); padding: 12px; margin: 10px 0;
+            font-family: var(--font-mono);
+        }
+
+        /* --- APP LAYOUT --- */
+        #app-container { display: flex; flex: 1; height: 100%; }
+        
+        /* SIDEBAR */
+        #sidebar {
+            width: 250px; background: var(--sidebar-bg);
+            border-right: var(--border); display: flex; flex-direction: column;
+        }
+        .brand {
+            padding: 20px; font-size: 1.5em; color: var(--primary);
+            text-shadow: 0 0 5px var(--primary); border-bottom: var(--border);
+            text-align: center;
+        }
+        .nav-item {
+            padding: 15px 20px; cursor: pointer; color: #888;
+            border-left: 3px solid transparent; transition: 0.2s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: var(--accent); color: #fff;
+            border-left: 3px solid var(--primary);
+        }
+        .nav-icon { width: 25px; text-align: center; margin-right: 10px; }
+
+        /* MAIN CONTENT */
+        #main-content {
+            flex: 1; padding: 20px; overflow-y: auto; position: relative;
+            background: radial-gradient(circle at center, #111 0%, #050505 100%);
+        }
+
+        /* PANELS */
+        .panel {
+            background: var(--panel-bg); border: var(--border);
+            padding: 20px; margin-bottom: 20px; position: relative;
+        }
+        .panel-header {
+            border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;
+            font-size: 1.1em; color: var(--primary); text-transform: uppercase;
+        }
+
+        /* DASHBOARD STATS */
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-card { background: #000; border: 1px solid #333; padding: 15px; text-align: center; }
+        .stat-val { font-size: 1.8em; color: #fff; margin: 5px 0; }
+        .stat-label { color: #666; font-size: 0.8em; text-transform: uppercase; }
+
+        /* TERMINAL / LOGS */
+        #terminal {
+            background: #000; height: 200px; overflow-y: scroll;
+            padding: 10px; font-size: 0.85em; border: 1px solid #333;
+            font-family: 'Courier New', monospace; color: #aaa;
+        }
+        .log-entry { margin: 2px 0; border-bottom: 1px solid #111; }
+        .log-time { color: #555; margin-right: 10px; }
+        .log-info { color: #00aaff; } .log-success { color: #00ff41; } .log-warn { color: #ffcc00; }
+
+        /* MINING RIG VISUALS */
+        .rig-container { display: flex; gap: 20px; align-items: flex-start; }
+        .rig-visual {
+            width: 200px; height: 200px; border: 4px solid #333;
+            display: flex; justify-content: center; align-items: center;
+            position: relative; background: #000;
+        }
+        .fan { font-size: 80px; color: #333; animation: spin 0s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .hardware-shop { margin-top: 20px; }
+        .shop-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #111; border: 1px solid #333; padding: 10px; margin-bottom: 5px;
+        }
+
+        /* CHAT */
+        #chat-container { display: flex; flex-direction: column; height: 500px; }
+        #chat-history { flex: 1; background: #000; border: 1px solid #333; padding: 10px; overflow-y: scroll; margin-bottom: 10px; }
+        .chat-msg { margin-bottom: 5px; word-break: break-word; }
+        .chat-user { color: var(--primary); font-weight: bold; cursor: pointer; }
+        .chat-ts { color: #444; font-size: 0.8em; margin-right: 5px; }
+
+        /* WALLET */
+        .wallet-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; }
+        
+        /* TOASTS */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; }
+        .toast {
+            background: #000; color: #fff; border-left: 4px solid var(--primary);
+            padding: 15px 25px; margin-top: 10px; box-shadow: 0 0 10px #000;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- ================================================================================== -->
+    <!-- SECTION 2: HTML STRUCTURE (DOM) -->
+    <!-- ================================================================================== -->
+
+    <!-- LOGIN OVERLAY -->
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <h1 style="color:var(--primary)">CCVV OS <span style="font-size:0.5em">v1.0</span></h1>
+            <p>Secure Decentralized Mining Terminal</p>
+            <div id="auth-error" class="text-red hidden">Error Message</div>
+            <input type="email" id="login-email" class="auth-input" placeholder="Operative Email">
+            <input type="password" id="login-pass" class="auth-input" placeholder="Access Key">
+            <button class="btn" style="width:100%" onclick="App.Auth.login()">Initialize Link</button>
+            <p style="font-size:0.8em; margin-top:15px; color:#555">System will auto-create identity if not found.</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-container" class="hidden">
+        
+        <!-- SIDEBAR NAV -->
+        <div id="sidebar">
+            <div class="brand"><i class="fas fa-microchip"></i> CCVV</div>
+            <div class="nav-item active" onclick="App.UI.nav('dashboard')">
+                <i class="fas fa-tachometer-alt nav-icon"></i> Dashboard
+            </div>
+            <div class="nav-item" onclick="App.UI.nav('mining')">
+                <i class="fas fa-hammer nav-icon"></i> Mining Rig
+            </div>
+            <div class="nav-item" onclick="App.UI.nav('wallet')">
+                <i class="fas fa-wallet nav-icon"></i> Wallet
+            </div>
+            <div class="nav-item" onclick="App.UI.nav('network')">
+                <i class="fas fa-globe nav-icon"></i> Network Chat
+            </div>
+            <div class="nav-item" onclick="App.UI.nav('settings')">
+                <i class="fas fa-cogs nav-icon"></i> Settings
+            </div>
+            <div style="flex:1"></div>
+            <div class="nav-item" onclick="location.reload()" style="color:var(--danger)">
+                <i class="fas fa-power-off nav-icon"></i> Disconnect
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div id="main-content">
+            
+            <!-- HEADER -->
+            <div class="flex j-between a-center" style="margin-bottom:20px;">
+                <div id="page-title" style="font-size:1.5em; font-weight:bold;">DASHBOARD</div>
+                <div class="text-green">
+                    UID: <span id="header-uid">...</span> | 
+                    <i class="fas fa-coins"></i> <span id="header-balance">0.00</span> CCVV
+                </div>
+            </div>
+
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section">
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Balance</div>
+                        <div class="stat-val" id="dash-balance">0</div>
+                        <div class="text-green">+0.0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Hash Rate</div>
+                        <div class="stat-val"><span id="dash-hash">0</span> H/s</div>
+                        <div>Virtual Power</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Network Difficulty</div>
+                        <div class="stat-val" id="dash-diff">...</div>
+                        <div>Global PoW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Rig Temp</div>
+                        <div class="stat-val" id="dash-temp">20°C</div>
+                        <div id="temp-status" class="text-green">Optimal</div>
+                    </div>
+                </div>
+
+                <div class="flex" style="gap:20px; margin-top:20px;">
+                    <div class="panel" style="flex:2">
+                        <div class="panel-header">Hash Rate History</div>
+                        <canvas id="hashChart" height="100"></canvas>
+                    </div>
+                    <div class="panel" style="flex:1">
+                        <div class="panel-header">System Events</div>
+                        <div id="terminal"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: MINING -->
+            <div id="view-mining" class="view-section hidden">
+                <div class="flex" style="gap:20px;">
+                    <!-- RIG CONTROL -->
+                    <div class="panel" style="flex:1">
+                        <div class="panel-header">Mining Operations</div>
+                        
+                        <div class="rig-container">
+                            <div class="rig-visual">
+                                <i id="fan-icon" class="fas fa-fan fan"></i>
+                                <div style="position:absolute; bottom:10px; font-size:0.8em; color:#0f0">
+                                    GPU-01
+                                </div>
+                            </div>
+                            <div style="flex:1">
+                                <table style="width:100%; color:#aaa;">
+                                    <tr><td>Status:</td><td id="miner-status" class="text-red">OFFLINE</td></tr>
+                                    <tr><td>Algorithm:</td><td>SHA-256 (Simulated)</td></tr>
+                                    <tr><td>Target Diff:</td><td id="miner-diff">Loading...</td></tr>
+                                    <tr><td>Block Reward:</td><td id="miner-reward">50 CCVV</td></tr>
+                                    <tr><td>Nonces Checked:</td><td id="miner-nonces">0</td></tr>
+                                </table>
+                                <br>
+                                <button id="btn-toggle-mine" class="btn" style="width:100%" onclick="App.Miner.toggle()">
+                                    INITIALIZE MINING SEQUENCE
+                                </button>
+                                <div style="margin-top:10px; font-size:0.8em; color:#666">
+                                    Warning: High temperatures may throttle performance.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPGRADES -->
+                    <div class="panel" style="flex:1">
+                        <div class="panel-header">Hardware Market (Virtual)</div>
+                        <p style="font-size:0.8em; color:#888">Buy upgrades to increase passive hash probability.</p>
+                        
+                        <div class="shop-item">
+                            <div>
+                                <div class="text-green"><i class="fas fa-microchip"></i> Basic Overclock</div>
+                                <div style="font-size:0.7em">+10 H/s Speed</div>
+                            </div>
+                            <button class="btn" onclick="App.Shop.buy('oc1', 100)">100 CCVV</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div>
+                                <div class="text-green"><i class="fas fa-memory"></i> Liquid Cooling</div>
+                                <div style="font-size:0.7em">Reduces Thermal Throttling</div>
+                            </div>
+                            <button class="btn" onclick="App.Shop.buy('cool1', 500)">500 CCVV</button>
+                        </div>
+
+                        <div class="shop-item">
+                            <div>
+                                <div class="text-green"><i class="fas fa-server"></i> ASIC Cluster</div>
+                                <div style="font-size:0.7em">+500 H/s Speed</div>
+                            </div>
+                            <button class="btn" onclick="App.Shop.buy('asic', 2500)">2500 CCVV</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">Current Block Challenge</div>
+                    <code id="block-challenge" style="color:var(--warning); word-break:break-all;">WAITING FOR NETWORK...</code>
+                </div>
+            </div>
+
+            <!-- VIEW: WALLET -->
+            <div id="view-wallet" class="view-section hidden">
+                <div class="flex" style="gap:20px;">
+                    <div class="panel" style="flex:1">
+                        <div class="panel-header">Send Funds</div>
+                        <p>Transfer CCVV to other network operatives.</p>
+                        
+                        <label>Recipient UID (User ID)</label>
+                        <input id="tx-to" type="text" class="auth-input" placeholder="e.g. 7d8f9a...">
+                        
+                        <label>Amount</label>
+                        <input id="tx-amt" type="number" class="auth-input" placeholder="0.00">
+                        
+                        <button class="btn" onclick="App.Wallet.send()">Execute Transfer</button>
+                    </div>
+
+                    <div class="panel" style="flex:1">
+                        <div class="panel-header">Your Address</div>
+                        <div style="background:#000; padding:20px; border:1px dashed #333; text-align:center;">
+                            <i class="fas fa-qrcode" style="font-size:4em; color:var(--primary); margin-bottom:10px;"></i>
+                            <br>
+                            <code id="wallet-addr" style="font-size:0.8em; color:#fff;">LOADING...</code>
+                        </div>
+                        <div style="margin-top:20px;">
+                            <strong>Note:</strong> Transactions are centralized. The Firebase Authority validates all ledgers instantly.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">Transaction Ledger</div>
+                    <div id="tx-history">
+                        <div class="wallet-row"><span style="color:#666">No recent transactions.</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: NETWORK (CHAT) -->
+            <div id="view-network" class="view-section hidden">
+                <div class="panel full-h" style="display:flex; flex-direction:column;">
+                    <div class="panel-header">Global Network Frequency (MQTT)</div>
+                    <div id="chat-container">
+                        <div id="chat-history"></div>
+                        <div class="flex">
+                            <input id="chat-input" class="auth-input" style="margin:0; margin-right:10px;" placeholder="Broadcast message...">
+                            <button class="btn" onclick="App.Net.sendChat()">SEND</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: SETTINGS -->
+            <div id="view-settings" class="view-section hidden">
+                <div class="panel">
+                    <div class="panel-header">System Configuration</div>
+                    <div class="shop-item">
+                        <span>Auto-Scroll Logs</span>
+                        <input type="checkbox" checked id="set-autoscroll">
+                    </div>
+                    <div class="shop-item">
+                        <span>Sound Effects</span>
+                        <input type="checkbox" id="set-sfx">
+                    </div>
+                    <br>
+                    <button class="btn" style="border-color:var(--danger); color:var(--danger)" onclick="App.Auth.logout()">
+                        Terminatel Session
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- ================================================================================== -->
+    <!-- SECTION 3: JAVASCRIPT (THE ENGINE) -->
+    <!-- ================================================================================== -->
+    <script>
+        /**
+         * CCVV OS - Monolithic Architecture
+         * Contains: Config, Auth, DB, Mining Logic, Wallet Logic, Networking
+         */
+
+        // --- 1. CONFIGURATION -----------------------------------------------------------
+        const CONFIG = {
+            firebase: {
+                apiKey: "AIzaSyBcNyU7MPQxVtG4RJi-1agoid0c2ATBUv4",
+                authDomain: "ccvv-1bbde.firebaseapp.com",
+                databaseURL: "https://ccvv-1bbde-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "ccvv-1bbde",
+                storageBucket: "ccvv-1bbde.firebasestorage.app",
+                messagingSenderId: "431297055924",
+                appId: "1:431297055924:web:d5cc4429d5ffe9832c5be1",
+                measurementId: "G-SN29EQ1DGF"
+            },
+            mqtt: {
+                broker: "broker.hivemq.com",
+                port: 8000,
+                topic: "ccvv-os/global"
+            },
+            mining: {
+                baseHashrate: 10, // Hashes per tick
+                tickRate: 100 // ms
+            }
+        };
+
+        // --- 2. CORE SYSTEM CLASS -------------------------------------------------------
+        const App = {
+            user: null,
+            db: null,
+            auth: null,
+            mqtt: null,
+            state: {
+                balance: 0,
+                hashrate: 0,
+                temp: 20,
+                upgrades: { oc1: 0, cool1: 0, asic: 0 },
+                currentChallenge: null,
+                difficulty: "00", // Hex prefix
+                reward: 50
+            },
+
+            // --- INITIALIZATION ---
+            init: function() {
+                try {
+                    firebase.initializeApp(CONFIG.firebase);
+                    this.db = firebase.database();
+                    this.auth = firebase.auth();
+                    
+                    // Auth Listener
+                    this.auth.onAuthStateChanged(user => {
+                        if (user) {
+                            this.user = user;
+                            this.onLoginSuccess();
+                        } else {
+                            this.UI.showAuth();
+                        }
+                    });
+
+                    // Start Graphics
+                    this.UI.initChart();
+
+                } catch (e) {
+                    console.error("Critical System Failure:", e);
+                    alert("System Init Failed. Check Console.");
+                }
+            },
+
+            // --- AUTH MODULE ---
+            Auth: {
+                login: async function() {
+                    const e = document.getElementById('login-email').value;
+                    const p = document.getElementById('login-pass').value;
+                    if(!e || !p) return App.UI.toast("Input credentials required", "error");
+
+                    try {
+                        await App.auth.signInWithEmailAndPassword(e, p);
+                    } catch (err) {
+                        if(err.code === 'auth/user-not-found') {
+                            try {
+                                await App.auth.createUserWithEmailAndPassword(e, p);
+                                App.UI.toast("New Identity Created", "success");
+                            } catch (createErr) {
+                                App.UI.toast(createErr.message, "error");
+                            }
+                        } else {
+                            App.UI.toast(err.message, "error");
+                        }
+                    }
+                },
+                logout: function() {
+                    App.auth.signOut();
+                    location.reload();
+                }
+            },
+
+            onLoginSuccess: function() {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                
+                // Set Header Info
+                document.getElementById('header-uid').innerText = this.user.uid.substring(0,8);
+                document.getElementById('wallet-addr').innerText = this.user.uid;
+
+                // Initialize Subsystems
+                this.Net.connect();
+                this.Data.startListeners();
+                this.UI.toast("Welcome back, Operative.", "success");
+                this.UI.log("System Online. Connection established.");
+            },
+
+            // --- DATA / FIREBASE MODULE ---
+            Data: {
+                startListeners: function() {
+                    const uid = App.user.uid;
+
+                    // 1. Balance Listener
+                    App.db.ref(`users/${uid}/balance`).on('value', snap => {
+                        App.state.balance = snap.val() || 0;
+                        App.UI.updateBalance();
+                    });
+
+                    // 2. Upgrades Listener (Sync hardware)
+                    App.db.ref(`users/${uid}/upgrades`).on('value', snap => {
+                        App.state.upgrades = snap.val() || { oc1:0, cool1:0, asic:0 };
+                    });
+
+                    // 3. System Listener (The Blockchain-less Ledger Head)
+                    App.db.ref('system').on('value', snap => {
+                        const val = snap.val();
+                        if(!val) return; // DB empty
+                        
+                        App.state.currentChallenge = val.current_challenge;
+                        App.state.difficulty = val.difficulty;
+                        App.state.reward = val.reward;
+
+                        // UI Updates
+                        document.getElementById('dash-diff').innerText = App.state.difficulty;
+                        document.getElementById('miner-diff').innerText = "Starts with " + App.state.difficulty;
+                        document.getElementById('miner-reward').innerText = val.reward + " CCVV";
+                        document.getElementById('block-challenge').innerText = val.current_challenge;
+
+                        App.Miner.resetNonce();
+                        App.UI.log(`[NET] New Block: ${val.current_challenge.substring(0,6)}...`);
+                    });
+
+                    // 4. Transaction History
+                    App.db.ref(`transactions`).orderByChild('to').equalTo(uid).limitToLast(10).on('child_added', snap => {
+                        App.Wallet.addHistoryRow(snap.val(), 'in');
+                    });
+                    App.db.ref(`transactions`).orderByChild('from').equalTo(uid).limitToLast(10).on('child_added', snap => {
+                        App.Wallet.addHistoryRow(snap.val(), 'out');
+                    });
+                }
+            },
+
+            // --- MINING MODULE (THE ENGINE) ---
+            Miner: {
+                active: false,
+                nonce: 0,
+                timer: null,
+
+                toggle: function() {
+                    this.active = !this.active;
+                    const btn = document.getElementById('btn-toggle-mine');
+                    const status = document.getElementById('miner-status');
+                    const fan = document.getElementById('fan-icon');
+
+                    if(this.active) {
+                        btn.innerText = "TERMINATE SEQUENCE";
+                        btn.style.borderColor = "var(--danger)";
+                        btn.style.color = "var(--danger)";
+                        status.innerText = "ONLINE - HASHING";
+                        status.className = "text-green";
+                        fan.style.animation = "spin 0.5s linear infinite";
+                        App.UI.log("Miner initialized. Allocate resources...");
+                        this.loop();
+                    } else {
+                        btn.innerText = "INITIALIZE MINING SEQUENCE";
+                        btn.style.borderColor = "var(--primary-dim)";
+                        btn.style.color = "var(--primary)";
+                        status.innerText = "OFFLINE";
+                        status.className = "text-red";
+                        fan.style.animation = "none";
+                        clearTimeout(this.timer);
+                    }
+                },
+
+                resetNonce: function() {
+                    this.nonce = 0;
+                },
+
+                // The Main Loop - Runs continuously when mining
+                loop: async function() {
+                    if(!this.active) return;
+
+                    // 1. Calculate Virtual Hashrate based on upgrades
+                    // Base: 10, OC1: +10, ASIC: +500
+                    let speed = CONFIG.mining.baseHashrate 
+                        + (App.state.upgrades.oc1 * 10) 
+                        + (App.state.upgrades.asic * 500);
+                    
+                    // Thermal Throttling Logic
+                    if(App.state.temp > 80) speed = speed * 0.5; // 50% slow down if hot
+                    if(App.state.temp > 95) {
+                        this.toggle(); // Emergency Shutdown
+                        App.UI.toast("EMERGENCY: Thermal Shutdown Initiated", "error");
+                        return;
+                    }
+
+                    // Heat Gen
+                    App.Miner.simulateHeat(speed);
+                    
+                    // Update Stats
+                    App.state.hashrate = speed;
+                    document.getElementById('dash-hash').innerText = speed;
+                    document.getElementById('miner-nonces').innerText = this.nonce;
+
+                    // 2. Perform Hash Attempts (Batch processing)
+                    // Instead of blocking UI with true while loop, we simulate 'speed' hashes per tick
+                    let found = false;
+                    let winningHash = "";
+                    let winningNonce = 0;
+
+                    for(let i=0; i < Math.ceil(speed/5); i++) { // Optimization: hash a fraction
+                        this.nonce++;
+                        const str = App.state.currentChallenge + this.nonce;
+                        // Use lightweight hash check logic
+                        const hash = CryptoJS.SHA256(str).toString();
+                        
+                        if(hash.startsWith(App.state.difficulty)) {
+                            found = true;
+                            winningHash = hash;
+                            winningNonce = this.nonce;
+                            break;
+                        }
+                    }
+
+                    // 3. Handle Result
+                    if(found) {
+                        this.active = false; // Pause to prevent double submit
+                        App.UI.log(`[SUCCESS] Block Found! Nonce: ${winningNonce}`);
+                        App.UI.toast("Valid Hash Found! Submitting...", "success");
+                        await this.submitBlock(winningNonce);
+                    } else {
+                        // Loop
+                        this.timer = setTimeout(() => this.loop(), CONFIG.mining.tickRate);
+                    }
+                },
+
+                simulateHeat: function(load) {
+                    // Heat increases with load, decreases with cooling upgrades
+                    const coolingPower = 1 + (App.state.upgrades.cool1 * 0.5);
+                    const heatGen = (load / 100); 
+                    
+                    // Natural cooling
+                    let newTemp = App.state.temp + (heatGen * 0.1) - (coolingPower * 0.1);
+                    if(newTemp < 20) newTemp = 20; // Ambient
+                    if(newTemp > 100) newTemp = 100;
+                    
+                    App.state.temp = parseFloat(newTemp.toFixed(1));
+                    
+                    // UI
+                    const el = document.getElementById('dash-temp');
+                    el.innerText = App.state.temp + "°C";
+                    el.style.color = App.state.temp > 70 ? "red" : "white";
+                },
+
+                submitBlock: async function(nonce) {
+                    const sysRef = App.db.ref('system');
+                    
+                    sysRef.transaction((currentSys) => {
+                        if (currentSys && currentSys.current_challenge === App.state.currentChallenge) {
+                            return {
+                                ...currentSys,
+                                current_challenge: CryptoJS.lib.WordArray.random(16).toString(),
+                                last_miner: App.user.email
+                            };
+                        }
+                        return;
+                    }, (error, committed) => {
+                        if (committed) {
+                            // Pay user
+                            const userRef = App.db.ref(`users/${App.user.uid}/balance`);
+                            userRef.transaction(bal => (bal || 0) + App.state.reward);
+                            
+                            App.UI.toast(`Reward Claimed! +${App.state.reward} CCVV`, "success");
+                            App.Net.sendChat(`SYSTEM: I mined a block!`);
+                            // Resume
+                            this.toggle(); 
+                        } else {
+                            App.UI.log("[REJECTED] Stale share.");
+                            this.toggle(); // Resume
+                        }
+                    });
+                }
+            },
+
+            // --- WALLET MODULE ---
+            Wallet: {
+                send: function() {
+                    const to = document.getElementById('tx-to').value.trim();
+                    const amt = parseFloat(document.getElementById('tx-amt').value);
+
+                    if(!to || !amt || amt <= 0) return App.UI.toast("Invalid Transaction Data", "error");
+                    if(amt > App.state.balance) return App.UI.toast("Insufficient Funds", "error");
+
+                    // 1. Deduct Sender
+                    App.db.ref(`users/${App.user.uid}/balance`).transaction(bal => {
+                        if(bal >= amt) return bal - amt;
+                        return; // Abort
+                    }, (err, committed) => {
+                        if(committed) {
+                            // 2. Add to Receiver (We assume UID exists for simplicity in this centralized model)
+                            // In real app, we'd check if user exists first via cloud function.
+                            App.db.ref(`users/${to}/balance`).transaction(bal => (bal||0) + amt);
+
+                            // 3. Log Transaction
+                            App.db.ref('transactions').push({
+                                from: App.user.uid,
+                                to: to,
+                                amount: amt,
+                                timestamp: Date.now()
+                            });
+
+                            App.UI.toast("Transaction Sent", "success");
+                            document.getElementById('tx-to').value = "";
+                            document.getElementById('tx-amt').value = "";
+                        }
+                    });
+                },
+
+                addHistoryRow: function(tx, type) {
+                    if(!tx) return;
+                    const container = document.getElementById('tx-history');
+                    const div = document.createElement('div');
+                    div.className = "wallet-row";
+                    const isIn = type === 'in';
+                    const color = isIn ? "var(--primary)" : "var(--danger)";
+                    const sign = isIn ? "+" : "-";
+                    
+                    div.innerHTML = `
+                        <div style="font-size:0.8em; color:#666">${new Date(tx.timestamp).toLocaleTimeString()}</div>
+                        <div style="font-size:0.8em">${isIn ? 'From: ' + tx.from.substring(0,6) : 'To: ' + tx.to.substring(0,6)}...</div>
+                        <div style="color:${color}; font-weight:bold">${sign}${tx.amount}</div>
+                    `;
+                    container.prepend(div);
+                }
+            },
+
+            // --- SHOP MODULE ---
+            Shop: {
+                buy: function(itemId, price) {
+                    if(App.state.balance < price) return App.UI.toast("Insufficient Funds", "error");
+
+                    // Transaction to decrement balance and increment item count
+                    App.db.ref(`users/${App.user.uid}`).transaction(userData => {
+                        if(userData && (userData.balance || 0) >= price) {
+                            userData.balance -= price;
+                            if(!userData.upgrades) userData.upgrades = {};
+                            userData.upgrades[itemId] = (userData.upgrades[itemId] || 0) + 1;
+                            return userData;
+                        }
+                        return;
+                    }, (err, committed) => {
+                        if(committed) {
+                            App.UI.toast("Upgrade Installed Successfully", "success");
+                            App.UI.log(`Hardware Acquired: ${itemId.toUpperCase()}`);
+                        } else {
+                            App.UI.toast("Transaction Failed", "error");
+                        }
+                    });
+                }
+            },
+
+            // --- NETWORK (MQTT) MODULE ---
+            Net: {
+                client: null,
+                
+                connect: function() {
+                    const id = "CCVV-Miner-" + Math.floor(Math.random()*10000);
+                    this.client = new Paho.MQTT.Client(CONFIG.mqtt.broker, CONFIG.mqtt.port, id);
+
+                    this.client.connect({
+                        onSuccess: () => {
+                            App.UI.log("MQTT Uplink Established.");
+                            this.client.subscribe(CONFIG.mqtt.topic);
+                        },
+                        onFailure: (e) => App.UI.log("MQTT Error: " + e.errorMessage)
+                    });
+
+                    this.client.onConnectionLost = (e) => App.UI.log("Connection Lost: " + e.errorMessage);
+                    
+                    this.client.onMessageArrived = (msg) => {
+                        try {
+                            const payload = JSON.parse(msg.payloadString);
+                            App.UI.addChatMessage(payload.user, payload.text);
+                        } catch(e) {
+                            // Plain text fallback
+                            App.UI.addChatMessage("System", msg.payloadString);
+                        }
+                    };
+                },
+
+                sendChat: function() {
+                    const input = document.getElementById('chat-input');
+                    const text = input.value.trim();
+                    if(!text) return;
+
+                    const payload = JSON.stringify({
+                        user: App.user.email.split('@')[0],
+                        text: text
+                    });
+
+                    const message = new Paho.MQTT.Message(payload);
+                    message.destinationName = CONFIG.mqtt.topic;
+                    this.client.send(message);
+                    input.value = "";
+                }
+            },
+
+            // --- UI MANAGER ---
+            UI: {
+                chart: null,
+
+                nav: function(page) {
+                    // Update Sidebar
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    event.currentTarget.classList.add('active'); // Needs event context or select by id
+                    
+                    // Hide all views
+                    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                    
+                    // Show target
+                    document.getElementById('view-' + page).classList.remove('hidden');
+                    document.getElementById('page-title').innerText = page.toUpperCase();
+                },
+
+                updateBalance: function() {
+                    const bal = parseFloat(App.state.balance).toFixed(2);
+                    document.getElementById('header-balance').innerText = bal;
+                    document.getElementById('dash-balance').innerText = bal;
+                },
+
+                log: function(msg) {
+                    const term = document.getElementById('terminal');
+                    const time = new Date().toLocaleTimeString();
+                    const div = document.createElement('div');
+                    div.className = "log-entry";
+                    div.innerHTML = `<span class="log-time">[${time}]</span> ${msg}`;
+                    term.appendChild(div);
+                    if(document.getElementById('set-autoscroll').checked) {
+                        term.scrollTop = term.scrollHeight;
+                    }
+                },
+
+                addChatMessage: function(user, text) {
+                    const box = document.getElementById('chat-history');
+                    const div = document.createElement('div');
+                    div.className = "chat-msg";
+                    div.innerHTML = `<span class="chat-ts">${new Date().toLocaleTimeString()}</span> <span class="chat-user"><${user}></span> ${text}`;
+                    box.appendChild(div);
+                    box.scrollTop = box.scrollHeight;
+                },
+
+                toast: function(msg, type="info") {
+                    const container = document.getElementById('toast-container');
+                    const div = document.createElement('div');
+                    div.className = "toast";
+                    div.innerText = msg;
+                    div.style.borderLeftColor = type === 'error' ? 'red' : 'var(--primary)';
+                    
+                    container.appendChild(div);
+                    setTimeout(() => div.remove(), 3000);
+                },
+
+                showAuth: function() {
+                    document.getElementById('auth-overlay').classList.remove('hidden');
+                    document.getElementById('app-container').classList.add('hidden');
+                },
+
+                initChart: function() {
+                    const ctx = document.getElementById('hashChart').getContext('2d');
+                    // Initial data
+                    const dataPoints = Array(20).fill(0);
+                    
+                    this.chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: Array(20).fill(''),
+                            datasets: [{
+                                label: 'Hashrate (H/s)',
+                                data: dataPoints,
+                                borderColor: '#00ff41',
+                                borderWidth: 1,
+                                pointRadius: 0,
+                                tension: 0.4,
+                                fill: true,
+                                backgroundColor: 'rgba(0, 255, 65, 0.1)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { display: false },
+                                y: { grid: { color: '#222' } }
+                            },
+                            animation: false
+                        }
+                    });
+
+                    // Update loop for chart (every 1s)
+                    setInterval(() => {
+                        if(!App.user) return;
+                        const d = this.chart.data.datasets[0].data;
+                        d.shift();
+                        d.push(App.state.hashrate);
+                        this.chart.update();
+                    }, 1000);
+                }
+            }
+        };
+
+        // --- BOOTSTRAP ---
+        window.onload = function() {
+            console.log("Booting CCVV OS...");
+            App.init();
+        };
+
+        // Sidebar click fix (since inline onclick doesn't pass 'this' easily in strict modules)
+        // We use a global delegator or just hardcode the ids in the onclicks in HTML.
+        // The HTML onclicks call App.UI.nav('page'), we need to handle visual active state manually if event.currentTarget fails.
+        // It works in standard browser DOM events.
+
+    </script>
+</body>
+</html>
