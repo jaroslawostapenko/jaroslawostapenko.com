@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Yaroslav Ostapenko">
+    <title>Orbit Connect | Created by Yaroslav Ostapenko</title>
+    <style>
+        /* =========================================
+           1. CSS VARIABLES & RESET
+           ========================================= */
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: #0a0f14;
+            --bg-input: #11161d;
+            --primary: #00ff9d;
+            --primary-dim: #00ff9d33;
+            --secondary: #00ccff;
+            --alert: #ff0055;
+            --text-main: #e0e0e0;
+            --text-dim: #707070;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --border-radius: 8px;
+            --shadow: 0 4px 20px rgba(0, 255, 157, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--bg-dark);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Background Particle Canvas */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        /* =========================================
+           2. LAYOUT & CONTAINERS
+           ========================================= */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 95vw;
+            height: 90vh;
+            max-width: 1400px;
+            background: rgba(10, 15, 20, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-dim);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            .sidebar-left, .sidebar-right {
+                display: none; 
+            }
+        }
+
+        /* =========================================
+           3. SIDEBARS
+           ========================================= */
+        .sidebar {
+            padding: 20px;
+            border-right: 1px solid var(--primary-dim);
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.2);
+            height: 100%;
+        }
+
+        .sidebar-right {
+            border-left: 1px solid var(--primary-dim);
+            border-right: none;
+        }
+
+        .brand {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 10px var(--primary-dim);
+        }
+
+        .brand span {
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--alert);
+            box-shadow: 0 0 8px var(--alert);
+            margin-right: 8px;
+        }
+
+        .status-badge.connected {
+            background-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        /* Connection Panel in Left Sidebar */
+        .connection-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: var(--primary-dim);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            background: rgba(0, 204, 255, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-danger {
+            border-color: var(--alert);
+            color: var(--alert);
+            background: rgba(255, 0, 85, 0.1);
+        }
+
+        .btn-danger:hover {
+            background: var(--alert);
+        }
+
+        /* Logs Area */
+        .logs-container {
+            flex: 1;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+        }
+
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 2px; }
+        .log-time { color: var(--secondary); margin-right: 5px; }
+        .log-info { color: var(--primary); }
+        .log-err { color: var(--alert); }
+        .log-sys { color: #fff; font-style: italic; }
+
+        /* Credits Footer */
+        .credits-footer {
+            margin-top: auto;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+        
+        .credits-footer .author {
+            color: var(--secondary);
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+            text-shadow: 0 0 5px rgba(0, 204, 255, 0.3);
+        }
+
+        /* =========================================
+           4. CHAT AREA
+           ========================================= */
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-panel);
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Message Bubbles */
+        .message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message.mine {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 204, 255, 0.2));
+            border: 1px solid var(--primary-dim);
+            color: var(--text-main);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.theirs {
+            align-self: flex-start;
+            background: #1a2029;
+            border: 1px solid #333;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            font-family: var(--font-mono);
+        }
+
+        .message.system {
+            align-self: center;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        /* File Attachment Styling */
+        .file-attachment {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border: 1px dashed var(--secondary);
+        }
+        
+        .file-attachment:hover { background: rgba(0,0,0,0.5); }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid #333;
+            color: white;
+            padding: 12px;
+            border-radius: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus { border-color: var(--primary); }
+        .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 8px;
+            transition: color 0.2s;
+        }
+        .icon-btn:hover { color: var(--primary); }
+        .icon-btn.clip:hover { color: var(--secondary); }
+
+        /* =========================================
+           5. MODALS & OVERLAYS
+           ========================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background: var(--bg-panel);
+            width: 500px;
+            max-width: 90%;
+            padding: 30px;
+            border: 1px solid var(--primary);
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.2);
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+        .modal h2 { color: var(--primary); font-family: var(--font-mono); margin-bottom: 15px; }
+        .modal p { color: var(--text-dim); margin-bottom: 20px; font-size: 0.9rem; }
+        
+        .sdp-box {
+            width: 100%;
+            height: 100px;
+            background: #000;
+            border: 1px solid #333;
+            color: var(--secondary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 10px;
+            resize: none;
+            margin-bottom: 15px;
+        }
+
+        .step-container { display: none; }
+        .step-container.active { display: block; }
+        
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* Drag and Drop Overlay */
+        .drag-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 255, 157, 0.1);
+            border: 2px dashed var(--primary);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            pointer-events: none;
+        }
+        .drag-overlay h1 { color: var(--primary); text-shadow: 0 0 10px black; }
+
+        /* Notification Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-panel);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideInRight 0.3s ease;
+            min-width: 250px;
+        }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Background Animation -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Application Wrapper -->
+    <div class="app-container" id="app">
+        
+        <!-- Left Sidebar: Controls -->
+        <aside class="sidebar sidebar-left">
+            <div class="brand">
+                <div class="status-badge" id="connection-badge"></div>
+                ORBIT<span>CONNECT</span>
+            </div>
+
+            <div class="connection-panel">
+                <div>
+                    <label style="color:var(--text-dim); font-size:0.8rem;">YOUR USERNAME</label>
+                    <input type="text" id="username-input" class="chat-input" style="width:100%; margin-top:5px; border-radius:4px;" value="Navigator">
+                </div>
+
+                <button class="btn" id="btn-create-offer">1. Create Room</button>
+                <button class="btn btn-secondary" id="btn-join-room">2. Join Room</button>
+                <button class="btn btn-danger" id="btn-disconnect" disabled>Disconnect</button>
+            </div>
+
+            <label style="color:var(--text-dim); font-size:0.7rem; font-family:var(--font-mono); margin-bottom:5px;">SYSTEM LOGS</label>
+            <div class="logs-container" id="system-logs">
+                <div class="log-entry"><span class="log-time">[SYS]</span> <span class="log-info">System initialized...</span></div>
+            </div>
+
+            <!-- CREDITS FOOTER -->
+            <div class="credits-footer">
+                <div>P2P Secure Messenger</div>
+                <span class="author">Created by Yaroslav Ostapenko</span>
+            </div>
+        </aside>
+
+        <!-- Center: Chat Interface -->
+        <main class="chat-area" id="chat-dropzone">
+            <div class="drag-overlay" id="drag-overlay">
+                <h1>DROP FILE TO SEND</h1>
+            </div>
+
+            <header class="chat-header">
+                <div>
+                    <h3 id="chat-title">Not Connected</h3>
+                    <span style="color:var(--text-dim); font-size:0.8rem;" id="chat-subtitle">Waiting for peer connection...</span>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="messages-list">
+                <!-- Messages will be injected here via JS -->
+                <div class="message system">Welcome to Orbit Connect. Establish a P2P connection to start.</div>
+            </div>
+
+            <div class="chat-input-area">
+                <button class="icon-btn clip" id="btn-attach" title="Send File">📎</button>
+                <input type="file" id="file-input" hidden>
+                <input type="text" class="chat-input" id="message-input" placeholder="Type a message..." disabled>
+                <button class="icon-btn" id="btn-send" title="Send Message">➤</button>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Info & History -->
+        <aside class="sidebar sidebar-right">
+            <h4 style="color:var(--primary); font-family:var(--font-mono); margin-bottom:15px;">STATS</h4>
+            <div style="font-size:0.8rem; color:var(--text-dim); line-height:1.6;">
+                <p>Data Sent: <span id="stat-sent" style="color:white;">0 B</span></p>
+                <p>Data Recv: <span id="stat-recv" style="color:white;">0 B</span></p>
+                <p>State: <span id="stat-state">New</span></p>
+            </div>
+
+            <hr style="border:0; border-top:1px solid #333; margin: 20px 0;">
+
+            <h4 style="color:var(--secondary); font-family:var(--font-mono); margin-bottom:15px;">FILES</h4>
+            <div id="file-list" style="flex:1; overflow-y:auto; font-size:0.8rem; color:var(--text-dim);">
+                <p style="font-style:italic;">No files transferred yet.</p>
+            </div>
+            
+            <div style="margin-top:auto; text-align:right; font-size:0.6rem; color:#333;">
+                v1.0.4 - Release
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="connection-modal">
+        <div class="modal">
+            <!-- Step 1: Create Offer -->
+            <div id="step-create" class="step-container">
+                <h2>Create Connection</h2>
+                <p>Copy this code and send it to your peer.</p>
+                <textarea class="sdp-box" id="offer-output" readonly></textarea>
+                <div class="modal-actions">
+                    <button class="btn" id="btn-copy-offer">Copy</button>
+                    <button class="btn btn-secondary" id="btn-goto-step3">I received the Answer</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Join (Input Offer) -->
+            <div id="step-join" class="step-container">
+                <h2>Join Room</h2>
+                <p>Paste the code received from your peer below.</p>
+                <textarea class="sdp-box" id="offer-input" placeholder="Paste Offer Here..."></textarea>
+                <div class="modal-actions">
+                    <button class="btn" id="btn-process-offer">Generate Answer</button>
+                </div>
+            </div>
+
+            <!-- Step 2b: Show Answer -->
+            <div id="step-answer" class="step-container">
+                <h2>Send Answer</h2>
+                <p>Copy this code and send it back to the host.</p>
+                <textarea class="sdp-box" id="answer-output" readonly></textarea>
+                <div class="modal-actions">
+                    <button class="btn" id="btn-copy-answer">Copy</button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Done</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Finalize (Input Answer) -->
+            <div id="step-finalize" class="step-container">
+                <h2>Finalize Connection</h2>
+                <p>Paste the answer code received from your peer.</p>
+                <textarea class="sdp-box" id="answer-input" placeholder="Paste Answer Here..."></textarea>
+                <div class="modal-actions">
+                    <button class="btn" id="btn-finalize">Connect</button>
+                </div>
+            </div>
+
+            <button style="position:absolute; top:10px; right:10px; background:none; border:none; color:white; cursor:pointer;" onclick="closeModal()">✕</button>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-area"></div>
+
+    <script>
+        /* =========================================
+           1. UTILITIES & CONFIG
+           ========================================= */
+        const $ = (id) => document.getElementById(id);
+        
+        // STUN servers are needed to punch through NATs.
+        const RTC_CONFIG = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun1.l.google.com:19302" }
+            ]
+        };
+
+        const DATA_CHANNEL_OPTIONS = { ordered: true };
+        const CHUNK_SIZE = 16384; 
+
+        /* =========================================
+           2. STATE MANAGEMENT
+           ========================================= */
+        const state = {
+            username: "Navigator",
+            peerName: "Unknown",
+            connected: false,
+            bytesSent: 0,
+            bytesRecv: 0,
+            fileTransfers: {}, // Key: ID, Value: { chunks, meta, progress }
+        };
+
+        /* =========================================
+           3. LOGGING & UI HELPERS
+           ========================================= */
+        function log(msg, type = 'info') {
+            const container = $('system-logs');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit'});
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${msg}</span>`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toast(msg, type='info') {
+            const container = $('toast-area');
+            const el = document.createElement('div');
+            el.className = 'toast';
+            el.innerText = msg;
+            if(type === 'error') el.style.borderLeftColor = 'var(--alert)';
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateStats() {
+            $('stat-sent').innerText = formatBytes(state.bytesSent);
+            $('stat-recv').innerText = formatBytes(state.bytesRecv);
+            $('stat-state').innerText = peerConnection ? peerConnection.connectionState : 'Closed';
+        }
+
+        /* =========================================
+           4. WEBRTC CORE
+           ========================================= */
+        let peerConnection = null;
+        let dataChannel = null;
+
+        function initPeerConnection() {
+            log('Initializing WebRTC stack...');
+            peerConnection = new RTCPeerConnection(RTC_CONFIG);
+
+            // Event: ICE Candidate generated (must be swapped manually)
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    log('ICE Candidate generated.', 'info');
+                    updateOfferOrAnswerOutput();
+                }
+            };
+
+            peerConnection.onconnectionstatechange = () => {
+                log(`Connection State: ${peerConnection.connectionState}`);
+                updateStats();
+                if(peerConnection.connectionState === 'connected') {
+                    setConnectedUI(true);
+                } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+                    setConnectedUI(false);
+                    toast('Peer disconnected', 'error');
+                }
+            };
+
+            peerConnection.ondatachannel = (event) => {
+                log('Received Data Channel from remote.');
+                setupDataChannel(event.channel);
+            };
+        }
+
+        function setupDataChannel(channel) {
+            dataChannel = channel;
+            dataChannel.onopen = () => {
+                log('Data Channel OPEN', 'info');
+                setConnectedUI(true);
+                // Send handshake to sync names
+                sendData({ type: 'handshake', username: state.username });
+            };
+            
+            dataChannel.onmessage = handleIncomingMessage;
+            
+            dataChannel.onclose = () => {
+                log('Data Channel CLOSED', 'err');
+                setConnectedUI(false);
+            };
+        }
+
+        function createDataChannel() {
+            const channel = peerConnection.createDataChannel("chat", DATA_CHANNEL_OPTIONS);
+            setupDataChannel(channel);
+        }
+
+        // Generate Offer
+        async function createOffer() {
+            initPeerConnection();
+            createDataChannel();
+            
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            
+            log('Generating Offer SDP...');
+            updateOfferOrAnswerOutput();
+        }
+
+        // Generate Answer
+        async function createAnswer(offerSDP) {
+            initPeerConnection();
+            
+            const remoteDesc = new RTCSessionDescription(JSON.parse(offerSDP));
+            await peerConnection.setRemoteDescription(remoteDesc);
+            
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            
+            log('Generating Answer SDP...');
+            updateOfferOrAnswerOutput();
+        }
+
+        // Finalize Connection (Host side)
+        async function finalizeConnection(answerSDP) {
+            const remoteDesc = new RTCSessionDescription(JSON.parse(answerSDP));
+            await peerConnection.setRemoteDescription(remoteDesc);
+            log('Remote description set. Finalizing...');
+        }
+
+        function updateOfferOrAnswerOutput() {
+            // We use the localDescription which contains the SDP and gathered ICE candidates
+            if(peerConnection.localDescription) {
+                const sdp = JSON.stringify(peerConnection.localDescription);
+                if($('step-create').classList.contains('active')) {
+                    $('offer-output').value = sdp;
+                } else if ($('step-answer').classList.contains('active')) {
+                    $('answer-output').value = sdp;
+                }
+            }
+        }
+
+        /* =========================================
+           5. DATA HANDLING & PROTOCOL
+           ========================================= */
+        function sendData(payload) {
+            if (dataChannel && dataChannel.readyState === 'open') {
+                const json = JSON.stringify(payload);
+                dataChannel.send(json);
+                state.bytesSent += json.length;
+                updateStats();
+            } else {
+                log('Cannot send: Channel not open', 'err');
+            }
+        }
+
+        function handleIncomingMessage(event) {
+            state.bytesRecv += event.data.length;
+            updateStats();
+
+            try {
+                const data = JSON.parse(event.data);
+                
+                switch(data.type) {
+                    case 'handshake':
+                        state.peerName = data.username;
+                        $('chat-title').innerText = `Connected with ${state.peerName}`;
+                        $('chat-subtitle').innerText = 'Secure Encrypted Tunnel (WebRTC)';
+                        toast(`${state.peerName} connected!`);
+                        break;
+                    
+                    case 'text':
+                        addMessageToUI(data.message, 'theirs', state.peerName);
+                        break;
+                    
+                    case 'file-start':
+                        handleFileStart(data);
+                        break;
+
+                    case 'file-chunk':
+                        handleFileChunk(data);
+                        break;
+                }
+            } catch (e) {
+                log('Error parsing incoming data: ' + e, 'err');
+            }
+        }
+
+        /* =========================================
+           6. FILE TRANSFER LOGIC
+           ========================================= */
+        async function sendFile(file) {
+            const fileId = Date.now().toString();
+            
+            // 1. Send Metadata
+            sendData({
+                type: 'file-start',
+                id: fileId,
+                name: file.name,
+                size: file.size,
+                mime: file.type
+            });
+
+            // UI Log
+            addMessageToUI(`Sending file: ${file.name} (${formatBytes(file.size)})`, 'mine', 'You', true);
+            log(`Starting file upload: ${file.name}`);
+
+            // 2. Read and Chunk
+            const reader = new FileReader();
+            let offset = 0;
+
+            reader.onload = (e) => {
+                const buffer = e.target.result;
+                // Convert ArrayBuffer to Base64 to send via JSON
+                
+                sendData({
+                    type: 'file-chunk',
+                    id: fileId,
+                    data: arrayBufferToBase64(buffer), // Custom helper
+                    offset: offset,
+                    last: (offset + buffer.byteLength) >= file.size
+                });
+
+                offset += buffer.byteLength;
+
+                if(offset < file.size) {
+                    readNextChunk();
+                } else {
+                    log(`File sent: ${file.name}`);
+                }
+            };
+
+            const readNextChunk = () => {
+                const slice = file.slice(offset, offset + CHUNK_SIZE);
+                reader.readAsArrayBuffer(slice);
+            };
+
+            readNextChunk();
+        }
+
+        function handleFileStart(data) {
+            state.fileTransfers[data.id] = {
+                meta: data,
+                chunks: [],
+                receivedSize: 0,
+                startTime: Date.now()
+            };
+            addMessageToUI(`Incoming file: ${data.name} (${formatBytes(data.size)})...`, 'theirs', state.peerName, true);
+        }
+
+        function handleFileChunk(data) {
+            const transfer = state.fileTransfers[data.id];
+            if(!transfer) return;
+
+            // Convert Base64 back to ArrayBuffer
+            const chunk = base64ToArrayBuffer(data.data);
+            transfer.chunks.push(chunk);
+            transfer.receivedSize += chunk.byteLength;
+
+            if(data.last) {
+                // Reassemble
+                const blob = new Blob(transfer.chunks, { type: transfer.meta.mime });
+                const url = URL.createObjectURL(blob);
+                
+                // Update UI
+                const container = $('messages-list');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message theirs';
+                msgDiv.innerHTML = `
+                    <div class="meta"><span>${state.peerName}</span><span>${new Date().toLocaleTimeString()}</span></div>
+                    <div>File Received: <strong>${transfer.meta.name}</strong></div>
+                    <div class="file-attachment" onclick="downloadFile('${url}', '${transfer.meta.name}')">
+                        <span>💾</span>
+                        <span>Download (${formatBytes(transfer.meta.size)})</span>
+                    </div>
+                `;
+                container.appendChild(msgDiv);
+                container.scrollTop = container.scrollHeight;
+                
+                // Add to sidebar
+                const fileList = $('file-list');
+                const fileEntry = document.createElement('div');
+                fileEntry.style.marginBottom = '10px';
+                fileEntry.innerHTML = `<a href="${url}" download="${transfer.meta.name}" style="color:var(--primary); text-decoration:none;">⬇ ${transfer.meta.name}</a>`;
+                fileList.appendChild(fileEntry);
+
+                log(`File transfer complete: ${transfer.meta.name}`);
+                delete state.fileTransfers[data.id];
+            }
+        }
+
+        // Binary Helpers
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binary_string = window.atob(base64);
+            const len = binary_string.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary_string.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function downloadFile(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        /* =========================================
+           7. UI INTERACTIONS
+           ========================================= */
+        
+        // Modals
+        function showModal(stepId) {
+            $('connection-modal').style.display = 'flex';
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            $(stepId).classList.add('active');
+        }
+
+        function closeModal() {
+            $('connection-modal').style.display = 'none';
+        }
+
+        // Connection Flow
+        $('btn-create-offer').onclick = () => {
+            state.username = $('username-input').value || "Navigator";
+            createOffer();
+            showModal('step-create');
+        };
+
+        $('btn-join-room').onclick = () => {
+            state.username = $('username-input').value || "Navigator";
+            showModal('step-join');
+        };
+
+        $('btn-goto-step3').onclick = () => {
+            showModal('step-finalize');
+        };
+
+        $('btn-process-offer').onclick = () => {
+            const offerText = $('offer-input').value;
+            if(!offerText) return toast('Please paste the offer code', 'error');
+            createAnswer(offerText);
+            showModal('step-answer');
+        };
+
+        $('btn-finalize').onclick = () => {
+            const answerText = $('answer-input').value;
+            if(!answerText) return toast('Please paste the answer code', 'error');
+            finalizeConnection(answerText);
+            closeModal();
+        };
+
+        $('btn-copy-offer').onclick = () => {
+            navigator.clipboard.writeText($('offer-output').value);
+            toast('Offer copied to clipboard');
+        };
+
+        $('btn-copy-answer').onclick = () => {
+            navigator.clipboard.writeText($('answer-output').value);
+            toast('Answer copied to clipboard');
+        };
+
+        $('btn-disconnect').onclick = () => {
+            if(peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+                setConnectedUI(false);
+                log('Disconnected manually.');
+            }
+        };
+
+        // Chat
+        $('btn-send').onclick = sendMessage;
+        $('message-input').onkeypress = (e) => {
+            if(e.key === 'Enter') sendMessage();
+        };
+
+        function sendMessage() {
+            const input = $('message-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            addMessageToUI(text, 'mine', state.username);
+            sendData({ type: 'text', message: text });
+            
+            input.value = '';
+        }
+
+        function addMessageToUI(text, type, sender, isSystem=false) {
+            const container = $('messages-list');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type} ${isSystem ? 'system' : ''}`;
+            
+            if(!isSystem) {
+                const time = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                msgDiv.innerHTML = `
+                    <div class="meta">
+                        <span>${sender}</span>
+                        <span>${time}</span>
+                    </div>
+                    <div>${text.replace(/\n/g, '<br>')}</div>
+                `;
+            } else {
+                msgDiv.innerText = text;
+            }
+
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function setConnectedUI(isConnected) {
+            state.connected = isConnected;
+            const badge = $('connection-badge');
+            const input = $('message-input');
+            const btnSend = $('btn-send');
+            const btnAttach = $('btn-attach');
+            const btnDis = $('btn-disconnect');
+            const title = $('chat-title');
+
+            if(isConnected) {
+                badge.classList.add('connected');
+                input.disabled = false;
+                btnSend.disabled = false;
+                btnDis.disabled = false;
+                // handshake handles the title
+            } else {
+                badge.classList.remove('connected');
+                input.disabled = true;
+                btnSend.disabled = true;
+                btnAttach.disabled = true;
+                btnDis.disabled = true;
+                title.innerText = 'Not Connected';
+                $('chat-subtitle').innerText = 'Waiting for peer connection...';
+                $('messages-list').innerHTML = '<div class="message system">Connection closed.</div>';
+            }
+        }
+
+        /* =========================================
+           8. FILE ATTACHMENTS & DRAG DROP
+           ========================================= */
+        const fileInput = $('file-input');
+        $('btn-attach').onclick = () => fileInput.click();
+        
+        fileInput.onchange = (e) => {
+            if(e.target.files.length > 0) {
+                sendFile(e.target.files[0]);
+            }
+        };
+
+        const dropzone = $('chat-dropzone');
+        const overlay = $('drag-overlay');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        dropzone.addEventListener('dragenter', () => {
+            if(state.connected) overlay.style.display = 'flex';
+        });
+
+        overlay.addEventListener('dragleave', () => {
+            overlay.style.display = 'none';
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            overlay.style.display = 'none';
+            if(!state.connected) return toast('Connect to a peer first', 'error');
+            
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if(files.length > 0) {
+                sendFile(files[0]);
+            }
+        });
+
+        /* =========================================
+           9. PARTICLE BACKGROUND SYSTEM
+           ========================================= */
+        const canvas = $('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.color = Math.random() > 0.5 ? 'rgba(0, 255, 157, 0.2)' : 'rgba(0, 204, 255, 0.2)';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Draw connections
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 255, 157, ${0.1 - dist/1000})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        /* =========================================
+           10. INIT
+           ========================================= */
+        window.onload = () => {
+            log('Created by Yaroslav Ostapenko', 'sys');
+            log('Ready. Set username and create or join a room.');
+            // Generate random username if needed
+            const randomId = Math.floor(Math.random() * 9999);
+            $('username-input').value = `User-${randomId}`;
+        };
+
+    </script>
+</body>
+</html>
