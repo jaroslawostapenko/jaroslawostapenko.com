@@ -3,50 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether P2P Messenger [E2EE Pro]</title>
-    <!-- PeerJS for WebRTC Negotiation -->
+    <title>Aether Monolith P2P</title>
+    <!-- External Libs -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- 
         ========================================================================
-        STYLESHEET (UNCHANGED STRUCTURE)
+        VISUAL LAYER (UNCHANGED)
         ========================================================================
     -->
     <style>
         :root {
-            /* Theme Variables */
             --primary-hue: 250;
             --primary: hsl(var(--primary-hue), 80%, 60%);
             --primary-dark: hsl(var(--primary-hue), 80%, 50%);
             --primary-light: hsl(var(--primary-hue), 80%, 75%);
             --primary-fade: hsla(var(--primary-hue), 80%, 60%, 0.1);
-            
             --bg-body: #f0f2f5;
             --bg-surface: #ffffff;
             --bg-surface-2: #f7f9fc;
             --bg-surface-blur: rgba(255, 255, 255, 0.85);
-            
             --text-main: #1a1b1e;
             --text-muted: #888888;
             --text-light: #ffffff;
-            
             --border: #e1e4e8;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
             --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
-            
             --radius-sm: 8px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-full: 9999px;
-            
             --safe-area-top: env(safe-area-inset-top);
             --safe-area-bottom: env(safe-area-inset-bottom);
-
             --anim-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --anim-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -64,13 +55,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-
-        html, body {
-            width: 100%; height: 100%; overflow: hidden;
-            background-color: var(--bg-body); color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
+        html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s ease, color 0.3s ease; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; opacity: 0.2; }
@@ -89,218 +74,84 @@
         .text-sm { font-size: 0.85rem; }
         .opacity-50 { opacity: 0.5; }
 
-        .btn {
-            border: none; outline: none; padding: 12px 24px;
-            border-radius: var(--radius-md); font-weight: 600; font-size: 1rem;
-            cursor: pointer; transition: transform 0.1s ease, box-shadow 0.2s ease;
-            position: relative; overflow: hidden; user-select: none;
-        }
+        .btn { border: none; outline: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; font-size: 1rem; cursor: pointer; transition: transform 0.1s ease, box-shadow 0.2s ease; position: relative; overflow: hidden; user-select: none; }
         .btn:active { transform: scale(0.96); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 15px var(--primary-fade); }
+        .btn-secondary { background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); }
         
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; box-shadow: 0 4px 15px var(--primary-fade);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-surface); color: var(--text-main);
-            border: 1px solid var(--border);
-        }
-
-        .btn-icon {
-            width: 44px; height: 44px; border-radius: 50%;
-            padding: 0; display: flex; align-items: center; justify-content: center;
-            background: var(--bg-surface); color: var(--text-muted);
-            box-shadow: var(--shadow-sm); border: none; cursor: pointer;
-            transition: 0.2s;
-        }
+        .btn-icon { width: 44px; height: 44px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); color: var(--text-muted); box-shadow: var(--shadow-sm); border: none; cursor: pointer; transition: 0.2s; }
         .btn-icon:hover { color: var(--primary); transform: translateY(-2px); }
         .btn-icon:active { transform: translateY(0); }
 
         .input-group { position: relative; margin-bottom: 1.5rem; width: 100%; }
-        .input-field {
-            width: 100%; padding: 16px; border-radius: var(--radius-md);
-            border: 2px solid transparent; background: var(--bg-surface);
-            color: var(--text-main); font-size: 1rem; box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-        }
+        .input-field { width: 100%; padding: 16px; border-radius: var(--radius-md); border: 2px solid transparent; background: var(--bg-surface); color: var(--text-main); font-size: 1rem; box-shadow: var(--shadow-sm); transition: all 0.3s ease; }
         .input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-fade); }
-        .input-label {
-            position: absolute; left: 16px; top: 16px; color: var(--text-muted);
-            pointer-events: none; transition: 0.2s ease all; background: transparent;
-        }
-        .input-field:focus ~ .input-label, .input-field:not(:placeholder-shown) ~ .input-label {
-            top: -10px; left: 12px; font-size: 0.75rem; background: var(--bg-body);
-            padding: 0 6px; color: var(--primary); font-weight: 600;
-        }
+        .input-label { position: absolute; left: 16px; top: 16px; color: var(--text-muted); pointer-events: none; transition: 0.2s ease all; background: transparent; }
+        .input-field:focus ~ .input-label, .input-field:not(:placeholder-shown) ~ .input-label { top: -10px; left: 12px; font-size: 0.75rem; background: var(--bg-body); padding: 0 6px; color: var(--primary); font-weight: 600; }
 
-        #app {
-            position: relative; width: 100%; max-width: 600px;
-            margin: 0 auto; height: 100%; background: var(--bg-surface-2);
-            box-shadow: var(--shadow-lg); overflow: hidden;
-            display: flex; flex-direction: column;
-        }
+        #app { position: relative; width: 100%; max-width: 600px; margin: 0 auto; height: 100%; background: var(--bg-surface-2); box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; }
 
-        .app-header {
-            height: 70px; background: var(--bg-surface-blur);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; padding-top: var(--safe-area-top);
-            position: absolute; top: 0; left: 0; right: 0; z-index: 100;
-            border-bottom: 1px solid var(--border);
-        }
-
+        .app-header { height: 70px; background: var(--bg-surface-blur); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; padding-top: var(--safe-area-top); position: absolute; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid var(--border); }
         .header-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
         .app-avatar-small { width: 30px; height: 30px; border-radius: 50%; display: inline-block; }
-        
-        .header-status {
-            width: 10px; height: 10px; border-radius: 50%;
-            background-color: #ff4757; box-shadow: 0 0 8px rgba(255, 71, 87, 0.5);
-            transition: background-color 0.3s;
-        }
+        .header-status { width: 10px; height: 10px; border-radius: 50%; background-color: #ff4757; box-shadow: 0 0 8px rgba(255, 71, 87, 0.5); transition: background-color 0.3s; }
         .header-status.online { background-color: #2ed573; box-shadow: 0 0 8px rgba(46, 213, 115, 0.5); }
         .header-status.connecting { background-color: #ffa502; animation: pulse-status 1s infinite; }
-
         @keyframes pulse-status { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .view {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            padding-top: 70px; padding-bottom: 20px;
-            overflow-y: auto; opacity: 0; transform: translateX(20px);
-            pointer-events: none; transition: opacity 0.4s var(--anim-smooth), transform 0.4s var(--anim-smooth);
-            display: flex; flex-direction: column; background: var(--bg-body); z-index: 10;
-        }
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 70px; padding-bottom: 20px; overflow-y: auto; opacity: 0; transform: translateX(20px); pointer-events: none; transition: opacity 0.4s var(--anim-smooth), transform 0.4s var(--anim-smooth); display: flex; flex-direction: column; background: var(--bg-body); z-index: 10; }
         .view.active { opacity: 1; transform: translateX(0); pointer-events: all; z-index: 20; }
 
         #view-login { z-index: 50; padding: 40px; justify-content: center; align-items: center; }
-        .logo-container {
-            width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            border-radius: 30px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 2rem; font-size: 3rem; color: white;
-            box-shadow: 0 10px 30px var(--primary-fade); animation: float 6s ease-in-out infinite;
-        }
+        .logo-container { width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 30px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; font-size: 3rem; color: white; box-shadow: 0 10px 30px var(--primary-fade); animation: float 6s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        .id-card {
-            background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md);
-            margin: 20px; box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border);
-        }
+        .id-card { background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md); margin: 20px; box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border); }
         .id-display { font-family: monospace; font-size: 1.4rem; color: var(--primary); margin: 10px 0; word-break: break-all; }
-        .connect-section {
-            padding: 20px; background: var(--bg-surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            margin-top: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-        }
+        .connect-section { padding: 20px; background: var(--bg-surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin-top: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
 
         #view-chat { padding-bottom: 0; background: var(--bg-surface-2); }
-        .chat-header-bar {
-            padding: 10px 20px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 10px;
-        }
+        .chat-header-bar { padding: 10px 20px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
         .chat-avatar-container { position: relative; width: 40px; height: 40px; }
-        .chat-area {
-            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column;
-            gap: 15px; scroll-behavior: smooth;
-        }
+        .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
         
-        .message-bubble {
-            max-width: 75%; padding: 12px 16px; font-size: 0.95rem; line-height: 1.4;
-            position: relative; word-wrap: break-word; animation: popIn 0.3s var(--anim-bounce);
-        }
+        .message-bubble { max-width: 75%; padding: 12px 16px; font-size: 0.95rem; line-height: 1.4; position: relative; word-wrap: break-word; animation: popIn 0.3s var(--anim-bounce); }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        .msg-system {
-            align-self: center; background: rgba(0,0,0,0.05); color: var(--text-muted);
-            font-size: 0.8rem; border-radius: 20px; padding: 6px 15px; max-width: 90%;
-        }
+        .msg-system { align-self: center; background: rgba(0,0,0,0.05); color: var(--text-muted); font-size: 0.8rem; border-radius: 20px; padding: 6px 15px; max-width: 90%; }
         [data-theme="dark"] .msg-system { background: rgba(255,255,255,0.1); }
-
-        .msg-me {
-            align-self: flex-end; background: var(--primary); color: white;
-            border-radius: 18px 18px 4px 18px; box-shadow: 0 4px 10px var(--primary-fade);
-        }
-        .msg-other {
-            align-self: flex-start; background: var(--bg-surface); color: var(--text-main);
-            border-radius: 18px 18px 18px 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);
-        }
-
-        .msg-image {
-            max-width: 100%; border-radius: 12px; margin-top: 5px; cursor: pointer;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
+        .msg-me { align-self: flex-end; background: var(--primary); color: white; border-radius: 18px 18px 4px 18px; box-shadow: 0 4px 10px var(--primary-fade); }
+        .msg-other { align-self: flex-start; background: var(--bg-surface); color: var(--text-main); border-radius: 18px 18px 18px 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+        
+        .msg-image { max-width: 100%; border-radius: 12px; margin-top: 5px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
         .msg-link { text-decoration: underline; color: inherit; font-weight: 500; }
-        .msg-meta {
-            font-size: 0.7rem; opacity: 0.7; margin-top: 4px;
-            display: flex; justify-content: flex-end; align-items: center; gap: 4px;
-        }
+        .msg-meta { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
         .msg-status i { font-size: 0.65rem; }
 
-        .chat-input-area {
-            background: var(--bg-surface); padding: 15px;
-            padding-bottom: max(15px, var(--safe-area-bottom));
-            display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border);
-            position: relative; z-index: 100;
-        }
-        .chat-input {
-            flex: 1; background: var(--bg-body); border: 1px solid var(--border);
-            padding: 12px 20px; border-radius: 24px; color: var(--text-main);
-            outline: none; transition: border-color 0.2s;
-        }
+        .chat-input-area { background: var(--bg-surface); padding: 15px; padding-bottom: max(15px, var(--safe-area-bottom)); display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); position: relative; z-index: 100; }
+        .chat-input { flex: 1; background: var(--bg-body); border: 1px solid var(--border); padding: 12px 20px; border-radius: 24px; color: var(--text-main); outline: none; transition: border-color 0.2s; }
         .chat-input:focus { border-color: var(--primary); }
 
-        .emoji-picker {
-            position: absolute; bottom: 80px; left: 10px; width: 300px;
-            background: var(--bg-surface); border-radius: var(--radius-md);
-            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
-            display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; padding: 10px;
-            height: 200px; overflow-y: auto; opacity: 0; pointer-events: none;
-            transform: translateY(20px); transition: 0.3s ease;
-        }
+        .emoji-picker { position: absolute; bottom: 80px; left: 10px; width: 300px; background: var(--bg-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); border: 1px solid var(--border); display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; padding: 10px; height: 200px; overflow-y: auto; opacity: 0; pointer-events: none; transform: translateY(20px); transition: 0.3s ease; }
         .emoji-picker.active { opacity: 1; pointer-events: all; transform: translateY(0); }
-        .emoji-item {
-            cursor: pointer; padding: 5px; text-align: center; border-radius: 5px;
-            font-size: 1.2rem; transition: background 0.2s;
-        }
+        .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 5px; font-size: 1.2rem; transition: background 0.2s; }
         .emoji-item:hover { background: var(--bg-body); }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s; display: flex; justify-content: center; align-items: center;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; justify-content: center; align-items: center; }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal-card {
-            width: 85%; max-width: 400px; background: var(--bg-surface);
-            border-radius: var(--radius-lg); padding: 24px;
-            transform: translateY(50px); transition: transform 0.3s var(--anim-bounce);
-            box-shadow: var(--shadow-lg);
-        }
+        .modal-card { width: 85%; max-width: 400px; background: var(--bg-surface); border-radius: var(--radius-lg); padding: 24px; transform: translateY(50px); transition: transform 0.3s var(--anim-bounce); box-shadow: var(--shadow-lg); }
         .modal-overlay.open .modal-card { transform: translateY(0); }
 
         .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc; transition: .4s; border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(24px); }
 
-        #toast-container {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 500; display: flex; flex-direction: column; gap: 10px;
-            width: 90%; max-width: 350px; pointer-events: none;
-        }
-        .toast {
-            background: rgba(30,30,30,0.95); color: white; padding: 14px 20px;
-            border-radius: var(--radius-md); font-size: 0.9rem; box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease forwards; backdrop-filter: blur(4px);
-            display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary);
-        }
+        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 500; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
+        .toast { background: rgba(30,30,30,0.95); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-size: 0.9rem; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease forwards; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .typing-indicator { padding: 10px; display: none; margin-left: 20px; }
@@ -310,795 +161,770 @@
         .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 
-        .credits-footer {
-            position: absolute; bottom: 30px; text-align: center; width: 100%; left: 0;
-            font-size: 0.85rem; color: var(--text-muted); opacity: 0.8;
-        }
+        .credits-footer { position: absolute; bottom: 30px; text-align: center; width: 100%; left: 0; font-size: 0.85rem; color: var(--text-muted); opacity: 0.8; }
+        
+        .md-bold { font-weight: 700; }
+        .md-italic { font-style: italic; }
+        .md-code { background: rgba(125,125,125,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- Main Header -->
+    <!-- Header -->
     <header class="app-header">
         <div class="header-status" id="connection-status"></div>
         <div class="header-title">
             <div id="header-avatar" class="app-avatar-small"></div>
-            <span>Aether Pro</span>
+            <span>Aether Monolith</span>
         </div>
-        <button class="btn-icon" id="btn-settings" title="Settings">
-            <i class="fas fa-cog"></i>
-        </button>
+        <button class="btn-icon" id="btn-settings" title="Settings"><i class="fas fa-cog"></i></button>
     </header>
 
-    <!-- VIEW 1: LOGIN -->
+    <!-- View 1: Login -->
     <section id="view-login" class="view active">
         <div class="logo-container"><i class="fas fa-bolt"></i></div>
-        <h2 class="text-center mb-4">Welcome Back</h2>
-        <p class="text-center mb-4" style="color:var(--text-muted)">Secure, Encrypted P2P Messaging</p>
-        
+        <h2 class="text-center mb-4">Aether System</h2>
+        <p class="text-center mb-4" style="color:var(--text-muted)">Decentralized Operating Core</p>
         <div class="input-group">
             <input type="text" id="input-username" class="input-field" placeholder=" " autocomplete="off">
-            <label class="input-label">Enter Username</label>
+            <label class="input-label">Identity (Username)</label>
         </div>
-        
-        <button id="btn-login" class="btn btn-primary w-full">Initialize Session</button>
-
-        <div class="credits-footer">
-            Created by <strong>Yaroslav Ostapenko</strong>
-        </div>
+        <button id="btn-login" class="btn btn-primary w-full">Boot Kernel</button>
+        <div class="credits-footer">Created by <strong>Yaroslav Ostapenko</strong></div>
     </section>
 
-    <!-- VIEW 2: HOME (Connection Manager) -->
+    <!-- View 2: Home -->
     <section id="view-home" class="view">
         <div class="p-4 flex-col h-full">
-            <h3 class="mb-2 text-center">Your Identity</h3>
+            <h3 class="mb-2 text-center">Identity Node</h3>
             <div class="id-card">
                 <div id="home-avatar-display" style="width:60px; height:60px; margin:0 auto 10px auto; border-radius:50%;"></div>
-                <div class="id-display" id="my-peer-id">Generating...</div>
-                <button class="btn btn-secondary" id="btn-copy-id">
-                    <i class="fas fa-copy"></i> Copy ID
-                </button>
-                <p class="copy-hint">Share this ID securely with a peer.</p>
+                <div class="id-display" id="my-peer-id">Initializing...</div>
+                <button class="btn btn-secondary" id="btn-copy-id"><i class="fas fa-copy"></i> Copy Address</button>
+                <p class="copy-hint">Waiting for secure handshake...</p>
             </div>
-
             <div class="flex-col justify-center" style="flex:1; align-items:center; opacity:0.3; margin: 20px 0;">
-                <i class="fas fa-satellite-dish" style="font-size:3rem; margin-bottom:1rem;"></i>
-                <p>Waiting for incoming signal...</p>
+                <i class="fas fa-shield-alt" style="font-size:3rem; margin-bottom:1rem;"></i>
+                <p>Secure Uplink Ready</p>
             </div>
-
             <div class="connect-section">
-                <h3 class="mb-4">Establish Connection</h3>
+                <h3 class="mb-4">Establish Uplink</h3>
                 <div class="input-group">
                     <input type="text" id="input-remote-id" class="input-field" placeholder=" ">
-                    <label class="input-label">Remote Peer ID</label>
+                    <label class="input-label">Target Peer Hash</label>
                 </div>
-                <button id="btn-connect" class="btn btn-primary w-full">
-                    Connect <i class="fas fa-arrow-right"></i>
-                </button>
+                <button id="btn-connect" class="btn btn-primary w-full">Initialize Tunnel <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </section>
 
-    <!-- VIEW 3: CHAT INTERFACE -->
+    <!-- View 3: Chat -->
     <section id="view-chat" class="view">
         <div class="chat-header-bar">
             <button class="btn-icon" id="btn-back-chat"><i class="fas fa-arrow-left"></i></button>
             <div class="chat-avatar-container" id="chat-partner-avatar"></div>
             <div>
                 <h4 id="chat-partner-name">Unknown</h4>
-                <div class="text-sm text-muted" id="chat-status-text">Encrypted Channel</div>
+                <div class="text-sm text-muted" id="chat-status-text">Negotiating Keys...</div>
             </div>
         </div>
-
-        <div id="messages-container" class="chat-area">
-            <!-- Messages injected here -->
-        </div>
-
-        <div class="typing-indicator" id="typing-indicator">
-            <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        </div>
-
-        <!-- Hidden Emoji Picker -->
+        <div id="messages-container" class="chat-area"></div>
+        <div class="typing-indicator" id="typing-indicator"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
         <div class="emoji-picker" id="emoji-picker-container"></div>
-
         <div class="chat-input-area">
-            <input type="file" id="file-input" hidden accept="image/png, image/jpeg">
+            <input type="file" id="file-input" hidden accept="image/*">
             <button class="btn-icon" id="btn-attach" title="Send Image"><i class="fas fa-image"></i></button>
             <button class="btn-icon" id="btn-emoji" title="Insert Emoji"><i class="far fa-smile"></i></button>
-            
-            <input type="text" id="msg-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
-            
-            <button id="btn-send-msg" class="btn-icon active" style="background:var(--primary); color:white;">
-                <i class="fas fa-paper-plane"></i>
-            </button>
+            <input type="text" id="msg-input" class="chat-input" placeholder="Enter secure payload..." autocomplete="off">
+            <button id="btn-send-msg" class="btn-icon active" style="background:var(--primary); color:white;"><i class="fas fa-paper-plane"></i></button>
         </div>
     </section>
 
-    <!-- Settings Modal -->
+    <!-- Settings -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-card">
             <div class="flex justify-between items-center mb-4">
-                <div class="modal-title" style="margin:0; font-weight:700; font-size:1.2rem;">Settings</div>
+                <div class="modal-title" style="margin:0; font-weight:700; font-size:1.2rem;">Core Config</div>
                 <button class="btn-icon" id="btn-close-settings"><i class="fas fa-times"></i></button>
             </div>
-            
-            <div class="setting-row">
-                <span><i class="fas fa-moon"></i> Dark Mode</span>
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            
-            <div class="setting-row">
-                <span><i class="fas fa-volume-up"></i> Sound Effects</span>
-                <label class="switch">
-                    <input type="checkbox" checked id="sound-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div class="setting-row">
-                <span><i class="fas fa-history"></i> Save History (IndexedDB)</span>
-                <label class="switch">
-                    <input type="checkbox" checked id="history-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            
-            <button id="btn-clear-history" class="btn btn-secondary w-full" style="margin-top:20px; color:#ff4757; border-color:#ff4757;">
-                <i class="fas fa-trash"></i> Clear Database
-            </button>
-
+            <div class="setting-row"><span><i class="fas fa-moon"></i> Dark Mode</span><label class="switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label></div>
+            <div class="setting-row"><span><i class="fas fa-volume-up"></i> Audio Feedback</span><label class="switch"><input type="checkbox" checked id="sound-toggle"><span class="slider"></span></label></div>
+            <div class="setting-row"><span><i class="fas fa-hdd"></i> VFS Persistence</span><label class="switch"><input type="checkbox" checked id="history-toggle"><span class="slider"></span></label></div>
+            <button id="btn-clear-history" class="btn btn-secondary w-full" style="margin-top:20px; color:#ff4757; border-color:#ff4757;"><i class="fas fa-bomb"></i> Format VFS</button>
             <div class="p-4 text-center" style="margin-top:20px; background:var(--bg-body); border-radius:var(--radius-sm);">
-                <small style="color:var(--text-muted)">
-                    Aether Messenger Pro v2.5<br>
-                    <strong>Created by Yaroslav Ostapenko</strong><br>
-                    Encryption: AES-GCM 256
-                </small>
+                <small style="color:var(--text-muted)">System v4.0<br><strong>Yaroslav Ostapenko</strong><br>1024-bit Architecture</small>
             </div>
         </div>
     </div>
-
-    <!-- Toast Notifications -->
     <div id="toast-container"></div>
 </div>
 
+<!-- 
+    ========================================================================
+    LOGIC KERNEL (MONOLITH JS ARCHITECTURE)
+    ========================================================================
+-->
 <script>
-    /*
-     * =========================================================================
-     * AETHER PRO - APPLICATION KERNEL
-     * 
-     * Architecture:
-     * 1. Globals & Configuration
-     * 2. Utils (Helpers, Formatters)
-     * 3. Diagnostics (Logging)
-     * 4. CryptoGuard (Encryption Layer)
-     * 5. Database (IndexedDB Wrapper)
-     * 6. EventBus (Pub/Sub)
-     * 7. Protocol (Data Packet Serialization)
-     * 8. NetworkManager (PeerJS Wrapper)
-     * 9. ChatSession (State Management)
-     * 10. UIController (DOM Manipulation)
-     * 11. CoreApp (Orchestrator)
-     * =========================================================================
-     */
-
     /**
-     * SECTION 1: GLOBALS & CONSTANTS
+     * MODULE 1: GLOBAL CONFIGURATION & TYPES
+     * Defines system-wide constants, enums, and event types.
      */
-    const CONSTANTS = {
-        APP_NAME: 'AetherPro',
-        VERSION: '2.5.0',
-        DB_NAME: 'AetherDB',
-        DB_VERSION: 2,
-        STORES: { MESSAGES: 'messages', CONFIG: 'config' },
+    const Config = {
+        SYS_NAME: 'AetherOS',
+        VERSION: '4.0.0',
+        DB_NAME: 'AetherFS_Partition_0',
+        DB_VERSION: 1,
+        STORES: {
+            MESSAGES: 'store_messages',
+            SESSIONS: 'store_sessions',
+            CONFIG: 'store_config',
+            BLOBS: 'store_blobs'
+        },
+        NET: {
+            HEARTBEAT_MS: 5000,
+            RETRY_DELAY_MS: 1000,
+            MAX_RETRIES: 5,
+            CHUNK_SIZE: 16 * 1024 // 16KB for WebRTC safety
+        },
         EVENTS: {
-            LOGIN: 'app:login',
-            CONNECT: 'app:connect',
-            SEND_MSG: 'app:send_msg',
-            STATUS_CHANGE: 'net:status',
-            DATA_RECEIVED: 'net:data',
+            // System
+            BOOT: 'sys:boot',
+            ERROR: 'sys:error',
+            // Auth
+            LOGIN: 'auth:login',
+            LOGOUT: 'auth:logout',
+            // Network
+            CONNECT: 'net:connect',
+            DISCONNECT: 'net:disconnect',
+            PEER_READY: 'net:peer_ready',
+            PEER_ERROR: 'net:peer_error',
+            DATA_IN: 'net:data_in',
+            DATA_OUT: 'net:data_out',
+            HANDSHAKE_START: 'net:handshake_start',
+            HANDSHAKE_COMPLETE: 'net:handshake_done',
+            // UI
+            UI_NAVIGATE: 'ui:navigate',
             UI_TOAST: 'ui:toast',
-            DB_READY: 'db:ready'
+            UI_RENDER_MSG: 'ui:render_msg',
+            UI_THEME_TOGGLE: 'ui:theme',
+            // Store
+            STORE_UPDATED: 'store:updated'
         },
         PACKET_TYPES: {
-            HANDSHAKE: 0x01,
-            MESSAGE: 0x02,
-            IMAGE_CHUNK: 0x03,
-            RECEIPT: 0x04,
-            TYPING: 0x05,
-            PING: 0x06
-        },
-        CHUNK_SIZE: 16 * 1024 // 16KB chunks for binary reliability
+            SYN: 0x01,        // Handshake Start
+            ACK: 0x02,        // Handshake Ack / Delivery Ack
+            DATA: 0x03,       // Standard Payload
+            PING: 0x04,       // Keepalive
+            TYPING: 0x05,     // Typing Indicator
+            BLOB_START: 0x06, // File Transfer Start
+            BLOB_CHUNK: 0x07, // File Transfer Chunk
+            BLOB_END: 0x08    // File Transfer End
+        }
     };
 
     /**
-     * SECTION 2: UTILITIES
+     * MODULE 2: SYSTEM UTILITIES
+     * Core helper functions for ID generation, timing, and formatting.
      */
     class Utils {
         /**
-         * Generate a UUID v4
-         * @returns {string}
+         * Generates a cryptographically strong UUID
          */
-        static generateUUID() {
+        static uuid() {
             if (crypto.randomUUID) return crypto.randomUUID();
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
+            return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
         }
 
         /**
-         * Wait for a specified time
-         * @param {number} ms 
-         */
-        static wait(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        /**
-         * Format timestamp
-         */
-        static formatTime(timestamp) {
-            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        /**
-         * Sanitize string for HTML
-         */
-        static sanitize(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        /**
-         * Detect URLs and linkify
-         */
-        static linkify(text) {
-            const urlRegex = /((https?:\/\/[^\s]+)|(www\.[^\s]+))/g;
-            return text.replace(urlRegex, (url) => {
-                const href = url.startsWith('http') ? url : `http://${url}`;
-                return `<a href="${href}" target="_blank" class="msg-link">${url}</a>`;
-            });
-        }
-
-        /**
-         * Debounce function execution
+         * Debounces function calls
          */
         static debounce(func, wait) {
             let timeout;
             return function(...args) {
+                const context = this;
                 clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
+                timeout = setTimeout(() => func.apply(context, args), wait);
             };
         }
-    }
 
-    /**
-     * SECTION 3: DIAGNOSTICS & LOGGING
-     */
-    class Diagnostics {
-        constructor() {
-            this.logs = [];
-        }
-
-        static log(module, message, data = null) {
-            const time = new Date().toISOString();
-            const logStr = `[${time}] [${module}] ${message}`;
-            console.log(logStr, data || '');
-        }
-
-        static error(module, message, error) {
-            const time = new Date().toISOString();
-            console.error(`[${time}] [${module}] ERROR: ${message}`, error);
-        }
-    }
-
-    /**
-     * SECTION 4: CRYPTOGUARD (E2EE)
-     * Handles AES-GCM Encryption/Decryption using Web Crypto API
-     */
-    class CryptoGuard {
-        constructor() {
-            this.key = null;
-            this.ivLength = 12; // 12 bytes for GCM
+        /**
+         * Converts ArrayBuffer to Hex String
+         */
+        static buf2hex(buffer) {
+            return [...new Uint8Array(buffer)]
+                .map(x => x.toString(16).padStart(2, '0'))
+                .join('');
         }
 
         /**
-         * Generates a new random AES-GCM key for the session.
-         * In a real full production app, this would use ECDH for key exchange.
-         * Here we generate a key and assume a secure initial channel (PeerJS TLS) exchanges it.
+         * Converts Hex String to Uint8Array
          */
-        async generateKey() {
-            try {
-                this.key = await window.crypto.subtle.generateKey(
-                    {
-                        name: "AES-GCM",
-                        length: 256
-                    },
-                    true,
-                    ["encrypt", "decrypt"]
-                );
-                Diagnostics.log('Crypto', 'New AES-256 Key Generated');
-                return this.key;
-            } catch (e) {
-                Diagnostics.error('Crypto', 'Key Gen Failed', e);
-                throw e;
+        static hex2buf(hexString) {
+            return new Uint8Array(
+                hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
+            );
+        }
+
+        /**
+         * Sleep Promise
+         */
+        static sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        /**
+         * Formats bytes to human readable string
+         */
+        static humanFileSize(bytes, si = false, dp = 1) {
+            const thresh = si ? 1000 : 1024;
+            if (Math.abs(bytes) < thresh) return bytes + ' B';
+            const units = si
+                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+            let u = -1;
+            const r = 10**dp;
+            do {
+                bytes /= thresh;
+                ++u;
+            } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+            return bytes.toFixed(dp) + ' ' + units[u];
+        }
+
+        /**
+         * Safe HTML Escape
+         */
+        static escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    }
+
+    /**
+     * MODULE 3: EVENT EMITTER (OBSERVER PATTERN)
+     * Central nervous system for decoupled communication between modules.
+     */
+    class EventEmitter {
+        constructor() {
+            this.listeners = new Map();
+        }
+
+        on(event, callback) {
+            if (!this.listeners.has(event)) {
+                this.listeners.set(event, new Set());
+            }
+            this.listeners.get(event).add(callback);
+            return () => this.off(event, callback); // Return unsubscribe function
+        }
+
+        off(event, callback) {
+            if (this.listeners.has(event)) {
+                this.listeners.get(event).delete(callback);
             }
         }
 
-        /**
-         * Export key to JSON Web Key format for sharing
-         */
-        async exportKey() {
-            if (!this.key) throw new Error("No key to export");
-            return await window.crypto.subtle.exportKey("jwk", this.key);
+        emit(event, data) {
+            if (this.listeners.has(event)) {
+                this.listeners.get(event).forEach(cb => {
+                    try {
+                        cb(data);
+                    } catch (e) {
+                        console.error(`Error in event listener for ${event}:`, e);
+                    }
+                });
+            }
         }
 
-        /**
-         * Import a JWK key
-         */
-        async importKey(jwk) {
-            this.key = await window.crypto.subtle.importKey(
-                "jwk",
-                jwk,
-                { name: "AES-GCM" },
-                true,
-                ["encrypt", "decrypt"]
-            );
-            Diagnostics.log('Crypto', 'Key Imported');
+        emitAsync(event, data) {
+            return new Promise(resolve => {
+                this.emit(event, data);
+                resolve();
+            });
+        }
+    }
+
+    /**
+     * MODULE 4: REDUX-LIKE STATE STORE
+     * Single source of truth for application state.
+     */
+    class StateManager {
+        constructor(eventBus) {
+            this.bus = eventBus;
+            // Initial State
+            this.state = {
+                user: {
+                    name: localStorage.getItem('aether_username') || null,
+                    id: null,
+                    publicKey: null
+                },
+                ui: {
+                    theme: localStorage.getItem('aether_theme') || 'light',
+                    currentView: 'view-login',
+                    soundEnabled: true,
+                    historyEnabled: true
+                },
+                network: {
+                    status: 'disconnected', // disconnected, connecting, online, handshaking, connected
+                    latency: 0,
+                    bytesSent: 0,
+                    bytesReceived: 0
+                },
+                chat: {
+                    partnerId: null,
+                    partnerName: null,
+                    messages: [],
+                    isTyping: false
+                }
+            };
         }
 
-        /**
-         * Encrypts a text string or object
-         */
-        async encrypt(data) {
-            if (!this.key) throw new Error("Encryption key not set");
+        getState() {
+            return this.state; // Direct reference for read-only speed
+        }
+
+        dispatch(action, payload) {
+            const prevState = JSON.parse(JSON.stringify(this.state)); // Deep copy for diffing if needed
             
-            const enc = new TextEncoder();
-            const encoded = enc.encode(JSON.stringify(data));
-            const iv = window.crypto.getRandomValues(new Uint8Array(this.ivLength));
-
-            const cipherText = await window.crypto.subtle.encrypt(
-                {
-                    name: "AES-GCM",
-                    iv: iv
-                },
-                this.key,
-                encoded
-            );
-
-            // Combine IV and Ciphertext
-            const buffer = new Uint8Array(iv.byteLength + cipherText.byteLength);
-            buffer.set(iv, 0);
-            buffer.set(new Uint8Array(cipherText), iv.byteLength);
-
-            // Return as base64 for easy transport over PeerJS JSON channel
-            return this.arrayBufferToBase64(buffer);
-        }
-
-        /**
-         * Decrypts a base64 string
-         */
-        async decrypt(base64Data) {
-            if (!this.key) throw new Error("Encryption key not set");
-
-            const buffer = this.base64ToArrayBuffer(base64Data);
-            const iv = buffer.slice(0, this.ivLength);
-            const cipherText = buffer.slice(this.ivLength);
-
-            const decrypted = await window.crypto.subtle.decrypt(
-                {
-                    name: "AES-GCM",
-                    iv: iv
-                },
-                this.key,
-                cipherText
-            );
-
-            const dec = new TextDecoder();
-            return JSON.parse(dec.decode(decrypted));
-        }
-
-        arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
+            // Reducer Logic (inline for simplicity in this monolith)
+            switch (action) {
+                case 'SET_USER_NAME':
+                    this.state.user.name = payload;
+                    localStorage.setItem('aether_username', payload);
+                    break;
+                case 'SET_USER_ID':
+                    this.state.user.id = payload;
+                    break;
+                case 'SET_THEME':
+                    this.state.ui.theme = payload;
+                    localStorage.setItem('aether_theme', payload);
+                    break;
+                case 'NAVIGATE':
+                    this.state.ui.currentView = payload;
+                    break;
+                case 'SET_NET_STATUS':
+                    this.state.network.status = payload;
+                    break;
+                case 'SET_PARTNER':
+                    this.state.chat.partnerId = payload.id;
+                    this.state.chat.partnerName = payload.name;
+                    break;
+                case 'ADD_MESSAGE':
+                    this.state.chat.messages.push(payload);
+                    break;
+                case 'UPDATE_METRICS':
+                    if(payload.sent) this.state.network.bytesSent += payload.sent;
+                    if(payload.recv) this.state.network.bytesReceived += payload.recv;
+                    break;
+                case 'SET_TYPING':
+                    this.state.chat.isTyping = payload;
+                    break;
+                case 'TOGGLE_SETTING':
+                    this.state.ui[payload.key] = payload.value;
+                    break;
             }
-            return window.btoa(binary);
-        }
 
-        base64ToArrayBuffer(base64) {
-            const binary_string = window.atob(base64);
-            const len = binary_string.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary_string.charCodeAt(i);
-            }
-            return bytes.buffer;
+            // Notify subscribers via EventBus
+            this.bus.emit(Config.EVENTS.STORE_UPDATED, { action, state: this.state });
         }
     }
 
     /**
-     * SECTION 5: DATABASE (INDEXEDDB)
-     * High-performance asynchronous storage for chat history.
+     * MODULE 5: VIRTUAL FILE SYSTEM (INDEXEDDB WRAPPER)
+     * Mimics a filesystem to store logs, messages, and binary blobs persistently.
      */
-    class Database {
+    class VFS {
         constructor() {
             this.db = null;
         }
 
-        open() {
+        async mount() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(CONSTANTS.DB_NAME, CONSTANTS.DB_VERSION);
+                const request = indexedDB.open(Config.DB_NAME, Config.DB_VERSION);
 
-                request.onerror = (event) => {
-                    Diagnostics.error('Database', 'Open Error', event.target.error);
-                    reject(event.target.error);
-                };
+                request.onerror = (e) => reject(`VFS Mount Error: ${e.target.error}`);
 
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    // Messages Store
-                    if (!db.objectStoreNames.contains(CONSTANTS.STORES.MESSAGES)) {
-                        const store = db.createObjectStore(CONSTANTS.STORES.MESSAGES, { keyPath: 'id' });
-                        store.createIndex('peerId', 'peerId', { unique: false });
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    
+                    // Create Object Stores
+                    if (!db.objectStoreNames.contains(Config.STORES.MESSAGES)) {
+                        const store = db.createObjectStore(Config.STORES.MESSAGES, { keyPath: 'id' });
                         store.createIndex('timestamp', 'timestamp', { unique: false });
+                        store.createIndex('peerId', 'peerId', { unique: false });
                     }
-                    Diagnostics.log('Database', 'Upgrade Completed');
+                    if (!db.objectStoreNames.contains(Config.STORES.BLOBS)) {
+                        db.createObjectStore(Config.STORES.BLOBS, { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains(Config.STORES.CONFIG)) {
+                        db.createObjectStore(Config.STORES.CONFIG, { keyPath: 'key' });
+                    }
                 };
 
-                request.onsuccess = (event) => {
-                    this.db = event.target.result;
-                    Diagnostics.log('Database', 'Opened Successfully');
-                    resolve(this.db);
+                request.onsuccess = (e) => {
+                    this.db = e.target.result;
+                    console.log(`[VFS] Mounted ${Config.DB_NAME}`);
+                    resolve();
                 };
             });
         }
 
-        addMessage(message) {
-            if (!this.db) return Promise.reject("DB not open");
+        write(storeName, data) {
+            if (!this.db) return Promise.reject("VFS not mounted");
             return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([CONSTANTS.STORES.MESSAGES], 'readwrite');
-                const store = transaction.objectStore(CONSTANTS.STORES.MESSAGES);
-                const req = store.add(message);
-                
+                const tx = this.db.transaction([storeName], 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.put(data);
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
         }
 
-        getHistory(peerId) {
-            if (!this.db) return Promise.reject("DB not open");
+        read(storeName, key) {
+            if (!this.db) return Promise.reject("VFS not mounted");
             return new Promise((resolve, reject) => {
-                const transaction = this.db.transaction([CONSTANTS.STORES.MESSAGES], 'readonly');
-                const store = transaction.objectStore(CONSTANTS.STORES.MESSAGES);
-                const index = store.index('peerId');
-                const range = IDBKeyRange.only(peerId);
-                const req = index.getAll(range);
-
-                req.onsuccess = () => {
-                    // Sort by timestamp manually if needed, though usually insertion order implies time
-                    const results = req.result.sort((a, b) => a.timestamp - b.timestamp);
-                    resolve(results);
-                };
+                const tx = this.db.transaction([storeName], 'readonly');
+                const store = tx.objectStore(storeName);
+                const req = store.get(key);
+                req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
         }
 
-        clearAll() {
+        query(storeName, index, value) {
+            if (!this.db) return Promise.reject("VFS not mounted");
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction([storeName], 'readonly');
+                const store = tx.objectStore(storeName);
+                const idx = store.index(index);
+                const req = idx.getAll(IDBKeyRange.only(value));
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        delete(storeName, key) {
+            if (!this.db) return Promise.reject("VFS not mounted");
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction([storeName], 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.delete(key);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        format() {
             if (!this.db) return;
-            const transaction = this.db.transaction([CONSTANTS.STORES.MESSAGES], 'readwrite');
-            transaction.objectStore(CONSTANTS.STORES.MESSAGES).clear();
-            Diagnostics.log('Database', 'Cleared All Data');
+            const tx = this.db.transaction([Config.STORES.MESSAGES, Config.STORES.BLOBS], 'readwrite');
+            tx.objectStore(Config.STORES.MESSAGES).clear();
+            tx.objectStore(Config.STORES.BLOBS).clear();
+            console.log('[VFS] Formatted successfully');
         }
     }
 
     /**
-     * SECTION 6: EVENT BUS
-     * Decouples modules.
+     * MODULE 6: CRYPTO VAULT (WEB CRYPTO API)
+     * Handles Key Generation, Exchange (ECDH), Derivation (HKDF), and Encryption (AES-GCM).
      */
-    class EventBus {
+    class CryptoVault {
         constructor() {
-            this.listeners = {};
+            this.keyPair = null;      // My ECDH Keypair
+            this.sharedSecret = null; // Raw bits
+            this.sessionKey = null;   // AES-GCM Key
         }
 
-        on(event, callback) {
-            if (!this.listeners[event]) this.listeners[event] = [];
-            this.listeners[event].push(callback);
+        async init() {
+            // Generate ECDH Keypair
+            this.keyPair = await window.crypto.subtle.generateKey(
+                { name: "ECDH", namedCurve: "P-256" },
+                true,
+                ["deriveKey", "deriveBits"]
+            );
         }
 
-        emit(event, data) {
-            if (this.listeners[event]) {
-                this.listeners[event].forEach(cb => {
-                    try { cb(data); } catch (e) { console.error(e); }
-                });
+        async getPublicKeyJWK() {
+            return await window.crypto.subtle.exportKey("jwk", this.keyPair.publicKey);
+        }
+
+        async deriveSession(peerPublicKeyJWK) {
+            try {
+                // Import Peer Key
+                const peerKey = await window.crypto.subtle.importKey(
+                    "jwk",
+                    peerPublicKeyJWK,
+                    { name: "ECDH", namedCurve: "P-256" },
+                    false,
+                    []
+                );
+
+                // Derive Shared Bits
+                const sharedBits = await window.crypto.subtle.deriveBits(
+                    { name: "ECDH", public: peerKey },
+                    this.keyPair.privateKey,
+                    256
+                );
+
+                // Import as Raw Key material
+                const rawKey = await window.crypto.subtle.importKey(
+                    "raw",
+                    sharedBits,
+                    "HKDF",
+                    false,
+                    ["deriveKey"]
+                );
+
+                // Derive AES-GCM Key
+                this.sessionKey = await window.crypto.subtle.deriveKey(
+                    { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(), info: new TextEncoder().encode("AetherV4") },
+                    rawKey,
+                    { name: "AES-GCM", length: 256 },
+                    false,
+                    ["encrypt", "decrypt"]
+                );
+
+                return true;
+            } catch (e) {
+                console.error('[Crypto] Derivation Failed:', e);
+                return false;
             }
+        }
+
+        async encrypt(plaintext) {
+            if (!this.sessionKey) throw new Error("No session key");
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const enc = new TextEncoder().encode(JSON.stringify(plaintext));
+
+            const ciphertext = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                this.sessionKey,
+                enc
+            );
+
+            // Return IV + Ciphertext as hex string
+            return {
+                iv: Utils.buf2hex(iv),
+                data: Utils.buf2hex(ciphertext)
+            };
+        }
+
+        async decrypt(envelope) {
+            if (!this.sessionKey) throw new Error("No session key");
+            const iv = Utils.hex2buf(envelope.iv);
+            const data = Utils.hex2buf(envelope.data);
+
+            const decrypted = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                this.sessionKey,
+                data
+            );
+
+            const dec = new TextDecoder();
+            return JSON.parse(dec.decode(decrypted));
         }
     }
 
     /**
-     * SECTION 7: PROTOCOL & AVATAR GEN
+     * MODULE 7: NETWORK STACK (PEERJS + RELIABILITY + PROTOCOL)
+     * Handles low-level WebRTC, Packet Construction, ACKs, and Heartbeats.
      */
-    class AvatarGenerator {
-        static generate(seed) {
-            let hash = 0;
-            for (let i = 0; i < seed.length; i++) {
-                hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-            const color = '#' + '00000'.substring(0, 6 - c.length) + c;
-            
-            const svg = `
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100" height="100" fill="${color}" />
-                    <text x="50" y="55" font-size="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold">
-                        ${seed.substring(0, 1).toUpperCase()}
-                    </text>
-                </svg>
-            `;
-            return `data:image/svg+xml;base64,${btoa(svg)}`;
-        }
-    }
-
-    class ChunkManager {
-        constructor() {
-            this.buffers = {}; // Store incoming chunks
-        }
-
-        handleChunk(peerId, chunkData) {
-            const { fileId, index, total, data } = chunkData;
-            if (!this.buffers[fileId]) {
-                this.buffers[fileId] = { parts: new Array(total), count: 0, total: total };
-            }
-            
-            this.buffers[fileId].parts[index] = data;
-            this.buffers[fileId].count++;
-
-            if (this.buffers[fileId].count === total) {
-                // Reassemble
-                const fullData = this.buffers[fileId].parts.join('');
-                delete this.buffers[fileId];
-                return fullData; // Base64 string
-            }
-            return null; // Not ready
-        }
-    }
-
-    /**
-     * SECTION 8: NETWORK MANAGER
-     * Handles PeerJS, Packet Serialization, and Reliability
-     */
-    class NetworkManager {
-        constructor(eventBus, cryptoGuard) {
-            this.bus = eventBus;
-            this.crypto = cryptoGuard;
+    class NetworkStack {
+        constructor(bus, store, crypto) {
+            this.bus = bus;
+            this.store = store;
+            this.crypto = crypto;
             this.peer = null;
             this.conn = null;
-            this.myId = null;
-            this.chunkManager = new ChunkManager();
-            this.heartbeatInterval = null;
+            this.ackBuffer = new Map(); // Store packets waiting for ACK
+            this.heartbeatTimer = null;
         }
 
-        init(username) {
-            this.peer = new Peer(null, { debug: 0 }); // 0 = no logs from lib
-
+        boot() {
+            // Initialize PeerJS
+            this.peer = new Peer(null, { debug: 0 });
+            
             this.peer.on('open', (id) => {
-                this.myId = id;
-                Diagnostics.log('Network', 'Peer Opened', id);
-                this.bus.emit(CONSTANTS.EVENTS.STATUS_CHANGE, { status: 'online', id: id });
+                this.store.dispatch('SET_USER_ID', id);
+                this.store.dispatch('SET_NET_STATUS', 'online');
+                this.bus.emit(Config.EVENTS.PEER_READY, id);
             });
 
-            this.peer.on('connection', (conn) => {
-                Diagnostics.log('Network', 'Incoming Connection');
-                this.setupConnection(conn);
-            });
+            this.peer.on('connection', (conn) => this.handleIncoming(conn));
 
             this.peer.on('error', (err) => {
-                Diagnostics.error('Network', 'Peer Error', err);
-                this.bus.emit(CONSTANTS.EVENTS.UI_TOAST, { msg: `Net Error: ${err.type}`, icon: 'wifi' });
+                this.bus.emit(Config.EVENTS.UI_TOAST, { message: `Net Error: ${err.type}`, type: 'error' });
             });
-
+            
             this.peer.on('disconnected', () => {
-                Diagnostics.log('Network', 'Disconnected from Signal Server');
-                this.peer.reconnect();
+                 this.store.dispatch('SET_NET_STATUS', 'disconnected');
+                 this.peer.reconnect();
             });
         }
 
-        connect(remoteId, username) {
+        connect(remoteId) {
             if (this.conn) this.conn.close();
-            const conn = this.peer.connect(remoteId, {
-                metadata: { username: username }
-            });
-            this.setupConnection(conn);
+            const conn = this.peer.connect(remoteId);
+            this.handleIncoming(conn); // Reuse logic
         }
 
-        setupConnection(conn) {
+        handleIncoming(conn) {
             this.conn = conn;
-
+            
             conn.on('open', async () => {
-                this.startHeartbeat();
+                this.store.dispatch('SET_NET_STATUS', 'handshaking');
                 
-                // 1. Generate & Export Key
-                await this.crypto.generateKey();
-                const jwk = await this.crypto.exportKey();
-
-                // 2. Send Handshake with Key
-                conn.send({
-                    type: CONSTANTS.PACKET_TYPES.HANDSHAKE,
-                    payload: { username: localStorage.getItem('aether_username'), key: jwk }
-                });
-
-                this.bus.emit(CONSTANTS.EVENTS.STATUS_CHANGE, { status: 'connected', peer: conn.peer });
+                // Start Handshake: Send SYN with Public Key
+                const myPub = await this.crypto.getPublicKeyJWK();
+                const packet = {
+                    type: Config.PACKET_TYPES.SYN,
+                    payload: { key: myPub, user: this.store.getState().user.name }
+                };
+                conn.send(packet);
             });
 
             conn.on('data', async (raw) => {
-                try {
-                    // Handle Handshake (Unencrypted)
-                    if (raw.type === CONSTANTS.PACKET_TYPES.HANDSHAKE) {
-                        await this.crypto.importKey(raw.payload.key);
-                        Diagnostics.log('Network', 'Handshake Completed. Channel Encrypted.');
-                        this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { 
-                            type: 'handshake', 
-                            username: raw.payload.username 
-                        });
-                        return;
-                    }
-
-                    // Handle Encrypted Packets
-                    if (raw.ciphertext) {
-                        const decrypted = await this.crypto.decrypt(raw.ciphertext);
-                        this.handleDecryptedPacket(decrypted);
-                    } else if (raw.type === CONSTANTS.PACKET_TYPES.PING) {
-                        // Plaintext ping (safe)
-                    }
-                } catch (e) {
-                    Diagnostics.error('Network', 'Packet Parse Error', e);
-                }
+                this.store.dispatch('UPDATE_METRICS', { recv: JSON.stringify(raw).length });
+                await this.routePacket(raw);
             });
 
             conn.on('close', () => {
-                this.stopHeartbeat();
-                this.bus.emit(CONSTANTS.EVENTS.STATUS_CHANGE, { status: 'closed' });
-            });
-
-            conn.on('error', (err) => {
-                Diagnostics.error('Network', 'Connection Error', err);
+                this.store.dispatch('SET_NET_STATUS', 'online'); // Back to waiting
+                this.store.dispatch('SET_PARTNER', {id: null, name: null});
+                clearInterval(this.heartbeatTimer);
             });
         }
 
-        handleDecryptedPacket(data) {
-            switch(data.type) {
-                case CONSTANTS.PACKET_TYPES.MESSAGE:
-                    this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { 
-                        type: 'message', 
-                        text: data.content, 
-                        timestamp: data.ts,
-                        id: data.id 
+        async routePacket(packet) {
+            switch(packet.type) {
+                case Config.PACKET_TYPES.SYN:
+                    // Received peer key. Derive session. Send ACK.
+                    await this.crypto.deriveSession(packet.payload.key);
+                    const myPub = await this.crypto.getPublicKeyJWK();
+                    this.conn.send({
+                        type: Config.PACKET_TYPES.ACK,
+                        payload: { key: myPub, user: this.store.getState().user.name }
                     });
+                    this.finalizeHandshake(packet.payload.user);
                     break;
-                case CONSTANTS.PACKET_TYPES.IMAGE_CHUNK:
-                    const result = this.chunkManager.handleChunk(this.conn.peer, data.content);
-                    if (result) {
-                        this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { 
-                            type: 'image', 
-                            data: result, 
-                            timestamp: Date.now() 
-                        });
+
+                case Config.PACKET_TYPES.ACK:
+                    // Peer accepted. Derive session if we initiated.
+                    if (!this.crypto.sessionKey) {
+                        await this.crypto.deriveSession(packet.payload.key);
+                    }
+                    this.finalizeHandshake(packet.payload.user);
+                    break;
+
+                case Config.PACKET_TYPES.DATA:
+                    // Decrypt Payload
+                    try {
+                        const decrypted = await this.crypto.decrypt(packet.payload);
+                        this.bus.emit(Config.EVENTS.DATA_IN, decrypted);
+                        // We could send a delivery ACK here in a fuller implementation
+                    } catch (e) {
+                        console.error("Decryption failed", e);
                     }
                     break;
-                case CONSTANTS.PACKET_TYPES.TYPING:
-                    this.bus.emit(CONSTANTS.EVENTS.DATA_RECEIVED, { type: 'typing' });
-                    break;
+                
+                case Config.PACKET_TYPES.TYPING:
+                     this.store.dispatch('SET_TYPING', true);
+                     setTimeout(() => this.store.dispatch('SET_TYPING', false), 2000);
+                     break;
+
+                case Config.PACKET_TYPES.PING:
+                     // Update latency metrics logic could go here
+                     break;
             }
         }
 
-        async send(type, content) {
-            if (!this.conn || !this.conn.open) return false;
-
-            // Handle Image Chunking Logic
-            if (type === 'image') {
-                const totalChunks = Math.ceil(content.length / CONSTANTS.CHUNK_SIZE);
-                const fileId = Utils.generateUUID();
-                
-                for (let i = 0; i < totalChunks; i++) {
-                    const chunk = content.slice(i * CONSTANTS.CHUNK_SIZE, (i + 1) * CONSTANTS.CHUNK_SIZE);
-                    const packet = {
-                        type: CONSTANTS.PACKET_TYPES.IMAGE_CHUNK,
-                        content: { fileId, index: i, total: totalChunks, data: chunk },
-                        ts: Date.now()
-                    };
-                    const encrypted = await this.crypto.encrypt(packet);
-                    this.conn.send({ ciphertext: encrypted });
-                    await Utils.wait(10); // Throttle to prevent WebRTC buffer overflow
-                }
-                return true;
-            }
-
-            // Standard Message
-            const packet = {
-                type: type === 'message' ? CONSTANTS.PACKET_TYPES.MESSAGE : CONSTANTS.PACKET_TYPES.TYPING,
-                content: content,
-                ts: Date.now(),
-                id: Utils.generateUUID()
-            };
-
-            const encrypted = await this.crypto.encrypt(packet);
-            this.conn.send({ ciphertext: encrypted });
-            return packet;
+        finalizeHandshake(partnerName) {
+            this.store.dispatch('SET_NET_STATUS', 'connected');
+            this.store.dispatch('SET_PARTNER', { id: this.conn.peer, name: partnerName });
+            this.startHeartbeat();
+            this.bus.emit(Config.EVENTS.UI_TOAST, { message: 'Secure Tunnel Established', type: 'success' });
         }
 
         startHeartbeat() {
-            this.stopHeartbeat();
-            this.heartbeatInterval = setInterval(() => {
-                if (this.conn && this.conn.open) {
-                    this.conn.send({ type: CONSTANTS.PACKET_TYPES.PING });
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = setInterval(() => {
+                if(this.conn && this.conn.open) {
+                    this.conn.send({ type: Config.PACKET_TYPES.PING });
                 }
-            }, 5000);
+            }, Config.NET.HEARTBEAT_MS);
         }
 
-        stopHeartbeat() {
-            clearInterval(this.heartbeatInterval);
+        async sendSecure(type, content) {
+            if (!this.conn || !this.conn.open) return;
+
+            // Prepare Payload
+            const payload = {
+                id: Utils.uuid(),
+                type: type, // 'message' or 'image'
+                content: content,
+                ts: Date.now()
+            };
+
+            // Encrypt
+            const encrypted = await this.crypto.encrypt(payload);
+
+            // Wrap in Packet
+            const packet = {
+                type: Config.PACKET_TYPES.DATA,
+                payload: encrypted
+            };
+
+            // Send
+            this.conn.send(packet);
+            this.store.dispatch('UPDATE_METRICS', { sent: JSON.stringify(packet).length });
+
+            return payload; // Return raw to UI
         }
-    }
 
-    /**
-     * SECTION 9: AUDIO ENGINE
-     */
-    class AudioEngine {
-        constructor() {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-            this.enabled = true;
-        }
-
-        play(type) {
-            if (!this.enabled || this.ctx.state === 'suspended') this.ctx.resume();
-            if (!this.enabled) return;
-
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            const now = this.ctx.currentTime;
-
-            if (type === 'msg_in') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
-            } else if (type === 'msg_out') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
+        sendSignal(type) {
+            if (this.conn && this.conn.open) {
+                this.conn.send({ type });
             }
         }
     }
 
     /**
-     * SECTION 10: UI CONTROLLER
+     * MODULE 8: MARKDOWN PARSER
+     * Custom regex-based parser for rich text rendering.
+     */
+    class MarkdownParser {
+        static parse(text) {
+            if (!text) return "";
+            let html = Utils.escapeHtml(text);
+
+            // Bold: **text**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<span class="md-bold">$1</span>');
+            // Italic: *text*
+            html = html.replace(/\*(.*?)\*/g, '<span class="md-italic">$1</span>');
+            // Inline Code: `text`
+            html = html.replace(/`(.*?)`/g, '<span class="md-code">$1</span>');
+            // Links: http://...
+            html = html.replace(/((https?:\/\/[^\s]+))/g, '<a href="$1" target="_blank" class="msg-link">$1</a>');
+
+            return html;
+        }
+    }
+
+    /**
+     * MODULE 9: UI CONTROLLER
+     * Maps State to DOM, handles User Input, renders Views.
      */
     class UIController {
-        constructor(eventBus) {
-            this.bus = eventBus;
-            this.dom = this.cacheDOM();
-            this.bindEvents();
-            this.renderEmojiPicker();
-            this.typingTimer = null;
-        }
-
-        cacheDOM() {
-            return {
+        constructor(bus, store) {
+            this.bus = bus;
+            this.store = store;
+            
+            // Cache DOM
+            this.dom = {
                 views: {
                     login: document.getElementById('view-login'),
                     home: document.getElementById('view-home'),
@@ -1123,308 +949,360 @@
                     clear: document.getElementById('btn-clear-history')
                 },
                 disp: {
-                    msgs: document.getElementById('messages-container'),
                     status: document.getElementById('connection-status'),
                     myId: document.getElementById('my-peer-id'),
                     pName: document.getElementById('chat-partner-name'),
                     pAvatar: document.getElementById('chat-partner-avatar'),
-                    headerAvatar: document.getElementById('header-avatar'),
-                    homeAvatar: document.getElementById('home-avatar-display'),
+                    msgs: document.getElementById('messages-container'),
                     typing: document.getElementById('typing-indicator'),
-                    emojis: document.getElementById('emoji-picker-container')
+                    emojis: document.getElementById('emoji-picker-container'),
+                    headerAvatar: document.getElementById('header-avatar'),
+                    homeAvatar: document.getElementById('home-avatar-display')
                 },
                 modals: {
                     settings: document.getElementById('settings-modal')
                 },
-                tog: {
+                toggles: {
                     theme: document.getElementById('theme-toggle'),
                     sound: document.getElementById('sound-toggle'),
                     history: document.getElementById('history-toggle')
                 }
             };
+
+            this.initListeners();
+            this.renderEmojiList();
         }
 
-        bindEvents() {
+        initListeners() {
+            // Store Subscriptions via Bus
+            this.bus.on(Config.EVENTS.STORE_UPDATED, (data) => this.render(data.state));
+            this.bus.on(Config.EVENTS.UI_TOAST, (d) => this.showToast(d.message, d.type));
+            this.bus.on(Config.EVENTS.DATA_IN, (msg) => this.appendMessage(msg, false));
+
+            // DOM Events
             this.dom.btns.login.onclick = () => {
                 const name = this.dom.inputs.user.value.trim();
-                if (name.length > 2) this.bus.emit(CONSTANTS.EVENTS.LOGIN, name);
-                else this.toast('Username too short', 'exclamation');
+                if (name.length > 2) this.bus.emit(Config.EVENTS.LOGIN, name);
+                else this.showToast('Invalid Identity', 'error');
             };
 
             this.dom.btns.connect.onclick = () => {
                 const id = this.dom.inputs.remote.value.trim();
-                if (id) this.bus.emit(CONSTANTS.EVENTS.CONNECT, id);
+                if (id) this.bus.emit(Config.EVENTS.CONNECT, id);
             };
 
             this.dom.btns.send.onclick = () => this.handleSend();
             this.dom.inputs.msg.onkeypress = (e) => { if(e.key === 'Enter') this.handleSend(); };
             
             this.dom.inputs.msg.oninput = Utils.debounce(() => {
-                this.bus.emit(CONSTANTS.EVENTS.SEND_MSG, { type: 'typing' });
+                this.bus.emit(Config.EVENTS.DATA_OUT, { type: 'typing' });
             }, 300);
 
             this.dom.btns.copy.onclick = () => {
                 navigator.clipboard.writeText(this.dom.disp.myId.innerText);
-                this.toast('ID Copied', 'check');
+                this.showToast('Address Copied', 'success');
+            };
+
+            this.dom.btns.back.onclick = () => {
+                this.store.dispatch('NAVIGATE', 'view-home');
+                this.dom.disp.msgs.innerHTML = '';
             };
 
             this.dom.btns.settings.onclick = () => this.dom.modals.settings.classList.add('open');
             this.dom.btns.closeSettings.onclick = () => this.dom.modals.settings.classList.remove('open');
-            
+
             this.dom.btns.attach.onclick = () => this.dom.inputs.file.click();
-            this.dom.inputs.file.onchange = (e) => {
-                if(e.target.files[0]) this.processFile(e.target.files[0]);
-            };
+            this.dom.inputs.file.onchange = (e) => this.handleFile(e.target.files[0]);
 
             this.dom.btns.emoji.onclick = (e) => {
                 e.stopPropagation();
                 this.dom.disp.emojis.classList.toggle('active');
             };
-            document.onclick = (e) => {
-                if (!this.dom.disp.emojis.contains(e.target) && e.target !== this.dom.btns.emoji) {
-                    this.dom.disp.emojis.classList.remove('active');
-                }
-            };
-
-            this.dom.btns.back.onclick = () => {
-                this.switchView('view-home');
-                this.dom.disp.msgs.innerHTML = '';
-            };
-
-            this.dom.btns.clear.onclick = () => {
-                // Trigger DB Clear
-                window.app.db.clearAll(); // Direct access for simplicity in single file
-                this.toast('Database Cleared', 'trash');
-            };
 
             // Theme Toggle
-            this.dom.tog.theme.onchange = (e) => {
-                document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
-                localStorage.setItem('aether_theme', e.target.checked ? 'dark' : 'light');
+            this.dom.toggles.theme.onchange = (e) => {
+                const t = e.target.checked ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', t);
+                this.store.dispatch('SET_THEME', t);
             };
+
+            // Clear VFS
+            this.dom.btns.clear.onclick = () => {
+                window.app.vfs.format();
+                this.showToast('VFS Formatted', 'success');
+            };
+        }
+
+        render(state) {
+            // View Navigation
+            Object.values(this.dom.views).forEach(el => el.classList.remove('active'));
+            document.getElementById(state.ui.currentView).classList.add('active');
+
+            // ID Display
+            if (state.user.id) this.dom.disp.myId.innerText = state.user.id;
+
+            // Partner Info
+            if (state.chat.partnerName) {
+                this.dom.disp.pName.innerText = state.chat.partnerName;
+                this.dom.disp.pAvatar.innerHTML = this.genAvatar(state.chat.partnerName);
+            }
+
+            // Connection Status Indicator
+            const s = state.network.status;
+            this.dom.disp.status.className = `header-status ${s === 'connected' || s === 'online' ? 'online' : s === 'handshaking' ? 'connecting' : ''}`;
+
+            // Typing
+            if (state.chat.isTyping) this.dom.disp.typing.classList.add('active');
+            else this.dom.disp.typing.classList.remove('active');
         }
 
         handleSend() {
-            const txt = this.dom.inputs.msg.value.trim();
-            if(!txt) return;
-            this.bus.emit(CONSTANTS.EVENTS.SEND_MSG, { type: 'message', content: txt });
+            const text = this.dom.inputs.msg.value.trim();
+            if (!text) return;
+            this.bus.emit(Config.EVENTS.DATA_OUT, { type: 'message', content: text });
             this.dom.inputs.msg.value = '';
         }
 
-        processFile(file) {
-            if (file.size > 5 * 1024 * 1024) return this.toast('File too big (Max 5MB)', 'ban');
+        handleFile(file) {
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) return this.showToast("File too large (>2MB)", "error");
             
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.bus.emit(CONSTANTS.EVENTS.SEND_MSG, { type: 'image', content: e.target.result });
+                this.bus.emit(Config.EVENTS.DATA_OUT, { type: 'image', content: e.target.result });
             };
             reader.readAsDataURL(file);
+            this.dom.inputs.file.value = '';
         }
 
-        renderEmojiPicker() {
-            const list = ['😀','😂','🥰','😎','🤔','😴','🥶','🤡','👻','👽','🤖','💩','👍','👎','👋','🙏','💪','🧠','❤️','💔','🔥','✨','🎉','🚀'];
-            this.dom.disp.emojis.innerHTML = list.map(e => `<div class="emoji-item">${e}</div>`).join('');
-            this.dom.disp.emojis.querySelectorAll('.emoji-item').forEach(item => {
-                item.onclick = () => {
-                    this.dom.inputs.msg.value += item.innerText;
+        appendMessage(msg, isMe) {
+            const div = document.createElement('div');
+            div.className = `message-bubble ${isMe ? 'msg-me' : 'msg-other'}`;
+            
+            let content = '';
+            if (msg.type === 'message') content = MarkdownParser.parse(msg.content);
+            else if (msg.type === 'image') content = `<img src="${msg.content}" class="msg-image" onclick="window.open(this.src)">`;
+
+            const time = new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            div.innerHTML = `
+                ${content}
+                <div class="msg-meta">
+                    ${time} ${isMe ? '<span class="msg-status"><i class="fas fa-check"></i></span>' : ''}
+                </div>
+            `;
+            this.dom.disp.msgs.appendChild(div);
+            this.dom.disp.msgs.scrollTop = this.dom.disp.msgs.scrollHeight;
+        }
+
+        addSystemMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'msg-system';
+            div.innerText = text;
+            this.dom.disp.msgs.appendChild(div);
+        }
+
+        renderEmojiList() {
+            const emojis = ['😀','😂','😍','😎','🤔','👍','👎','👋','🙏','🔥','🎉','🚀','💀','👻','🤖','💩','❤️','💔','👀','🧠'];
+            this.dom.disp.emojis.innerHTML = emojis.map(e => `<div class="emoji-item">${e}</div>`).join('');
+            this.dom.disp.emojis.querySelectorAll('.emoji-item').forEach(el => {
+                el.onclick = () => {
+                    this.dom.inputs.msg.value += el.innerText;
                     this.dom.inputs.msg.focus();
                 };
             });
         }
 
-        switchView(id) {
-            Object.values(this.dom.views).forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        toast(msg, icon) {
+        showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
             const div = document.createElement('div');
             div.className = 'toast';
+            const icon = type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle';
             div.innerHTML = `<i class="fas fa-${icon}"></i> <span>${msg}</span>`;
-            document.getElementById('toast-container').appendChild(div);
+            container.appendChild(div);
             setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 3000);
         }
 
-        addMessage(msg, isMe) {
-            const div = document.createElement('div');
-            div.className = `message-bubble ${isMe ? 'msg-me' : 'msg-other'}`;
-            
-            let content = '';
-            if (msg.type === 'text') content = Utils.linkify(Utils.sanitize(msg.payload));
-            else if (msg.type === 'image') content = `<img src="${msg.payload}" class="msg-image" onclick="window.open(this.src)">`;
-
-            div.innerHTML = `${content}<div class="msg-meta">${Utils.formatTime(msg.timestamp)}</div>`;
-            this.dom.disp.msgs.appendChild(div);
-            this.dom.disp.msgs.scrollTop = this.dom.disp.msgs.scrollHeight;
+        genAvatar(seed) {
+            // Deterministic Color Generator
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase().padStart(6, '0');
+            const letter = seed.charAt(0).toUpperCase();
+            return `<img src="data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#${c}"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="50" font-family="sans-serif" font-weight="bold">${letter}</text></svg>`)}" style="width:100%;height:100%;border-radius:50%;">`;
         }
 
-        addSystem(txt) {
-            const div = document.createElement('div');
-            div.className = 'msg-system';
-            div.innerText = txt;
-            this.dom.disp.msgs.appendChild(div);
-        }
-
-        showTyping() {
-            this.dom.disp.typing.classList.add('active');
-            this.dom.disp.msgs.scrollTop = this.dom.disp.msgs.scrollHeight;
-            clearTimeout(this.typingTimer);
-            this.typingTimer = setTimeout(() => this.dom.disp.typing.classList.remove('active'), 2000);
-        }
-        
-        setAvatar(username, target) {
-            const svg = AvatarGenerator.generate(username);
-            const img = `<img src="${svg}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-            if(target === 'header') this.dom.disp.headerAvatar.innerHTML = img;
-            if(target === 'home') this.dom.disp.homeAvatar.innerHTML = img;
-            if(target === 'partner') this.dom.disp.pAvatar.innerHTML = img;
+        setAvatars(username) {
+            const svg = this.genAvatar(username);
+            this.dom.disp.headerAvatar.innerHTML = svg;
+            this.dom.disp.homeAvatar.innerHTML = svg;
         }
     }
 
     /**
-     * SECTION 11: MAIN APPLICATION ORCHESTRATOR
+     * MODULE 10: KERNEL (BOOTLOADER)
+     * Orchestrates the startup sequence and module injection.
      */
-    class AppCore {
+    class Kernel {
         constructor() {
-            this.bus = new EventBus();
-            this.crypto = new CryptoGuard();
-            this.db = new Database();
-            this.audio = new AudioEngine();
-            this.net = new NetworkManager(this.bus, this.crypto);
-            this.ui = new UIController(this.bus);
-            
-            this.username = null;
-            this.peerId = null;
+            // Service Container
+            this.bus = new EventEmitter();
+            this.store = new StateManager(this.bus);
+            this.vfs = new VFS();
+            this.crypto = new CryptoVault();
+            this.net = new NetworkStack(this.bus, this.store, this.crypto);
+            this.ui = new UIController(this.bus, this.store);
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
 
-        async init() {
-            // Restore Settings
+        async boot() {
+            console.log(`[Kernel] Booting ${Config.SYS_NAME} v${Config.VERSION}...`);
+
+            // 1. Mount File System
+            try {
+                await this.vfs.mount();
+            } catch (e) {
+                console.error("[Kernel] VFS Failure", e);
+            }
+
+            // 2. Initialize Crypto Subsystem
+            await this.crypto.init();
+
+            // 3. Load User Prefs
+            const savedName = localStorage.getItem('aether_username');
+            if(savedName) this.ui.dom.inputs.user.value = savedName;
+
             const savedTheme = localStorage.getItem('aether_theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            this.ui.dom.tog.theme.checked = savedTheme === 'dark';
+            this.ui.dom.toggles.theme.checked = savedTheme === 'dark';
 
-            // Init DB
-            try {
-                await this.db.open();
-                this.bus.emit(CONSTANTS.EVENTS.DB_READY);
-            } catch (e) {
-                console.error("Critical DB Failure", e);
-            }
+            // 4. Bind Core Events
+            this.bindEvents();
 
-            // Bind Event Handlers
-            this.bus.on(CONSTANTS.EVENTS.LOGIN, (name) => this.handleLogin(name));
-            this.bus.on(CONSTANTS.EVENTS.CONNECT, (id) => this.net.connect(id, this.username));
-            this.bus.on(CONSTANTS.EVENTS.SEND_MSG, (data) => this.handleOutgoingMessage(data));
-            this.bus.on(CONSTANTS.EVENTS.STATUS_CHANGE, (d) => this.handleStatus(d));
-            this.bus.on(CONSTANTS.EVENTS.DATA_RECEIVED, (d) => this.handleIncomingData(d));
-            this.bus.on(CONSTANTS.EVENTS.UI_TOAST, (d) => this.ui.toast(d.msg, d.icon));
-
-            // Auto-fill user
-            const savedUser = localStorage.getItem('aether_username');
-            if (savedUser) this.ui.dom.inputs.user.value = savedUser;
+            console.log('[Kernel] System Ready');
         }
 
-        handleLogin(username) {
-            this.username = username;
-            localStorage.setItem('aether_username', username);
-            this.ui.setAvatar(username, 'header');
-            this.ui.setAvatar(username, 'home');
-            
-            this.net.init(username);
-            this.ui.toast('Connecting to secure network...', 'satellite-dish');
-        }
+        bindEvents() {
+            // Auth Flow
+            this.bus.on(Config.EVENTS.LOGIN, (username) => {
+                this.store.dispatch('SET_USER_NAME', username);
+                this.ui.setAvatars(username);
+                this.net.boot(); // Start Network
+                this.store.dispatch('NAVIGATE', 'view-home');
+                this.playSound('login');
+            });
 
-        handleStatus(data) {
-            const { status, id, peer } = data;
-            
-            if (status === 'online') {
-                this.peerId = id;
-                this.ui.dom.disp.myId.innerText = id;
-                this.ui.dom.disp.status.classList.add('online');
-                this.ui.switchView('view-home');
-                this.ui.toast('Online & Secure', 'shield-alt');
-            } else if (status === 'connected') {
-                this.ui.switchView('view-chat');
-                this.ui.addSystem('--- Secure End-to-End Encrypted Channel Established ---');
-                this.ui.dom.disp.pName.innerText = 'Verifying...';
-                this.loadHistory(peer);
-            } else if (status === 'closed') {
-                this.ui.addSystem('Connection Terminated');
-                this.ui.dom.disp.status.classList.remove('online');
-            }
-        }
+            // Connection Flow
+            this.bus.on(Config.EVENTS.CONNECT, (id) => {
+                this.net.connect(id);
+                this.ui.showToast('Initializing Uplink...', 'info');
+            });
 
-        async handleIncomingData(data) {
-            if (data.type === 'handshake') {
-                this.ui.dom.disp.pName.innerText = data.username;
-                this.ui.setAvatar(data.username, 'partner');
-                this.ui.addSystem(`${data.username} joined the session.`);
-            } else if (data.type === 'message' || data.type === 'image') {
-                this.ui.addMessage({ type: data.type, payload: data.type === 'image' ? data.data : data.text, timestamp: data.timestamp }, false);
-                this.audio.play('msg_in');
-                
-                // Save to DB
-                if (this.ui.dom.tog.history.checked) {
-                    await this.db.addMessage({
-                        id: Utils.generateUUID(),
+            // Outgoing Data
+            this.bus.on(Config.EVENTS.DATA_OUT, async (payload) => {
+                if (payload.type === 'typing') {
+                    this.net.sendSignal(Config.PACKET_TYPES.TYPING);
+                    return;
+                }
+
+                // Optimistic UI
+                this.ui.appendMessage({ ...payload, ts: Date.now() }, true);
+                this.playSound('sent');
+
+                // Network Send
+                const sentMsg = await this.net.sendSecure(payload.type, payload.content);
+
+                // Persistence
+                if (this.store.getState().ui.historyEnabled && sentMsg) {
+                    await this.vfs.write(Config.STORES.MESSAGES, {
+                        ...sentMsg,
                         peerId: this.net.conn.peer,
-                        type: data.type,
-                        payload: data.type === 'image' ? data.data : data.text,
-                        timestamp: data.timestamp,
-                        sender: 'other'
+                        direction: 'out'
                     });
                 }
-            } else if (data.type === 'typing') {
-                this.ui.showTyping();
-            }
-        }
+            });
 
-        async handleOutgoingMessage(data) {
-            if (data.type === 'typing') {
-                this.net.send('typing', null);
-                return;
-            }
+            // Incoming Data
+            this.bus.on(Config.EVENTS.DATA_IN, async (msg) => {
+                this.ui.appendMessage(msg, false);
+                this.playSound('recv');
 
-            const sentPacket = await this.net.send(data.type, data.content);
-            if (sentPacket) {
-                this.ui.addMessage({ type: data.type, payload: data.content, timestamp: sentPacket.ts }, true);
-                this.audio.play('msg_out');
-
-                // Save to DB
-                if (this.ui.dom.tog.history.checked) {
-                    await this.db.addMessage({
-                        id: sentPacket.id,
+                // Persistence
+                if (this.store.getState().ui.historyEnabled) {
+                    await this.vfs.write(Config.STORES.MESSAGES, {
+                        ...msg,
                         peerId: this.net.conn.peer,
-                        type: data.type,
-                        payload: data.content,
-                        timestamp: sentPacket.ts,
-                        sender: 'me'
+                        direction: 'in'
                     });
                 }
-            } else {
-                this.ui.toast('Not Connected', 'wifi-slash');
-            }
+            });
+
+            // Status Changes
+            this.store.subscribe((data) => {
+                if(data.action === 'SET_NET_STATUS' && data.state.network.status === 'connected') {
+                    this.store.dispatch('NAVIGATE', 'view-chat');
+                    this.ui.addSystemMessage('--- Secure Channel (AES-256-GCM) Established ---');
+                    this.loadHistory();
+                }
+            });
         }
 
-        async loadHistory(peerId) {
-            if (!this.ui.dom.tog.history.checked) return;
-            const msgs = await this.db.getHistory(peerId);
+        async loadHistory() {
+            if (!this.store.getState().ui.historyEnabled) return;
+            const peerId = this.store.getState().chat.partnerId;
+            const msgs = await this.vfs.query(Config.STORES.MESSAGES, 'peerId', peerId);
+            
             if (msgs.length > 0) {
-                this.ui.addSystem('--- History Loaded ---');
-                msgs.forEach(m => this.ui.addMessage({ type: m.type, payload: m.payload, timestamp: m.timestamp }, m.sender === 'me'));
+                msgs.sort((a,b) => a.ts - b.ts);
+                this.ui.addSystemMessage('--- VFS History Loaded ---');
+                msgs.forEach(m => this.ui.appendMessage(m, m.direction === 'out'));
+            }
+        }
+
+        playSound(type) {
+            if (!this.store.getState().ui.soundEnabled) return;
+            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(this.audioCtx.destination);
+
+            const now = this.audioCtx.currentTime;
+
+            if (type === 'sent') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'recv') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else {
+                osc.frequency.setValueAtTime(200, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
             }
         }
     }
 
-    /*
-     * =========================================================================
-     * BOOT
-     * =========================================================================
+    /**
+     * MODULE 11: BOOTSTRAP
+     * Application Entry Point.
      */
-    window.onload = () => {
-        window.app = new AppCore();
-        window.app.init();
-    };
+    window.addEventListener('load', () => {
+        window.app = new Kernel();
+        window.app.boot();
+    });
 
 </script>
 </body>
