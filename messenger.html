@@ -3,63 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aether Monolith P2P</title>
-    <!-- External Libs -->
+    <title>Aether P2P Messenger - Advanced</title>
+    <!-- PeerJS for P2P Networking -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- 
-        ========================================================================
-        VISUAL LAYER (UNCHANGED)
-        ========================================================================
-    -->
     <style>
+        /* 
+         * ==================================================================
+         * THEME CONFIGURATION (Unchanged Base, Extended for Features)
+         * ==================================================================
+         */
         :root {
+            /* Light Theme */
             --primary-hue: 250;
             --primary: hsl(var(--primary-hue), 80%, 60%);
             --primary-dark: hsl(var(--primary-hue), 80%, 50%);
             --primary-light: hsl(var(--primary-hue), 80%, 75%);
             --primary-fade: hsla(var(--primary-hue), 80%, 60%, 0.1);
+            
             --bg-body: #f0f2f5;
             --bg-surface: #ffffff;
             --bg-surface-2: #f7f9fc;
-            --bg-surface-blur: rgba(255, 255, 255, 0.85);
+            
             --text-main: #1a1b1e;
             --text-muted: #888888;
             --text-light: #ffffff;
+            
             --border: #e1e4e8;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
             --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
+            
             --radius-sm: 8px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-full: 9999px;
+            
             --safe-area-top: env(safe-area-inset-top);
             --safe-area-bottom: env(safe-area-inset-bottom);
+
             --anim-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --anim-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --msg-me-bg: var(--primary);
+            --msg-other-bg: var(--bg-surface);
         }
 
         [data-theme="dark"] {
             --bg-body: #121212;
             --bg-surface: #1e1e1e;
             --bg-surface-2: #2c2c2c;
-            --bg-surface-blur: rgba(30, 30, 30, 0.85);
+            
             --text-main: #e0e0e0;
             --text-muted: #a0a0a0;
+            
             --border: #333333;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
             --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --msg-me-bg: var(--primary-dark);
+            --msg-other-bg: #2a2a2a;
         }
 
+        /* 
+         * ==================================================================
+         * BASE STYLES
+         * ==================================================================
+         */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-        html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s ease, color 0.3s ease; }
-        ::-webkit-scrollbar { width: 5px; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-body); color: var(--text-main); transition: 0.3s; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; opacity: 0.2; }
+        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: var(--radius-full); opacity: 0.2; }
 
+        /* Utilities */
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -67,82 +85,119 @@
         .justify-center { justify-content: center; }
         .justify-between { justify-content: space-between; }
         .w-full { width: 100%; }
+        .h-full { height: 100%; }
         .text-center { text-align: center; }
         .mb-2 { margin-bottom: 0.5rem; }
         .mb-4 { margin-bottom: 1rem; }
         .p-4 { padding: 1rem; }
-        .text-sm { font-size: 0.85rem; }
-        .opacity-50 { opacity: 0.5; }
 
-        .btn { border: none; outline: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; font-size: 1rem; cursor: pointer; transition: transform 0.1s ease, box-shadow 0.2s ease; position: relative; overflow: hidden; user-select: none; }
+        /* Components */
+        .btn { border: none; outline: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
         .btn:active { transform: scale(0.96); }
         .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 15px var(--primary-fade); }
         .btn-secondary { background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); }
-        
-        .btn-icon { width: 44px; height: 44px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); color: var(--text-muted); box-shadow: var(--shadow-sm); border: none; cursor: pointer; transition: 0.2s; }
+        .btn-icon { width: 44px; height: 44px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); color: var(--text-muted); box-shadow: var(--shadow-sm); cursor: pointer; border:none; transition: 0.2s; }
         .btn-icon:hover { color: var(--primary); transform: translateY(-2px); }
-        .btn-icon:active { transform: translateY(0); }
+        .btn-icon.active { color: var(--primary); background: var(--primary-fade); }
 
         .input-group { position: relative; margin-bottom: 1.5rem; width: 100%; }
-        .input-field { width: 100%; padding: 16px; border-radius: var(--radius-md); border: 2px solid transparent; background: var(--bg-surface); color: var(--text-main); font-size: 1rem; box-shadow: var(--shadow-sm); transition: all 0.3s ease; }
+        .input-field { width: 100%; padding: 16px; border-radius: var(--radius-md); border: 2px solid transparent; background: var(--bg-surface); color: var(--text-main); font-size: 1rem; box-shadow: var(--shadow-sm); transition: 0.3s; }
         .input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-fade); }
-        .input-label { position: absolute; left: 16px; top: 16px; color: var(--text-muted); pointer-events: none; transition: 0.2s ease all; background: transparent; }
+        .input-label { position: absolute; left: 16px; top: 16px; color: var(--text-muted); pointer-events: none; transition: 0.2s; background: transparent; }
         .input-field:focus ~ .input-label, .input-field:not(:placeholder-shown) ~ .input-label { top: -10px; left: 12px; font-size: 0.75rem; background: var(--bg-body); padding: 0 6px; color: var(--primary); font-weight: 600; }
 
+        /* Layout */
         #app { position: relative; width: 100%; max-width: 600px; margin: 0 auto; height: 100%; background: var(--bg-surface-2); box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; }
-
-        .app-header { height: 70px; background: var(--bg-surface-blur); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; padding-top: var(--safe-area-top); position: absolute; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        .header-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-        .app-avatar-small { width: 30px; height: 30px; border-radius: 50%; display: inline-block; }
-        .header-status { width: 10px; height: 10px; border-radius: 50%; background-color: #ff4757; box-shadow: 0 0 8px rgba(255, 71, 87, 0.5); transition: background-color 0.3s; }
+        
+        .app-header { height: 70px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; padding-top: var(--safe-area-top); position: absolute; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+        [data-theme="dark"] .app-header { background: rgba(30, 30, 30, 0.85); }
+        .header-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+        .header-status { width: 10px; height: 10px; border-radius: 50%; background-color: #ff4757; box-shadow: 0 0 8px rgba(255, 71, 87, 0.5); transition: 0.3s; }
         .header-status.online { background-color: #2ed573; box-shadow: 0 0 8px rgba(46, 213, 115, 0.5); }
-        .header-status.connecting { background-color: #ffa502; animation: pulse-status 1s infinite; }
-        @keyframes pulse-status { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 70px; padding-bottom: 20px; overflow-y: auto; opacity: 0; transform: translateX(20px); pointer-events: none; transition: opacity 0.4s var(--anim-smooth), transform 0.4s var(--anim-smooth); display: flex; flex-direction: column; background: var(--bg-body); z-index: 10; }
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 70px; padding-bottom: 0; overflow-y: auto; opacity: 0; transform: translateX(20px); pointer-events: none; transition: opacity 0.4s ease, transform 0.4s ease; display: flex; flex-direction: column; background: var(--bg-body); z-index: 10; }
         .view.active { opacity: 1; transform: translateX(0); pointer-events: all; z-index: 20; }
 
-        #view-login { z-index: 50; padding: 40px; justify-content: center; align-items: center; }
+        /* Login View */
+        #view-login { z-index: 50; padding: 40px; justify-content: center; align-items: center; background: var(--bg-body); }
         .logo-container { width: 100px; height: 100px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 30px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; font-size: 3rem; color: white; box-shadow: 0 10px 30px var(--primary-fade); animation: float 6s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .credits-footer { position: absolute; bottom: 30px; text-align: center; width: 100%; left: 0; font-size: 0.85rem; color: var(--text-muted); opacity: 0.8; }
 
+        /* Home View */
         .id-card { background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md); margin: 20px; box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border); }
-        .id-display { font-family: monospace; font-size: 1.4rem; color: var(--primary); margin: 10px 0; word-break: break-all; }
+        .id-display { font-family: monospace; font-size: 1.5rem; color: var(--primary); margin: 10px 0; letter-spacing: 1px; word-break: break-all; }
         .connect-section { padding: 20px; background: var(--bg-surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin-top: auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+        
+        /* Saved Contacts List */
+        .contacts-list { flex: 1; overflow-y: auto; padding: 0 20px; }
+        .contact-item { display: flex; align-items: center; padding: 12px; background: var(--bg-surface); border-radius: var(--radius-md); margin-bottom: 10px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
+        .contact-item:hover { transform: translateX(5px); border-color: var(--primary); }
+        .contact-avatar { width: 40px; height: 40px; background: var(--primary-light); color: var(--primary-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; }
+        .contact-info { flex: 1; }
+        .contact-name { font-weight: 600; font-size: 0.95rem; }
+        .contact-id { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; }
 
-        #view-chat { padding-bottom: 0; background: var(--bg-surface-2); }
-        .chat-header-bar { padding: 10px 20px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .chat-avatar-container { position: relative; width: 40px; height: 40px; }
+        /* Chat View */
+        #view-chat { display: flex; flex-direction: column; background: var(--bg-surface-2); }
+        .chat-header-bar { padding: 15px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
         .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
         
-        .message-bubble { max-width: 75%; padding: 12px 16px; font-size: 0.95rem; line-height: 1.4; position: relative; word-wrap: break-word; animation: popIn 0.3s var(--anim-bounce); }
+        .message-bubble { max-width: 80%; padding: 12px 16px; font-size: 0.95rem; line-height: 1.4; position: relative; word-wrap: break-word; animation: popIn 0.3s var(--anim-bounce); display: flex; flex-direction: column; }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        .msg-system { align-self: center; background: rgba(0,0,0,0.05); color: var(--text-muted); font-size: 0.8rem; border-radius: 20px; padding: 6px 15px; max-width: 90%; }
-        [data-theme="dark"] .msg-system { background: rgba(255,255,255,0.1); }
-        .msg-me { align-self: flex-end; background: var(--primary); color: white; border-radius: 18px 18px 4px 18px; box-shadow: 0 4px 10px var(--primary-fade); }
-        .msg-other { align-self: flex-start; background: var(--bg-surface); color: var(--text-main); border-radius: 18px 18px 18px 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
         
-        .msg-image { max-width: 100%; border-radius: 12px; margin-top: 5px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
-        .msg-link { text-decoration: underline; color: inherit; font-weight: 500; }
-        .msg-meta { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
-        .msg-status i { font-size: 0.65rem; }
+        .msg-system { align-self: center; background: rgba(0,0,0,0.05); color: var(--text-muted); font-size: 0.8rem; border-radius: 20px; padding: 6px 15px; max-width: 90%; text-align: center; }
+        [data-theme="dark"] .msg-system { background: rgba(255,255,255,0.1); }
+        
+        .msg-me { align-self: flex-end; background: var(--msg-me-bg); color: white; border-radius: 18px 18px 4px 18px; box-shadow: 0 4px 10px var(--primary-fade); }
+        .msg-me .msg-meta { color: rgba(255,255,255,0.8); }
+        
+        .msg-other { align-self: flex-start; background: var(--msg-other-bg); color: var(--text-main); border-radius: 18px 18px 18px 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
 
-        .chat-input-area { background: var(--bg-surface); padding: 15px; padding-bottom: max(15px, var(--safe-area-bottom)); display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); position: relative; z-index: 100; }
-        .chat-input { flex: 1; background: var(--bg-body); border: 1px solid var(--border); padding: 12px 20px; border-radius: 24px; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+        .msg-meta { font-size: 0.7rem; margin-top: 4px; text-align: right; align-self: flex-end; }
+        
+        /* Media Styles */
+        .msg-image { max-width: 100%; border-radius: 12px; margin-bottom: 5px; cursor: pointer; }
+        .msg-audio-container { display: flex; align-items: center; gap: 10px; width: 200px; padding-bottom: 5px; }
+        .audio-play-btn { background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .msg-other .audio-play-btn { background: rgba(0,0,0,0.1); }
+        .audio-wave { flex: 1; height: 24px; display: flex; align-items: center; justify-content: space-around; }
+        .wave-bar { width: 3px; background: currentColor; border-radius: 2px; animation: quiet 1s infinite; }
+        .playing .wave-bar { animation: loud 0.8s infinite; }
+        @keyframes loud { 0%, 100% { height: 20%; } 50% { height: 100%; } }
+        @keyframes quiet { 0% { height: 20%; } }
+
+        /* Chat Input Area */
+        .chat-input-area { background: var(--bg-surface); padding: 15px; padding-bottom: max(15px, var(--safe-area-bottom)); display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); position: relative; }
+        .chat-input { flex: 1; background: var(--bg-body); border: 1px solid var(--border); padding: 12px 20px; border-radius: 24px; color: var(--text-main); outline: none; transition: 0.2s; }
         .chat-input:focus { border-color: var(--primary); }
+        .btn-send { width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px var(--primary-fade); transition: 0.2s; }
+        .btn-send:hover { transform: scale(1.05); }
 
-        .emoji-picker { position: absolute; bottom: 80px; left: 10px; width: 300px; background: var(--bg-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); border: 1px solid var(--border); display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; padding: 10px; height: 200px; overflow-y: auto; opacity: 0; pointer-events: none; transform: translateY(20px); transition: 0.3s ease; }
-        .emoji-picker.active { opacity: 1; pointer-events: all; transform: translateY(0); }
-        .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 5px; font-size: 1.2rem; transition: background 0.2s; }
-        .emoji-item:hover { background: var(--bg-body); }
+        /* Media Attachments Menu */
+        .attachments-menu { position: absolute; bottom: 80px; left: 15px; background: var(--bg-surface); border-radius: var(--radius-md); padding: 10px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); transform: scale(0); transform-origin: bottom left; transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 50; }
+        .attachments-menu.open { transform: scale(1); }
+        .attach-opt { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; transition: 0.2s; }
+        .attach-opt:hover { background: var(--bg-body); }
+        .attach-opt i { width: 24px; text-align: center; color: var(--primary); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; justify-content: center; align-items: center; }
+        /* Recording Overlay */
+        .recording-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-surface); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 20; transform: translateY(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .recording-overlay.active { transform: translateY(0); }
+        .rec-indicator { display: flex; align-items: center; gap: 10px; color: #ff4757; font-weight: 600; }
+        .rec-dot { width: 12px; height: 12px; background: #ff4757; border-radius: 50%; animation: pulseRed 1s infinite; }
+        @keyframes pulseRed { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        
+        #audio-visualizer { width: 100px; height: 40px; }
+
+        /* Settings Modal & Toast */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal-card { width: 85%; max-width: 400px; background: var(--bg-surface); border-radius: var(--radius-lg); padding: 24px; transform: translateY(50px); transition: transform 0.3s var(--anim-bounce); box-shadow: var(--shadow-lg); }
+        .modal-card { width: 85%; max-width: 400px; background: var(--bg-surface); border-radius: var(--radius-lg); padding: 24px; transform: translateY(50px); transition: 0.3s var(--anim-bounce); box-shadow: var(--shadow-lg); }
         .modal-overlay.open .modal-card { transform: translateY(0); }
-
         .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        
+        /* Switch */
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -151,1158 +206,820 @@
         input:checked + .slider:before { transform: translateX(24px); }
 
         #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 500; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
-        .toast { background: rgba(30,30,30,0.95); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-size: 0.9rem; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease forwards; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary); }
+        .toast { background: rgba(30,30,30,0.9); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-size: 0.9rem; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease forwards; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 10px; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .typing-indicator { padding: 10px; display: none; margin-left: 20px; }
+        /* Typing Indicator */
+        .typing-indicator { padding: 10px; display: none; }
         .typing-indicator.active { display: block; }
         .dots { display: flex; gap: 4px; }
         .dot { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: pulse 1s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 
-        .credits-footer { position: absolute; bottom: 30px; text-align: center; width: 100%; left: 0; font-size: 0.85rem; color: var(--text-muted); opacity: 0.8; }
-        
-        .md-bold { font-weight: 700; }
-        .md-italic { font-style: italic; }
-        .md-code { background: rgba(125,125,125,0.2); padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- Header -->
+    <!-- Header (Shared) -->
     <header class="app-header">
         <div class="header-status" id="connection-status"></div>
-        <div class="header-title">
-            <div id="header-avatar" class="app-avatar-small"></div>
-            <span>Aether Monolith</span>
-        </div>
-        <button class="btn-icon" id="btn-settings" title="Settings"><i class="fas fa-cog"></i></button>
+        <div class="header-title">Aether v2</div>
+        <button class="btn-icon" id="btn-settings">
+            <i class="fas fa-cog"></i>
+        </button>
     </header>
 
-    <!-- View 1: Login -->
+    <!-- VIEW 1: LOGIN -->
     <section id="view-login" class="view active">
         <div class="logo-container"><i class="fas fa-bolt"></i></div>
-        <h2 class="text-center mb-4">Aether System</h2>
-        <p class="text-center mb-4" style="color:var(--text-muted)">Decentralized Operating Core</p>
+        <h2 class="text-center mb-4">Welcome Back</h2>
+        <p class="text-center mb-4" style="color:var(--text-muted)">Advanced P2P Messaging</p>
         <div class="input-group">
             <input type="text" id="input-username" class="input-field" placeholder=" " autocomplete="off">
-            <label class="input-label">Identity (Username)</label>
+            <label class="input-label">Choose a Username</label>
         </div>
-        <button id="btn-login" class="btn btn-primary w-full">Boot Kernel</button>
+        <button id="btn-login" class="btn btn-primary w-full">Start Messaging</button>
         <div class="credits-footer">Created by <strong>Yaroslav Ostapenko</strong></div>
     </section>
 
-    <!-- View 2: Home -->
+    <!-- VIEW 2: HOME (CONTACTS) -->
     <section id="view-home" class="view">
         <div class="p-4 flex-col h-full">
-            <h3 class="mb-2 text-center">Identity Node</h3>
+            <h3 class="mb-2">My Connection ID</h3>
             <div class="id-card">
-                <div id="home-avatar-display" style="width:60px; height:60px; margin:0 auto 10px auto; border-radius:50%;"></div>
                 <div class="id-display" id="my-peer-id">Initializing...</div>
-                <button class="btn btn-secondary" id="btn-copy-id"><i class="fas fa-copy"></i> Copy Address</button>
-                <p class="copy-hint">Waiting for secure handshake...</p>
+                <div class="flex justify-center gap-2">
+                    <button class="btn btn-secondary btn-sm" id="btn-copy-id"><i class="fas fa-copy"></i> Copy</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-share-id"><i class="fas fa-share-alt"></i> Share</button>
+                </div>
             </div>
-            <div class="flex-col justify-center" style="flex:1; align-items:center; opacity:0.3; margin: 20px 0;">
-                <i class="fas fa-shield-alt" style="font-size:3rem; margin-bottom:1rem;"></i>
-                <p>Secure Uplink Ready</p>
+
+            <h3 class="mb-2">Saved Contacts</h3>
+            <div class="contacts-list" id="contacts-list-container">
+                <!-- Dynamically populated -->
+                <div class="text-center p-4" style="color:var(--text-muted); font-size:0.9rem; margin-top:20px;">
+                    No saved contacts yet.
+                </div>
             </div>
+
             <div class="connect-section">
-                <h3 class="mb-4">Establish Uplink</h3>
+                <h3 class="mb-4">Connect New</h3>
                 <div class="input-group">
                     <input type="text" id="input-remote-id" class="input-field" placeholder=" ">
-                    <label class="input-label">Target Peer Hash</label>
+                    <label class="input-label">Paste Friend's ID</label>
                 </div>
-                <button id="btn-connect" class="btn btn-primary w-full">Initialize Tunnel <i class="fas fa-arrow-right"></i></button>
+                <button id="btn-connect" class="btn btn-primary w-full">Connect <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </section>
 
-    <!-- View 3: Chat -->
+    <!-- VIEW 3: CHAT -->
     <section id="view-chat" class="view">
         <div class="chat-header-bar">
-            <button class="btn-icon" id="btn-back-chat"><i class="fas fa-arrow-left"></i></button>
-            <div class="chat-avatar-container" id="chat-partner-avatar"></div>
-            <div>
+            <div class="btn-icon" id="btn-back-chat"><i class="fas fa-arrow-left"></i></div>
+            <div style="flex:1">
                 <h4 id="chat-partner-name">Unknown</h4>
-                <div class="text-sm text-muted" id="chat-status-text">Negotiating Keys...</div>
+                <div class="flex items-center gap-1">
+                    <span style="font-size:0.75rem; color:var(--text-muted)">Encrypted</span>
+                    <i class="fas fa-lock" style="font-size:0.6rem; color:var(--primary)"></i>
+                </div>
             </div>
+            <button class="btn-icon" id="btn-save-contact" title="Save Contact"><i class="fas fa-user-plus"></i></button>
         </div>
+
         <div id="messages-container" class="chat-area"></div>
-        <div class="typing-indicator" id="typing-indicator"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="emoji-picker" id="emoji-picker-container"></div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        </div>
+
         <div class="chat-input-area">
-            <input type="file" id="file-input" hidden accept="image/*">
-            <button class="btn-icon" id="btn-attach" title="Send Image"><i class="fas fa-image"></i></button>
-            <button class="btn-icon" id="btn-emoji" title="Insert Emoji"><i class="far fa-smile"></i></button>
-            <input type="text" id="msg-input" class="chat-input" placeholder="Enter secure payload..." autocomplete="off">
-            <button id="btn-send-msg" class="btn-icon active" style="background:var(--primary); color:white;"><i class="fas fa-paper-plane"></i></button>
+            <!-- Hidden inputs for files -->
+            <input type="file" id="file-input-image" accept="image/*" class="hidden">
+            
+            <!-- Attachments Menu -->
+            <div class="attachments-menu" id="attachments-menu">
+                <div class="attach-opt" id="opt-image">
+                    <i class="fas fa-image"></i> <span>Photo</span>
+                </div>
+                <div class="attach-opt" id="opt-audio">
+                    <i class="fas fa-microphone"></i> <span>Voice Note</span>
+                </div>
+            </div>
+
+            <button class="btn-icon" id="btn-toggle-attach"><i class="fas fa-paperclip"></i></button>
+            <input type="text" id="msg-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
+            <button id="btn-send-msg" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+
+            <!-- Recording Overlay -->
+            <div class="recording-overlay" id="recording-overlay">
+                <div class="rec-indicator">
+                    <div class="rec-dot"></div>
+                    <span id="rec-timer">00:00</span>
+                </div>
+                <canvas id="audio-visualizer"></canvas>
+                <div class="flex gap-2">
+                    <button class="btn-icon" id="btn-cancel-rec" style="color:#ff4757"><i class="fas fa-trash"></i></button>
+                    <button class="btn-icon active" id="btn-stop-send-rec"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Settings -->
+    <!-- Settings Modal -->
     <div class="modal-overlay" id="settings-modal">
         <div class="modal-card">
             <div class="flex justify-between items-center mb-4">
-                <div class="modal-title" style="margin:0; font-weight:700; font-size:1.2rem;">Core Config</div>
+                <div class="modal-title" style="margin:0">Settings</div>
                 <button class="btn-icon" id="btn-close-settings"><i class="fas fa-times"></i></button>
             </div>
-            <div class="setting-row"><span><i class="fas fa-moon"></i> Dark Mode</span><label class="switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label></div>
-            <div class="setting-row"><span><i class="fas fa-volume-up"></i> Audio Feedback</span><label class="switch"><input type="checkbox" checked id="sound-toggle"><span class="slider"></span></label></div>
-            <div class="setting-row"><span><i class="fas fa-hdd"></i> VFS Persistence</span><label class="switch"><input type="checkbox" checked id="history-toggle"><span class="slider"></span></label></div>
-            <button id="btn-clear-history" class="btn btn-secondary w-full" style="margin-top:20px; color:#ff4757; border-color:#ff4757;"><i class="fas fa-bomb"></i> Format VFS</button>
-            <div class="p-4 text-center" style="margin-top:20px; background:var(--bg-body); border-radius:var(--radius-sm);">
-                <small style="color:var(--text-muted)">System v4.0<br><strong>Yaroslav Ostapenko</strong><br>1024-bit Architecture</small>
+            <div class="setting-row">
+                <span>Dark Mode</span>
+                <label class="switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+                <span>Sound Effects</span>
+                <label class="switch"><input type="checkbox" checked id="sound-toggle"><span class="slider"></span></label>
+            </div>
+            <div class="p-4" style="margin-top:20px; background:var(--bg-body); border-radius:var(--radius-sm); text-align:center;">
+                <small style="color:var(--text-muted)">
+                    Aether Messenger v2.0<br>
+                    Created by <strong>Yaroslav Ostapenko</strong><br>
+                    Secure P2P WebRTC
+                </small>
             </div>
         </div>
     </div>
+
+    <!-- Toast Container -->
     <div id="toast-container"></div>
 </div>
 
-<!-- 
-    ========================================================================
-    LOGIC KERNEL (MONOLITH JS ARCHITECTURE)
-    ========================================================================
--->
 <script>
-    /**
-     * MODULE 1: GLOBAL CONFIGURATION & TYPES
-     * Defines system-wide constants, enums, and event types.
-     */
-    const Config = {
-        SYS_NAME: 'AetherOS',
-        VERSION: '4.0.0',
-        DB_NAME: 'AetherFS_Partition_0',
-        DB_VERSION: 1,
-        STORES: {
-            MESSAGES: 'store_messages',
-            SESSIONS: 'store_sessions',
-            CONFIG: 'store_config',
-            BLOBS: 'store_blobs'
-        },
-        NET: {
-            HEARTBEAT_MS: 5000,
-            RETRY_DELAY_MS: 1000,
-            MAX_RETRIES: 5,
-            CHUNK_SIZE: 16 * 1024 // 16KB for WebRTC safety
-        },
-        EVENTS: {
-            // System
-            BOOT: 'sys:boot',
-            ERROR: 'sys:error',
-            // Auth
-            LOGIN: 'auth:login',
-            LOGOUT: 'auth:logout',
-            // Network
-            CONNECT: 'net:connect',
-            DISCONNECT: 'net:disconnect',
-            PEER_READY: 'net:peer_ready',
-            PEER_ERROR: 'net:peer_error',
-            DATA_IN: 'net:data_in',
-            DATA_OUT: 'net:data_out',
-            HANDSHAKE_START: 'net:handshake_start',
-            HANDSHAKE_COMPLETE: 'net:handshake_done',
-            // UI
-            UI_NAVIGATE: 'ui:navigate',
-            UI_TOAST: 'ui:toast',
-            UI_RENDER_MSG: 'ui:render_msg',
-            UI_THEME_TOGGLE: 'ui:theme',
-            // Store
-            STORE_UPDATED: 'store:updated'
-        },
-        PACKET_TYPES: {
-            SYN: 0x01,        // Handshake Start
-            ACK: 0x02,        // Handshake Ack / Delivery Ack
-            DATA: 0x03,       // Standard Payload
-            PING: 0x04,       // Keepalive
-            TYPING: 0x05,     // Typing Indicator
-            BLOB_START: 0x06, // File Transfer Start
-            BLOB_CHUNK: 0x07, // File Transfer Chunk
-            BLOB_END: 0x08    // File Transfer End
-        }
-    };
+/**
+ * ======================================================================
+ * ARCHITECTURE OVERVIEW
+ * ======================================================================
+ * The application is divided into Service Classes to separate concerns:
+ * 1. EventBus: Handles publish/subscribe events across the app.
+ * 2. Store: Manages global state (User, Theme, Settings).
+ * 3. StorageService: Handles localStorage (Chat history, Contacts).
+ * 4. AudioService: Handles MediaRecorder and Canvas Visualization.
+ * 5. ImageService: Handles file reading and compression.
+ * 6. NetworkService: Wrapper around PeerJS.
+ * 7. UIManager: Manipulates the DOM.
+ * 8. Main: Bootstraps the application.
+ */
 
-    /**
-     * MODULE 2: SYSTEM UTILITIES
-     * Core helper functions for ID generation, timing, and formatting.
-     */
-    class Utils {
-        /**
-         * Generates a cryptographically strong UUID
-         */
-        static uuid() {
-            if (crypto.randomUUID) return crypto.randomUUID();
-            return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
-                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-            );
-        }
+// --- 1. Event Bus ---
+class EventBus {
+    constructor() { this.events = {}; }
+    on(event, callback) {
+        if (!this.events[event]) this.events[event] = [];
+        this.events[event].push(callback);
+    }
+    emit(event, data) {
+        if (this.events[event]) this.events[event].forEach(cb => cb(data));
+    }
+}
+const Bus = new EventBus();
 
-        /**
-         * Debounces function calls
-         */
-        static debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), wait);
-            };
-        }
+// --- 2. Store ---
+const Store = {
+    state: {
+        username: localStorage.getItem('aether_username') || '',
+        theme: localStorage.getItem('aether_theme') || 'light',
+        soundEnabled: true,
+        currentView: 'view-login',
+        myId: null,
+        connectedPeerId: null,
+        connectedPeerName: null
+    },
+    update(key, value) {
+        this.state[key] = value;
+        if(key === 'theme') localStorage.setItem('aether_theme', value);
+        if(key === 'username') localStorage.setItem('aether_username', value);
+    },
+    get(key) { return this.state[key]; }
+};
 
-        /**
-         * Converts ArrayBuffer to Hex String
-         */
-        static buf2hex(buffer) {
-            return [...new Uint8Array(buffer)]
-                .map(x => x.toString(16).padStart(2, '0'))
-                .join('');
-        }
+// --- 3. Storage Service ---
+class StorageService {
+    constructor() {
+        this.CONTACTS_KEY = 'aether_contacts';
+        this.CHATS_KEY = 'aether_chats';
+    }
 
-        /**
-         * Converts Hex String to Uint8Array
-         */
-        static hex2buf(hexString) {
-            return new Uint8Array(
-                hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
-            );
-        }
+    getContacts() {
+        return JSON.parse(localStorage.getItem(this.CONTACTS_KEY) || '[]');
+    }
 
-        /**
-         * Sleep Promise
-         */
-        static sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+    saveContact(id, name) {
+        const contacts = this.getContacts();
+        if (!contacts.find(c => c.id === id)) {
+            contacts.push({ id, name, addedAt: Date.now() });
+            localStorage.setItem(this.CONTACTS_KEY, JSON.stringify(contacts));
+            Bus.emit('contacts:updated');
+            return true;
         }
+        return false;
+    }
 
-        /**
-         * Formats bytes to human readable string
-         */
-        static humanFileSize(bytes, si = false, dp = 1) {
-            const thresh = si ? 1000 : 1024;
-            if (Math.abs(bytes) < thresh) return bytes + ' B';
-            const units = si
-                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-                : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-            let u = -1;
-            const r = 10**dp;
-            do {
-                bytes /= thresh;
-                ++u;
-            } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-            return bytes.toFixed(dp) + ' ' + units[u];
-        }
+    getChatHistory(peerId) {
+        const allChats = JSON.parse(localStorage.getItem(this.CHATS_KEY) || '{}');
+        return allChats[peerId] || [];
+    }
 
-        /**
-         * Safe HTML Escape
-         */
-        static escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+    saveMessage(peerId, messageObj) {
+        const allChats = JSON.parse(localStorage.getItem(this.CHATS_KEY) || '{}');
+        if (!allChats[peerId]) allChats[peerId] = [];
+        allChats[peerId].push(messageObj);
+        // Limit history to last 50 messages per peer to save space
+        if(allChats[peerId].length > 50) allChats[peerId].shift();
+        localStorage.setItem(this.CHATS_KEY, JSON.stringify(allChats));
+    }
+}
+const DB = new StorageService();
+
+// --- 4. Audio Service (Recording & Visualizing) ---
+class AudioService {
+    constructor() {
+        this.mediaRecorder = null;
+        this.audioChunks = [];
+        this.isRecording = false;
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.analyser = this.audioCtx.createAnalyser();
+        this.canvas = document.getElementById('audio-visualizer');
+        this.canvasCtx = this.canvas.getContext('2d');
+        this.stream = null;
+        this.visualizerFrame = null;
+        this.startTime = 0;
+        this.timerInterval = null;
+    }
+
+    async startRecording() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            this.mediaRecorder = new MediaRecorder(this.stream);
+            this.audioChunks = [];
+            
+            // Connect stream to analyser
+            const source = this.audioCtx.createMediaStreamSource(this.stream);
+            source.connect(this.analyser);
+            this.analyser.fftSize = 256;
+
+            this.mediaRecorder.ondataavailable = (e) => this.audioChunks.push(e.data);
+            this.mediaRecorder.start();
+            this.isRecording = true;
+            this.startTime = Date.now();
+            
+            this.startVisualizer();
+            this.startTimer();
+            Bus.emit('audio:start');
+        } catch (err) {
+            console.error(err);
+            Bus.emit('toast', { msg: 'Microphone access denied', type: 'error' });
         }
     }
 
-    /**
-     * MODULE 3: EVENT EMITTER (OBSERVER PATTERN)
-     * Central nervous system for decoupled communication between modules.
-     */
-    class EventEmitter {
-        constructor() {
-            this.listeners = new Map();
-        }
-
-        on(event, callback) {
-            if (!this.listeners.has(event)) {
-                this.listeners.set(event, new Set());
-            }
-            this.listeners.get(event).add(callback);
-            return () => this.off(event, callback); // Return unsubscribe function
-        }
-
-        off(event, callback) {
-            if (this.listeners.has(event)) {
-                this.listeners.get(event).delete(callback);
-            }
-        }
-
-        emit(event, data) {
-            if (this.listeners.has(event)) {
-                this.listeners.get(event).forEach(cb => {
-                    try {
-                        cb(data);
-                    } catch (e) {
-                        console.error(`Error in event listener for ${event}:`, e);
-                    }
-                });
-            }
-        }
-
-        emitAsync(event, data) {
-            return new Promise(resolve => {
-                this.emit(event, data);
-                resolve();
-            });
-        }
+    stopRecording() {
+        return new Promise((resolve) => {
+            if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') return resolve(null);
+            
+            this.mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                this.cleanup();
+                resolve(audioBlob);
+            };
+            this.mediaRecorder.stop();
+        });
     }
 
-    /**
-     * MODULE 4: REDUX-LIKE STATE STORE
-     * Single source of truth for application state.
-     */
-    class StateManager {
-        constructor(eventBus) {
-            this.bus = eventBus;
-            // Initial State
-            this.state = {
-                user: {
-                    name: localStorage.getItem('aether_username') || null,
-                    id: null,
-                    publicKey: null
-                },
-                ui: {
-                    theme: localStorage.getItem('aether_theme') || 'light',
-                    currentView: 'view-login',
-                    soundEnabled: true,
-                    historyEnabled: true
-                },
-                network: {
-                    status: 'disconnected', // disconnected, connecting, online, handshaking, connected
-                    latency: 0,
-                    bytesSent: 0,
-                    bytesReceived: 0
-                },
-                chat: {
-                    partnerId: null,
-                    partnerName: null,
-                    messages: [],
-                    isTyping: false
-                }
-            };
+    cancelRecording() {
+        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
         }
-
-        getState() {
-            return this.state; // Direct reference for read-only speed
-        }
-
-        dispatch(action, payload) {
-            const prevState = JSON.parse(JSON.stringify(this.state)); // Deep copy for diffing if needed
-            
-            // Reducer Logic (inline for simplicity in this monolith)
-            switch (action) {
-                case 'SET_USER_NAME':
-                    this.state.user.name = payload;
-                    localStorage.setItem('aether_username', payload);
-                    break;
-                case 'SET_USER_ID':
-                    this.state.user.id = payload;
-                    break;
-                case 'SET_THEME':
-                    this.state.ui.theme = payload;
-                    localStorage.setItem('aether_theme', payload);
-                    break;
-                case 'NAVIGATE':
-                    this.state.ui.currentView = payload;
-                    break;
-                case 'SET_NET_STATUS':
-                    this.state.network.status = payload;
-                    break;
-                case 'SET_PARTNER':
-                    this.state.chat.partnerId = payload.id;
-                    this.state.chat.partnerName = payload.name;
-                    break;
-                case 'ADD_MESSAGE':
-                    this.state.chat.messages.push(payload);
-                    break;
-                case 'UPDATE_METRICS':
-                    if(payload.sent) this.state.network.bytesSent += payload.sent;
-                    if(payload.recv) this.state.network.bytesReceived += payload.recv;
-                    break;
-                case 'SET_TYPING':
-                    this.state.chat.isTyping = payload;
-                    break;
-                case 'TOGGLE_SETTING':
-                    this.state.ui[payload.key] = payload.value;
-                    break;
-            }
-
-            // Notify subscribers via EventBus
-            this.bus.emit(Config.EVENTS.STORE_UPDATED, { action, state: this.state });
-        }
+        this.cleanup();
+        Bus.emit('audio:cancel');
     }
 
-    /**
-     * MODULE 5: VIRTUAL FILE SYSTEM (INDEXEDDB WRAPPER)
-     * Mimics a filesystem to store logs, messages, and binary blobs persistently.
-     */
-    class VFS {
-        constructor() {
-            this.db = null;
-        }
-
-        async mount() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(Config.DB_NAME, Config.DB_VERSION);
-
-                request.onerror = (e) => reject(`VFS Mount Error: ${e.target.error}`);
-
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    
-                    // Create Object Stores
-                    if (!db.objectStoreNames.contains(Config.STORES.MESSAGES)) {
-                        const store = db.createObjectStore(Config.STORES.MESSAGES, { keyPath: 'id' });
-                        store.createIndex('timestamp', 'timestamp', { unique: false });
-                        store.createIndex('peerId', 'peerId', { unique: false });
-                    }
-                    if (!db.objectStoreNames.contains(Config.STORES.BLOBS)) {
-                        db.createObjectStore(Config.STORES.BLOBS, { keyPath: 'id' });
-                    }
-                    if (!db.objectStoreNames.contains(Config.STORES.CONFIG)) {
-                        db.createObjectStore(Config.STORES.CONFIG, { keyPath: 'key' });
-                    }
-                };
-
-                request.onsuccess = (e) => {
-                    this.db = e.target.result;
-                    console.log(`[VFS] Mounted ${Config.DB_NAME}`);
-                    resolve();
-                };
-            });
-        }
-
-        write(storeName, data) {
-            if (!this.db) return Promise.reject("VFS not mounted");
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readwrite');
-                const store = tx.objectStore(storeName);
-                const req = store.put(data);
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-        }
-
-        read(storeName, key) {
-            if (!this.db) return Promise.reject("VFS not mounted");
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readonly');
-                const store = tx.objectStore(storeName);
-                const req = store.get(key);
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-        }
-
-        query(storeName, index, value) {
-            if (!this.db) return Promise.reject("VFS not mounted");
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readonly');
-                const store = tx.objectStore(storeName);
-                const idx = store.index(index);
-                const req = idx.getAll(IDBKeyRange.only(value));
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-        }
-
-        delete(storeName, key) {
-            if (!this.db) return Promise.reject("VFS not mounted");
-            return new Promise((resolve, reject) => {
-                const tx = this.db.transaction([storeName], 'readwrite');
-                const store = tx.objectStore(storeName);
-                const req = store.delete(key);
-                req.onsuccess = () => resolve();
-                req.onerror = () => reject(req.error);
-            });
-        }
-
-        format() {
-            if (!this.db) return;
-            const tx = this.db.transaction([Config.STORES.MESSAGES, Config.STORES.BLOBS], 'readwrite');
-            tx.objectStore(Config.STORES.MESSAGES).clear();
-            tx.objectStore(Config.STORES.BLOBS).clear();
-            console.log('[VFS] Formatted successfully');
-        }
+    cleanup() {
+        this.isRecording = false;
+        if (this.stream) this.stream.getTracks().forEach(track => track.stop());
+        cancelAnimationFrame(this.visualizerFrame);
+        clearInterval(this.timerInterval);
+        this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    /**
-     * MODULE 6: CRYPTO VAULT (WEB CRYPTO API)
-     * Handles Key Generation, Exchange (ECDH), Derivation (HKDF), and Encryption (AES-GCM).
-     */
-    class CryptoVault {
-        constructor() {
-            this.keyPair = null;      // My ECDH Keypair
-            this.sharedSecret = null; // Raw bits
-            this.sessionKey = null;   // AES-GCM Key
-        }
+    startVisualizer() {
+        const bufferLength = this.analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        const draw = () => {
+            if(!this.isRecording) return;
+            this.visualizerFrame = requestAnimationFrame(draw);
+            this.analyser.getByteFrequencyData(dataArray);
+            
+            this.canvasCtx.fillStyle = '#ffffff'; // Bg clear
+            this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            const barWidth = (this.canvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
 
-        async init() {
-            // Generate ECDH Keypair
-            this.keyPair = await window.crypto.subtle.generateKey(
-                { name: "ECDH", namedCurve: "P-256" },
-                true,
-                ["deriveKey", "deriveBits"]
-            );
-        }
-
-        async getPublicKeyJWK() {
-            return await window.crypto.subtle.exportKey("jwk", this.keyPair.publicKey);
-        }
-
-        async deriveSession(peerPublicKeyJWK) {
-            try {
-                // Import Peer Key
-                const peerKey = await window.crypto.subtle.importKey(
-                    "jwk",
-                    peerPublicKeyJWK,
-                    { name: "ECDH", namedCurve: "P-256" },
-                    false,
-                    []
-                );
-
-                // Derive Shared Bits
-                const sharedBits = await window.crypto.subtle.deriveBits(
-                    { name: "ECDH", public: peerKey },
-                    this.keyPair.privateKey,
-                    256
-                );
-
-                // Import as Raw Key material
-                const rawKey = await window.crypto.subtle.importKey(
-                    "raw",
-                    sharedBits,
-                    "HKDF",
-                    false,
-                    ["deriveKey"]
-                );
-
-                // Derive AES-GCM Key
-                this.sessionKey = await window.crypto.subtle.deriveKey(
-                    { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(), info: new TextEncoder().encode("AetherV4") },
-                    rawKey,
-                    { name: "AES-GCM", length: 256 },
-                    false,
-                    ["encrypt", "decrypt"]
-                );
-
-                return true;
-            } catch (e) {
-                console.error('[Crypto] Derivation Failed:', e);
-                return false;
+            for(let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] / 2;
+                this.canvasCtx.fillStyle = `hsl(250, 80%, 60%)`; // Primary color
+                this.canvasCtx.fillRect(x, this.canvas.height - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
             }
-        }
-
-        async encrypt(plaintext) {
-            if (!this.sessionKey) throw new Error("No session key");
-            const iv = window.crypto.getRandomValues(new Uint8Array(12));
-            const enc = new TextEncoder().encode(JSON.stringify(plaintext));
-
-            const ciphertext = await window.crypto.subtle.encrypt(
-                { name: "AES-GCM", iv: iv },
-                this.sessionKey,
-                enc
-            );
-
-            // Return IV + Ciphertext as hex string
-            return {
-                iv: Utils.buf2hex(iv),
-                data: Utils.buf2hex(ciphertext)
-            };
-        }
-
-        async decrypt(envelope) {
-            if (!this.sessionKey) throw new Error("No session key");
-            const iv = Utils.hex2buf(envelope.iv);
-            const data = Utils.hex2buf(envelope.data);
-
-            const decrypted = await window.crypto.subtle.decrypt(
-                { name: "AES-GCM", iv: iv },
-                this.sessionKey,
-                data
-            );
-
-            const dec = new TextDecoder();
-            return JSON.parse(dec.decode(decrypted));
-        }
+        };
+        draw();
     }
 
-    /**
-     * MODULE 7: NETWORK STACK (PEERJS + RELIABILITY + PROTOCOL)
-     * Handles low-level WebRTC, Packet Construction, ACKs, and Heartbeats.
-     */
-    class NetworkStack {
-        constructor(bus, store, crypto) {
-            this.bus = bus;
-            this.store = store;
-            this.crypto = crypto;
-            this.peer = null;
-            this.conn = null;
-            this.ackBuffer = new Map(); // Store packets waiting for ACK
-            this.heartbeatTimer = null;
-        }
-
-        boot() {
-            // Initialize PeerJS
-            this.peer = new Peer(null, { debug: 0 });
-            
-            this.peer.on('open', (id) => {
-                this.store.dispatch('SET_USER_ID', id);
-                this.store.dispatch('SET_NET_STATUS', 'online');
-                this.bus.emit(Config.EVENTS.PEER_READY, id);
-            });
-
-            this.peer.on('connection', (conn) => this.handleIncoming(conn));
-
-            this.peer.on('error', (err) => {
-                this.bus.emit(Config.EVENTS.UI_TOAST, { message: `Net Error: ${err.type}`, type: 'error' });
-            });
-            
-            this.peer.on('disconnected', () => {
-                 this.store.dispatch('SET_NET_STATUS', 'disconnected');
-                 this.peer.reconnect();
-            });
-        }
-
-        connect(remoteId) {
-            if (this.conn) this.conn.close();
-            const conn = this.peer.connect(remoteId);
-            this.handleIncoming(conn); // Reuse logic
-        }
-
-        handleIncoming(conn) {
-            this.conn = conn;
-            
-            conn.on('open', async () => {
-                this.store.dispatch('SET_NET_STATUS', 'handshaking');
-                
-                // Start Handshake: Send SYN with Public Key
-                const myPub = await this.crypto.getPublicKeyJWK();
-                const packet = {
-                    type: Config.PACKET_TYPES.SYN,
-                    payload: { key: myPub, user: this.store.getState().user.name }
-                };
-                conn.send(packet);
-            });
-
-            conn.on('data', async (raw) => {
-                this.store.dispatch('UPDATE_METRICS', { recv: JSON.stringify(raw).length });
-                await this.routePacket(raw);
-            });
-
-            conn.on('close', () => {
-                this.store.dispatch('SET_NET_STATUS', 'online'); // Back to waiting
-                this.store.dispatch('SET_PARTNER', {id: null, name: null});
-                clearInterval(this.heartbeatTimer);
-            });
-        }
-
-        async routePacket(packet) {
-            switch(packet.type) {
-                case Config.PACKET_TYPES.SYN:
-                    // Received peer key. Derive session. Send ACK.
-                    await this.crypto.deriveSession(packet.payload.key);
-                    const myPub = await this.crypto.getPublicKeyJWK();
-                    this.conn.send({
-                        type: Config.PACKET_TYPES.ACK,
-                        payload: { key: myPub, user: this.store.getState().user.name }
-                    });
-                    this.finalizeHandshake(packet.payload.user);
-                    break;
-
-                case Config.PACKET_TYPES.ACK:
-                    // Peer accepted. Derive session if we initiated.
-                    if (!this.crypto.sessionKey) {
-                        await this.crypto.deriveSession(packet.payload.key);
-                    }
-                    this.finalizeHandshake(packet.payload.user);
-                    break;
-
-                case Config.PACKET_TYPES.DATA:
-                    // Decrypt Payload
-                    try {
-                        const decrypted = await this.crypto.decrypt(packet.payload);
-                        this.bus.emit(Config.EVENTS.DATA_IN, decrypted);
-                        // We could send a delivery ACK here in a fuller implementation
-                    } catch (e) {
-                        console.error("Decryption failed", e);
-                    }
-                    break;
-                
-                case Config.PACKET_TYPES.TYPING:
-                     this.store.dispatch('SET_TYPING', true);
-                     setTimeout(() => this.store.dispatch('SET_TYPING', false), 2000);
-                     break;
-
-                case Config.PACKET_TYPES.PING:
-                     // Update latency metrics logic could go here
-                     break;
-            }
-        }
-
-        finalizeHandshake(partnerName) {
-            this.store.dispatch('SET_NET_STATUS', 'connected');
-            this.store.dispatch('SET_PARTNER', { id: this.conn.peer, name: partnerName });
-            this.startHeartbeat();
-            this.bus.emit(Config.EVENTS.UI_TOAST, { message: 'Secure Tunnel Established', type: 'success' });
-        }
-
-        startHeartbeat() {
-            clearInterval(this.heartbeatTimer);
-            this.heartbeatTimer = setInterval(() => {
-                if(this.conn && this.conn.open) {
-                    this.conn.send({ type: Config.PACKET_TYPES.PING });
-                }
-            }, Config.NET.HEARTBEAT_MS);
-        }
-
-        async sendSecure(type, content) {
-            if (!this.conn || !this.conn.open) return;
-
-            // Prepare Payload
-            const payload = {
-                id: Utils.uuid(),
-                type: type, // 'message' or 'image'
-                content: content,
-                ts: Date.now()
-            };
-
-            // Encrypt
-            const encrypted = await this.crypto.encrypt(payload);
-
-            // Wrap in Packet
-            const packet = {
-                type: Config.PACKET_TYPES.DATA,
-                payload: encrypted
-            };
-
-            // Send
-            this.conn.send(packet);
-            this.store.dispatch('UPDATE_METRICS', { sent: JSON.stringify(packet).length });
-
-            return payload; // Return raw to UI
-        }
-
-        sendSignal(type) {
-            if (this.conn && this.conn.open) {
-                this.conn.send({ type });
-            }
-        }
+    startTimer() {
+        const timerEl = document.getElementById('rec-timer');
+        this.timerInterval = setInterval(() => {
+            const diff = Math.floor((Date.now() - this.startTime) / 1000);
+            const m = Math.floor(diff / 60).toString().padStart(2, '0');
+            const s = (diff % 60).toString().padStart(2, '0');
+            timerEl.innerText = `${m}:${s}`;
+        }, 1000);
     }
 
-    /**
-     * MODULE 8: MARKDOWN PARSER
-     * Custom regex-based parser for rich text rendering.
-     */
-    class MarkdownParser {
-        static parse(text) {
-            if (!text) return "";
-            let html = Utils.escapeHtml(text);
+    // Sound generation for UI feedback
+    beep(type) {
+        if (!Store.get('soundEnabled')) return;
+        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
 
-            // Bold: **text**
-            html = html.replace(/\*\*(.*?)\*\*/g, '<span class="md-bold">$1</span>');
-            // Italic: *text*
-            html = html.replace(/\*(.*?)\*/g, '<span class="md-italic">$1</span>');
-            // Inline Code: `text`
-            html = html.replace(/`(.*?)`/g, '<span class="md-code">$1</span>');
-            // Links: http://...
-            html = html.replace(/((https?:\/\/[^\s]+))/g, '<a href="$1" target="_blank" class="msg-link">$1</a>');
-
-            return html;
+        const now = this.audioCtx.currentTime;
+        if (type === 'send') {
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === 'receive') {
+            osc.frequency.setValueAtTime(800, now);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
         }
     }
+}
+const AudioMgr = new AudioService();
 
-    /**
-     * MODULE 9: UI CONTROLLER
-     * Maps State to DOM, handles User Input, renders Views.
-     */
-    class UIController {
-        constructor(bus, store) {
-            this.bus = bus;
-            this.store = store;
-            
-            // Cache DOM
-            this.dom = {
-                views: {
-                    login: document.getElementById('view-login'),
-                    home: document.getElementById('view-home'),
-                    chat: document.getElementById('view-chat')
-                },
-                inputs: {
-                    user: document.getElementById('input-username'),
-                    remote: document.getElementById('input-remote-id'),
-                    msg: document.getElementById('msg-input'),
-                    file: document.getElementById('file-input')
-                },
-                btns: {
-                    login: document.getElementById('btn-login'),
-                    connect: document.getElementById('btn-connect'),
-                    send: document.getElementById('btn-send-msg'),
-                    attach: document.getElementById('btn-attach'),
-                    emoji: document.getElementById('btn-emoji'),
-                    settings: document.getElementById('btn-settings'),
-                    closeSettings: document.getElementById('btn-close-settings'),
-                    copy: document.getElementById('btn-copy-id'),
-                    back: document.getElementById('btn-back-chat'),
-                    clear: document.getElementById('btn-clear-history')
-                },
-                disp: {
-                    status: document.getElementById('connection-status'),
-                    myId: document.getElementById('my-peer-id'),
-                    pName: document.getElementById('chat-partner-name'),
-                    pAvatar: document.getElementById('chat-partner-avatar'),
-                    msgs: document.getElementById('messages-container'),
-                    typing: document.getElementById('typing-indicator'),
-                    emojis: document.getElementById('emoji-picker-container'),
-                    headerAvatar: document.getElementById('header-avatar'),
-                    homeAvatar: document.getElementById('home-avatar-display')
-                },
-                modals: {
-                    settings: document.getElementById('settings-modal')
-                },
-                toggles: {
-                    theme: document.getElementById('theme-toggle'),
-                    sound: document.getElementById('sound-toggle'),
-                    history: document.getElementById('history-toggle')
-                }
-            };
-
-            this.initListeners();
-            this.renderEmojiList();
-        }
-
-        initListeners() {
-            // Store Subscriptions via Bus
-            this.bus.on(Config.EVENTS.STORE_UPDATED, (data) => this.render(data.state));
-            this.bus.on(Config.EVENTS.UI_TOAST, (d) => this.showToast(d.message, d.type));
-            this.bus.on(Config.EVENTS.DATA_IN, (msg) => this.appendMessage(msg, false));
-
-            // DOM Events
-            this.dom.btns.login.onclick = () => {
-                const name = this.dom.inputs.user.value.trim();
-                if (name.length > 2) this.bus.emit(Config.EVENTS.LOGIN, name);
-                else this.showToast('Invalid Identity', 'error');
-            };
-
-            this.dom.btns.connect.onclick = () => {
-                const id = this.dom.inputs.remote.value.trim();
-                if (id) this.bus.emit(Config.EVENTS.CONNECT, id);
-            };
-
-            this.dom.btns.send.onclick = () => this.handleSend();
-            this.dom.inputs.msg.onkeypress = (e) => { if(e.key === 'Enter') this.handleSend(); };
-            
-            this.dom.inputs.msg.oninput = Utils.debounce(() => {
-                this.bus.emit(Config.EVENTS.DATA_OUT, { type: 'typing' });
-            }, 300);
-
-            this.dom.btns.copy.onclick = () => {
-                navigator.clipboard.writeText(this.dom.disp.myId.innerText);
-                this.showToast('Address Copied', 'success');
-            };
-
-            this.dom.btns.back.onclick = () => {
-                this.store.dispatch('NAVIGATE', 'view-home');
-                this.dom.disp.msgs.innerHTML = '';
-            };
-
-            this.dom.btns.settings.onclick = () => this.dom.modals.settings.classList.add('open');
-            this.dom.btns.closeSettings.onclick = () => this.dom.modals.settings.classList.remove('open');
-
-            this.dom.btns.attach.onclick = () => this.dom.inputs.file.click();
-            this.dom.inputs.file.onchange = (e) => this.handleFile(e.target.files[0]);
-
-            this.dom.btns.emoji.onclick = (e) => {
-                e.stopPropagation();
-                this.dom.disp.emojis.classList.toggle('active');
-            };
-
-            // Theme Toggle
-            this.dom.toggles.theme.onchange = (e) => {
-                const t = e.target.checked ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', t);
-                this.store.dispatch('SET_THEME', t);
-            };
-
-            // Clear VFS
-            this.dom.btns.clear.onclick = () => {
-                window.app.vfs.format();
-                this.showToast('VFS Formatted', 'success');
-            };
-        }
-
-        render(state) {
-            // View Navigation
-            Object.values(this.dom.views).forEach(el => el.classList.remove('active'));
-            document.getElementById(state.ui.currentView).classList.add('active');
-
-            // ID Display
-            if (state.user.id) this.dom.disp.myId.innerText = state.user.id;
-
-            // Partner Info
-            if (state.chat.partnerName) {
-                this.dom.disp.pName.innerText = state.chat.partnerName;
-                this.dom.disp.pAvatar.innerHTML = this.genAvatar(state.chat.partnerName);
-            }
-
-            // Connection Status Indicator
-            const s = state.network.status;
-            this.dom.disp.status.className = `header-status ${s === 'connected' || s === 'online' ? 'online' : s === 'handshaking' ? 'connecting' : ''}`;
-
-            // Typing
-            if (state.chat.isTyping) this.dom.disp.typing.classList.add('active');
-            else this.dom.disp.typing.classList.remove('active');
-        }
-
-        handleSend() {
-            const text = this.dom.inputs.msg.value.trim();
-            if (!text) return;
-            this.bus.emit(Config.EVENTS.DATA_OUT, { type: 'message', content: text });
-            this.dom.inputs.msg.value = '';
-        }
-
-        handleFile(file) {
-            if (!file) return;
-            if (file.size > 2 * 1024 * 1024) return this.showToast("File too large (>2MB)", "error");
-            
+// --- 5. Image Service (Compression) ---
+class ImageService {
+    compress(file) {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                this.bus.emit(Config.EVENTS.DATA_OUT, { type: 'image', content: e.target.result });
-            };
             reader.readAsDataURL(file);
-            this.dom.inputs.file.value = '';
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Limit size for P2P
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Compress to JPEG 0.7 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    }
+}
+const ImgMgr = new ImageService();
+
+// --- 6. Network Service (PeerJS) ---
+class NetworkService {
+    constructor() {
+        this.peer = null;
+        this.conn = null;
+    }
+
+    init() {
+        this.peer = new Peer(null, { debug: 1 });
+        
+        this.peer.on('open', (id) => {
+            Store.update('myId', id);
+            Bus.emit('network:ready', id);
+            Bus.emit('toast', { msg: 'Online & Ready', type: 'success' });
+        });
+
+        this.peer.on('connection', (conn) => {
+            this.handleConnection(conn);
+            Bus.emit('toast', { msg: 'Incoming Connection...', type: 'info' });
+        });
+
+        this.peer.on('error', (err) => {
+            console.error('Peer Error:', err);
+            Bus.emit('toast', { msg: 'Network Error: ' + err.type, type: 'error' });
+        });
+
+        this.peer.on('disconnected', () => {
+            Bus.emit('toast', { msg: 'Disconnected from server', type: 'warning' });
+            this.peer.reconnect();
+        });
+    }
+
+    connect(remoteId) {
+        if (!this.peer) return;
+        const conn = this.peer.connect(remoteId, {
+            metadata: { username: Store.get('username') }
+        });
+        this.handleConnection(conn);
+    }
+
+    handleConnection(conn) {
+        if (this.conn) this.conn.close();
+        this.conn = conn;
+
+        this.conn.on('open', () => {
+            // Handshake
+            this.conn.send({ type: 'handshake', username: Store.get('username') });
+            Store.update('connectedPeerId', this.conn.peer);
+            Bus.emit('network:connected', { id: this.conn.peer });
+        });
+
+        this.conn.on('data', (data) => {
+            Bus.emit('network:data', data);
+        });
+
+        this.conn.on('close', () => {
+            Bus.emit('network:disconnected');
+            Store.update('connectedPeerId', null);
+            this.conn = null;
+        });
+    }
+
+    send(data) {
+        if (this.conn && this.conn.open) {
+            this.conn.send(data);
+            return true;
         }
+        return false;
+    }
+}
+const Net = new NetworkService();
 
-        appendMessage(msg, isMe) {
-            const div = document.createElement('div');
-            div.className = `message-bubble ${isMe ? 'msg-me' : 'msg-other'}`;
-            
-            let content = '';
-            if (msg.type === 'message') content = MarkdownParser.parse(msg.content);
-            else if (msg.type === 'image') content = `<img src="${msg.content}" class="msg-image" onclick="window.open(this.src)">`;
+// --- 7. UI Manager ---
+class UIManager {
+    constructor() {
+        this.dom = {
+            views: {
+                login: document.getElementById('view-login'),
+                home: document.getElementById('view-home'),
+                chat: document.getElementById('view-chat')
+            },
+            inputs: {
+                username: document.getElementById('input-username'),
+                remoteId: document.getElementById('input-remote-id'),
+                msg: document.getElementById('msg-input'),
+                file: document.getElementById('file-input-image')
+            },
+            btns: {
+                login: document.getElementById('btn-login'),
+                connect: document.getElementById('btn-connect'),
+                send: document.getElementById('btn-send-msg'),
+                copy: document.getElementById('btn-copy-id'),
+                attach: document.getElementById('btn-toggle-attach'),
+                saveContact: document.getElementById('btn-save-contact'),
+                back: document.getElementById('btn-back-chat')
+            },
+            menus: {
+                attach: document.getElementById('attachments-menu')
+            },
+            overlays: {
+                rec: document.getElementById('recording-overlay'),
+                settings: document.getElementById('settings-modal')
+            },
+            lists: {
+                messages: document.getElementById('messages-container'),
+                contacts: document.getElementById('contacts-list-container')
+            }
+        };
 
-            const time = new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        this.bindEvents();
+        this.renderContacts();
+    }
 
-            div.innerHTML = `
-                ${content}
-                <div class="msg-meta">
-                    ${time} ${isMe ? '<span class="msg-status"><i class="fas fa-check"></i></span>' : ''}
+    bindEvents() {
+        // Navigation
+        this.dom.btns.login.addEventListener('click', () => {
+            const user = this.dom.inputs.username.value.trim();
+            if(user.length < 3) return Bus.emit('toast', {msg:'Name too short', type:'error'});
+            Store.update('username', user);
+            Net.init();
+            this.switchView('view-home');
+        });
+
+        this.dom.btns.back.addEventListener('click', () => this.switchView('view-home'));
+
+        // Settings
+        document.getElementById('btn-settings').addEventListener('click', () => this.dom.overlays.settings.classList.add('open'));
+        document.getElementById('btn-close-settings').addEventListener('click', () => this.dom.overlays.settings.classList.remove('open'));
+        document.getElementById('theme-toggle').addEventListener('change', (e) => this.toggleTheme(e.target.checked));
+        document.getElementById('sound-toggle').addEventListener('change', (e) => Store.update('soundEnabled', e.target.checked));
+
+        // Connect & Copy
+        this.dom.btns.copy.addEventListener('click', () => {
+            if(Store.get('myId')) {
+                navigator.clipboard.writeText(Store.get('myId'));
+                Bus.emit('toast', {msg:'ID Copied', type:'success'});
+            }
+        });
+
+        this.dom.btns.connect.addEventListener('click', () => {
+            const id = this.dom.inputs.remoteId.value.trim();
+            if(id && id !== Store.get('myId')) Net.connect(id);
+        });
+
+        // Messaging
+        this.dom.btns.send.addEventListener('click', () => this.sendTextMessage());
+        this.dom.inputs.msg.addEventListener('keypress', (e) => { if(e.key==='Enter') this.sendTextMessage(); });
+        this.dom.inputs.msg.addEventListener('input', () => {
+            if(Net.conn) Net.send({ type: 'typing' });
+        });
+
+        // Attachments
+        this.dom.btns.attach.addEventListener('click', () => {
+            this.dom.menus.attach.classList.toggle('open');
+        });
+
+        // Image Handling
+        document.getElementById('opt-image').addEventListener('click', () => {
+            this.dom.menus.attach.classList.remove('open');
+            this.dom.inputs.file.click();
+        });
+        this.dom.inputs.file.addEventListener('change', async (e) => {
+            if(e.target.files.length > 0) {
+                try {
+                    Bus.emit('toast', {msg:'Compressing image...', type:'info'});
+                    const base64 = await ImgMgr.compress(e.target.files[0]);
+                    this.sendMediaMessage('image', base64);
+                } catch(err) {
+                    Bus.emit('toast', {msg:'Image Error', type:'error'});
+                }
+            }
+        });
+
+        // Audio Handling
+        document.getElementById('opt-audio').addEventListener('click', () => {
+            this.dom.menus.attach.classList.remove('open');
+            this.dom.overlays.rec.classList.add('active');
+            AudioMgr.startRecording();
+        });
+
+        document.getElementById('btn-cancel-rec').addEventListener('click', () => {
+            AudioMgr.cancelRecording();
+            this.dom.overlays.rec.classList.remove('active');
+        });
+
+        document.getElementById('btn-stop-send-rec').addEventListener('click', async () => {
+            const blob = await AudioMgr.stopRecording();
+            this.dom.overlays.rec.classList.remove('active');
+            if(blob) {
+                // Convert Blob to Base64 for PeerJS compatibility in single file setup
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    this.sendMediaMessage('audio', reader.result);
+                };
+            }
+        });
+
+        // Save Contact
+        this.dom.btns.saveContact.addEventListener('click', () => {
+            const id = Store.get('connectedPeerId');
+            const name = Store.get('connectedPeerName');
+            if(id && name) {
+                if(DB.saveContact(id, name)) {
+                    Bus.emit('toast', {msg: 'Contact Saved', type:'success'});
+                } else {
+                    Bus.emit('toast', {msg: 'Already Saved', type:'info'});
+                }
+            }
+        });
+
+        // Global Events
+        Bus.on('network:ready', (id) => document.getElementById('my-peer-id').innerText = id);
+        
+        Bus.on('network:connected', (data) => {
+            this.switchView('view-chat');
+            this.addSystemMessage('Connection established.');
+            // Load history
+            const history = DB.getChatHistory(data.id);
+            this.dom.lists.messages.innerHTML = '';
+            history.forEach(msg => this.renderMessage(msg));
+        });
+
+        Bus.on('network:data', (data) => this.handleIncomingData(data));
+        Bus.on('network:disconnected', () => {
+            document.getElementById('chat-partner-name').innerText = 'Offline';
+            this.addSystemMessage('Peer disconnected.');
+        });
+        
+        Bus.on('toast', (data) => this.showToast(data.msg, data.type));
+        Bus.on('contacts:updated', () => this.renderContacts());
+    }
+
+    switchView(viewId) {
+        Object.values(this.dom.views).forEach(el => el.classList.remove('active'));
+        this.dom.views[viewId.replace('view-', '')].classList.add('active');
+        Store.update('currentView', viewId);
+    }
+
+    toggleTheme(isDark) {
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        Store.update('theme', isDark ? 'dark' : 'light');
+    }
+
+    // Message Handling
+    sendTextMessage() {
+        const text = this.dom.inputs.msg.value.trim();
+        if(!text) return;
+        
+        const msgObj = {
+            id: Date.now().toString(36),
+            type: 'text',
+            content: text,
+            sender: 'me',
+            timestamp: Date.now()
+        };
+
+        if(Net.send(msgObj)) {
+            this.renderMessage(msgObj);
+            DB.saveMessage(Store.get('connectedPeerId'), msgObj);
+            this.dom.inputs.msg.value = '';
+            AudioMgr.beep('send');
+        } else {
+            Bus.emit('toast', {msg:'Not connected', type:'error'});
+        }
+    }
+
+    sendMediaMessage(type, content) {
+        const msgObj = {
+            id: Date.now().toString(36),
+            type: type,
+            content: content,
+            sender: 'me',
+            timestamp: Date.now()
+        };
+        
+        if(Net.send(msgObj)) {
+            this.renderMessage(msgObj);
+            DB.saveMessage(Store.get('connectedPeerId'), msgObj);
+            AudioMgr.beep('send');
+        }
+    }
+
+    handleIncomingData(data) {
+        if(data.type === 'handshake') {
+            Store.update('connectedPeerName', data.username);
+            document.getElementById('chat-partner-name').innerText = data.username;
+            this.addSystemMessage(`${data.username} joined.`);
+        } else if (data.type === 'typing') {
+            this.showTypingIndicator();
+        } else if (['text', 'image', 'audio'].includes(data.type)) {
+            const msgObj = { ...data, sender: 'other' };
+            this.renderMessage(msgObj);
+            DB.saveMessage(Store.get('connectedPeerId'), msgObj);
+            AudioMgr.beep('receive');
+        }
+    }
+
+    // Rendering
+    renderMessage(msg) {
+        const div = document.createElement('div');
+        const isMe = msg.sender === 'me';
+        div.className = `message-bubble ${isMe ? 'msg-me' : 'msg-other'}`;
+        
+        const time = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+        let contentHtml = '';
+        if(msg.type === 'text') {
+            contentHtml = msg.content.replace(/</g, "&lt;"); // Simple sanitize
+        } else if (msg.type === 'image') {
+            contentHtml = `<img src="${msg.content}" class="msg-image" onclick="window.open(this.src)">`;
+        } else if (msg.type === 'audio') {
+            const audioId = 'audio-' + msg.id;
+            contentHtml = `
+                <div class="msg-audio-container">
+                    <button class="audio-play-btn" onclick="document.getElementById('${audioId}').play()">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <div class="audio-wave">
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div>
+                    </div>
+                    <audio id="${audioId}" src="${msg.content}" style="display:none" onplay="this.parentElement.classList.add('playing')" onended="this.parentElement.classList.remove('playing')"></audio>
                 </div>
             `;
-            this.dom.disp.msgs.appendChild(div);
-            this.dom.disp.msgs.scrollTop = this.dom.disp.msgs.scrollHeight;
         }
 
-        addSystemMessage(text) {
-            const div = document.createElement('div');
-            div.className = 'msg-system';
-            div.innerText = text;
-            this.dom.disp.msgs.appendChild(div);
-        }
-
-        renderEmojiList() {
-            const emojis = ['😀','😂','😍','😎','🤔','👍','👎','👋','🙏','🔥','🎉','🚀','💀','👻','🤖','💩','❤️','💔','👀','🧠'];
-            this.dom.disp.emojis.innerHTML = emojis.map(e => `<div class="emoji-item">${e}</div>`).join('');
-            this.dom.disp.emojis.querySelectorAll('.emoji-item').forEach(el => {
-                el.onclick = () => {
-                    this.dom.inputs.msg.value += el.innerText;
-                    this.dom.inputs.msg.focus();
-                };
-            });
-        }
-
-        showToast(msg, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const div = document.createElement('div');
-            div.className = 'toast';
-            const icon = type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle';
-            div.innerHTML = `<i class="fas fa-${icon}"></i> <span>${msg}</span>`;
-            container.appendChild(div);
-            setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 3000);
-        }
-
-        genAvatar(seed) {
-            // Deterministic Color Generator
-            let hash = 0;
-            for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase().padStart(6, '0');
-            const letter = seed.charAt(0).toUpperCase();
-            return `<img src="data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#${c}"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="50" font-family="sans-serif" font-weight="bold">${letter}</text></svg>`)}" style="width:100%;height:100%;border-radius:50%;">`;
-        }
-
-        setAvatars(username) {
-            const svg = this.genAvatar(username);
-            this.dom.disp.headerAvatar.innerHTML = svg;
-            this.dom.disp.homeAvatar.innerHTML = svg;
-        }
+        div.innerHTML = `${contentHtml}<span class="msg-meta">${time}</span>`;
+        this.dom.lists.messages.appendChild(div);
+        this.dom.lists.messages.scrollTop = this.dom.lists.messages.scrollHeight;
     }
 
-    /**
-     * MODULE 10: KERNEL (BOOTLOADER)
-     * Orchestrates the startup sequence and module injection.
-     */
-    class Kernel {
-        constructor() {
-            // Service Container
-            this.bus = new EventEmitter();
-            this.store = new StateManager(this.bus);
-            this.vfs = new VFS();
-            this.crypto = new CryptoVault();
-            this.net = new NetworkStack(this.bus, this.store, this.crypto);
-            this.ui = new UIController(this.bus, this.store);
-            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        async boot() {
-            console.log(`[Kernel] Booting ${Config.SYS_NAME} v${Config.VERSION}...`);
-
-            // 1. Mount File System
-            try {
-                await this.vfs.mount();
-            } catch (e) {
-                console.error("[Kernel] VFS Failure", e);
-            }
-
-            // 2. Initialize Crypto Subsystem
-            await this.crypto.init();
-
-            // 3. Load User Prefs
-            const savedName = localStorage.getItem('aether_username');
-            if(savedName) this.ui.dom.inputs.user.value = savedName;
-
-            const savedTheme = localStorage.getItem('aether_theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            this.ui.dom.toggles.theme.checked = savedTheme === 'dark';
-
-            // 4. Bind Core Events
-            this.bindEvents();
-
-            console.log('[Kernel] System Ready');
-        }
-
-        bindEvents() {
-            // Auth Flow
-            this.bus.on(Config.EVENTS.LOGIN, (username) => {
-                this.store.dispatch('SET_USER_NAME', username);
-                this.ui.setAvatars(username);
-                this.net.boot(); // Start Network
-                this.store.dispatch('NAVIGATE', 'view-home');
-                this.playSound('login');
-            });
-
-            // Connection Flow
-            this.bus.on(Config.EVENTS.CONNECT, (id) => {
-                this.net.connect(id);
-                this.ui.showToast('Initializing Uplink...', 'info');
-            });
-
-            // Outgoing Data
-            this.bus.on(Config.EVENTS.DATA_OUT, async (payload) => {
-                if (payload.type === 'typing') {
-                    this.net.sendSignal(Config.PACKET_TYPES.TYPING);
-                    return;
-                }
-
-                // Optimistic UI
-                this.ui.appendMessage({ ...payload, ts: Date.now() }, true);
-                this.playSound('sent');
-
-                // Network Send
-                const sentMsg = await this.net.sendSecure(payload.type, payload.content);
-
-                // Persistence
-                if (this.store.getState().ui.historyEnabled && sentMsg) {
-                    await this.vfs.write(Config.STORES.MESSAGES, {
-                        ...sentMsg,
-                        peerId: this.net.conn.peer,
-                        direction: 'out'
-                    });
-                }
-            });
-
-            // Incoming Data
-            this.bus.on(Config.EVENTS.DATA_IN, async (msg) => {
-                this.ui.appendMessage(msg, false);
-                this.playSound('recv');
-
-                // Persistence
-                if (this.store.getState().ui.historyEnabled) {
-                    await this.vfs.write(Config.STORES.MESSAGES, {
-                        ...msg,
-                        peerId: this.net.conn.peer,
-                        direction: 'in'
-                    });
-                }
-            });
-
-            // Status Changes
-            this.store.subscribe((data) => {
-                if(data.action === 'SET_NET_STATUS' && data.state.network.status === 'connected') {
-                    this.store.dispatch('NAVIGATE', 'view-chat');
-                    this.ui.addSystemMessage('--- Secure Channel (AES-256-GCM) Established ---');
-                    this.loadHistory();
-                }
-            });
-        }
-
-        async loadHistory() {
-            if (!this.store.getState().ui.historyEnabled) return;
-            const peerId = this.store.getState().chat.partnerId;
-            const msgs = await this.vfs.query(Config.STORES.MESSAGES, 'peerId', peerId);
-            
-            if (msgs.length > 0) {
-                msgs.sort((a,b) => a.ts - b.ts);
-                this.ui.addSystemMessage('--- VFS History Loaded ---');
-                msgs.forEach(m => this.ui.appendMessage(m, m.direction === 'out'));
-            }
-        }
-
-        playSound(type) {
-            if (!this.store.getState().ui.soundEnabled) return;
-            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-            
-            const osc = this.audioCtx.createOscillator();
-            const gain = this.audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(this.audioCtx.destination);
-
-            const now = this.audioCtx.currentTime;
-
-            if (type === 'sent') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else if (type === 'recv') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else {
-                osc.frequency.setValueAtTime(200, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            }
-        }
+    addSystemMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'msg-system';
+        div.innerText = text;
+        this.dom.lists.messages.appendChild(div);
     }
 
-    /**
-     * MODULE 11: BOOTSTRAP
-     * Application Entry Point.
-     */
-    window.addEventListener('load', () => {
-        window.app = new Kernel();
-        window.app.boot();
-    });
+    renderContacts() {
+        const list = this.dom.lists.contacts;
+        list.innerHTML = '';
+        const contacts = DB.getContacts();
+
+        if(contacts.length === 0) {
+            list.innerHTML = `<div class="text-center p-4" style="color:var(--text-muted)">No saved contacts yet.</div>`;
+            return;
+        }
+
+        contacts.forEach(c => {
+            const el = document.createElement('div');
+            el.className = 'contact-item';
+            el.innerHTML = `
+                <div class="contact-avatar">${c.name.charAt(0).toUpperCase()}</div>
+                <div class="contact-info">
+                    <div class="contact-name">${c.name}</div>
+                    <div class="contact-id">ID: ...${c.id.substr(-8)}</div>
+                </div>
+                <i class="fas fa-plug" style="color:var(--text-muted)"></i>
+            `;
+            el.addEventListener('click', () => {
+                Bus.emit('toast', {msg: `Connecting to ${c.name}...`, type:'info'});
+                Net.connect(c.id);
+            });
+            list.appendChild(el);
+        });
+    }
+
+    showTypingIndicator() {
+        const el = document.getElementById('typing-indicator');
+        el.classList.add('active');
+        this.dom.lists.messages.scrollTop = this.dom.lists.messages.scrollHeight;
+        if(this.typingTimeout) clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => el.classList.remove('active'), 2000);
+    }
+
+    showToast(msg, type) {
+        const container = document.getElementById('toast-container');
+        const el = document.createElement('div');
+        el.className = 'toast';
+        let icon = 'info-circle';
+        if(type === 'success') icon = 'check-circle';
+        if(type === 'error') icon = 'exclamation-triangle';
+        
+        el.innerHTML = `<i class="fas fa-${icon}"></i> <span>${msg}</span>`;
+        container.appendChild(el);
+        
+        setTimeout(() => {
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 300);
+        }, 3000);
+    }
+}
+
+// --- 8. Initialization ---
+window.addEventListener('DOMContentLoaded', () => {
+    // Init State
+    const savedTheme = Store.get('theme');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('theme-toggle').checked = (savedTheme === 'dark');
+
+    const savedUser = Store.get('username');
+    if(savedUser) document.getElementById('input-username').value = savedUser;
+
+    // Start App
+    const UI = new UIManager();
+});
+
+// PWA Install Prompt Handler (Optional)
+window.addEventListener('beforeinstallprompt', (e) => e.preventDefault());
 
 </script>
 </body>
