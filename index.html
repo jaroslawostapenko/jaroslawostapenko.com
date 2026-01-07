@@ -12,8 +12,7 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://jaroslawostapenko.github.io/jaroslawostapenko.com/">
 
-    <!-- Favicon - Updated for Google Search -->
-    <!-- Using absolute path to fix GitHub Pages indexing issue -->
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" sizes="192x192" href="/jaroslawostapenko.com/favi.ico">
     <link rel="shortcut icon" href="/jaroslawostapenko.com/favi.ico">
     <link rel="apple-touch-icon" href="/jaroslawostapenko.com/favi.ico">
@@ -107,7 +106,6 @@
                     <div class="bg-blue-600 p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
                         <i data-lucide="code-2" class="w-6 h-6"></i>
                     </div>
-                    <!-- The logo text color is managed by script.js based on scroll -->
                     <span id="logo-text" class="text-xl font-bold tracking-tight text-slate-900 lg:text-white transition-colors">
                         Yaroslav<span class="text-blue-600">.dev</span>
                     </span>
@@ -115,13 +113,12 @@
 
                 <!-- Desktop Nav -->
                 <nav class="hidden md:flex items-center gap-8">
-                    <!-- Note: Nav text color handling for scroll is complex with Tailwind classes alone, 
-                         simplified here to Slate-600 for visibility on white, and relying on header transparency for dark bg -->
                     <a href="#hero" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Start</a>
                     <a href="#about" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">O mnie</a>
                     <a href="#skills" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Umiejętności</a>
                     <a href="#projects" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Projekty</a>
                     <a href="#experience" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Doświadczenie</a>
+                    <a href="#certificates" class="nav-link text-sm font-medium text-slate-600 hover:text-blue-600 lg:text-slate-200 lg:hover:text-white transition-colors">Certyfikaty</a>
                     <a href="#contact" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-all hover:shadow-lg hover:-translate-y-0.5">
                         Zatrudnij mnie
                     </a>
@@ -142,6 +139,7 @@
                 <a href="#skills" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Umiejętności</a>
                 <a href="#projects" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Projekty</a>
                 <a href="#experience" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Doświadczenie</a>
+                <a href="#certificates" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Certyfikaty</a>
                 <a href="#contact" class="mobile-link text-slate-600 hover:text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">Kontakt</a>
             </nav>
         </div>
@@ -977,8 +975,48 @@
             </div>
         </section>
 
+        <!-- Certificates Section (New) -->
+        <section id="certificates" class="py-20 lg:py-32 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header -->
+                <div class="mb-16 max-w-2xl">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Certyfikaty</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">Potwierdzone kompetencje i kursy</p>
+                    <div class="h-1 w-20 bg-blue-600 rounded-full mt-6"></div>
+                </div>
+
+                <!-- Grid -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Certificate Card -->
+                    <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div class="p-6 flex flex-col h-full">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                                    <i data-lucide="award" class="w-8 h-8"></i>
+                                </div>
+                                <a href="https://skillshop.credential.net/c6674fd9-3dc5-48ee-bf4f-2dd2bee54bbd#acc.av28eQB6" target="_blank" class="text-slate-400 hover:text-blue-600 transition-colors">
+                                    <i data-lucide="external-link" class="w-5 h-5"></i>
+                                </a>
+                            </div>
+                            
+                            <h3 class="text-xl font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">Google AI Essentials</h3>
+                            <p class="text-slate-500 font-medium text-sm mb-4">Google</p>
+                            
+                            <p class="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">
+                                Certyfikat potwierdzający umiejętności w zakresie wykorzystania narzędzi sztucznej inteligencji do zwiększania produktywności i tworzenia treści.
+                            </p>
+
+                            <a href="https://skillshop.credential.net/c6674fd9-3dc5-48ee-bf4f-2dd2bee54bbd#acc.av28eQB6" target="_blank" class="w-full py-3 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
+                                Zobacz Certyfikat
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Contact Section -->
-        <section id="contact" class="py-20 lg:py-32 bg-slate-50 relative overflow-hidden">
+        <section id="contact" class="py-20 lg:py-32 bg-white relative overflow-hidden border-t border-slate-100">
             
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 contact-hud-container">
                 <div class="mb-16 max-w-2xl">
@@ -999,8 +1037,8 @@
                         </div>
 
                         <div class="space-y-6">
-                            <a href="mailto:yaroslav.ostapenko16@gmail.com" class="flex items-center gap-4 p-4 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
+                            <a href="mailto:yaroslav.ostapenko16@gmail.com" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
+                                <div class="p-3 bg-white text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper shadow-sm border border-slate-100">
                                     <i data-lucide="mail" class="w-6 h-6"></i>
                                 </div>
                                 <div>
@@ -1009,8 +1047,8 @@
                                 </div>
                             </a>
 
-                            <a href="tel:+48513815774" class="flex items-center gap-4 p-4 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
+                            <a href="tel:+48513815774" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
+                                <div class="p-3 bg-white text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper shadow-sm border border-slate-100">
                                     <i data-lucide="phone" class="w-6 h-6"></i>
                                 </div>
                                 <div>
@@ -1019,8 +1057,8 @@
                                 </div>
                             </a>
 
-                            <div class="flex items-center gap-4 p-4 rounded-xl bg-white/80 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
-                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper">
+                            <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 backdrop-blur-md border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group contact-info-card">
+                                <div class="p-3 bg-white text-blue-600 rounded-lg group-hover:scale-110 transition-transform icon-wrapper shadow-sm border border-slate-100">
                                     <i data-lucide="map-pin" class="w-6 h-6"></i>
                                 </div>
                                 <div>
@@ -1032,30 +1070,30 @@
                     </div>
 
                     <!-- Form -->
-                    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-slate-100">
+                    <div class="bg-slate-50 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-slate-100">
                         <form id="contact-form" class="space-y-6">
                             <div class="grid sm:grid-cols-2 gap-6">
                                 <div class="space-y-2 hud-input-group">
                                     <label for="name" class="text-sm font-medium text-slate-700">Imię</label>
-                                    <input type="text" id="name" required class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="Twoje imię">
+                                    <input type="text" id="name" required class="w-full px-4 py-3 rounded-lg bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="Twoje imię">
                                     <div class="input-highlight"></div>
                                 </div>
                                 <div class="space-y-2 hud-input-group">
                                     <label for="email" class="text-sm font-medium text-slate-700">Email</label>
-                                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="twoj@email.com">
+                                    <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="twoj@email.com">
                                     <div class="input-highlight"></div>
                                 </div>
                             </div>
                             
                             <div class="space-y-2 hud-input-group">
                                 <label for="subject" class="text-sm font-medium text-slate-700">Temat</label>
-                                <input type="text" id="subject" required class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="W czym mogę pomóc?">
+                                <input type="text" id="subject" required class="w-full px-4 py-3 rounded-lg bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all hud-input" placeholder="W czym mogę pomóc?">
                                 <div class="input-highlight"></div>
                             </div>
 
                             <div class="space-y-2 hud-input-group">
                                 <label for="message" class="text-sm font-medium text-slate-700">Wiadomość</label>
-                                <textarea id="message" required rows="4" class="w-full px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none hud-input" placeholder="Treść wiadomości..."></textarea>
+                                <textarea id="message" required rows="4" class="w-full px-4 py-3 rounded-lg bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none hud-input" placeholder="Treść wiadomości..."></textarea>
                                 <div class="input-highlight"></div>
                             </div>
 
